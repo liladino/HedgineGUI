@@ -50,13 +50,25 @@ public class Square {
 	char getFile() {
 		return file;
 	}
-	
-	boolean isNull() {
+
+	/* * * * * *
+	 * Methods *
+	 * * * * * */
+	public boolean isNull() {
 		if (rank == -1 || rank == 0) {
 			return true;
 		}
 		return false;
 	}
 	
+	public boolean equals(Square s) {
+		if (s.getFile() != file) {
+			return false;
+		}
+		if (s.getRank() != rank) {
+			return false;
+		}
+		return true;
+	}
 	
 }

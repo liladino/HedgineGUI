@@ -7,6 +7,9 @@ public class Move {
 	private final Square to;
 	private final char promotion;
 	
+	/* * * * * * * *
+	 * Constructor *
+	 * * * * * * * */
 	public Move() {
 		//nullmove
 		from = new Square();
@@ -61,6 +64,22 @@ public class Move {
 		}
 	}
 	
+	/* * * * * *
+	 * Getters *
+	 * * * * * */
+	public Square getFrom() {
+		return from;
+	}
+	public Square getTo() {
+		return to;
+	}
+	public char getPromotion() {
+		return promotion;
+	}
+	
+	/* * * * * *
+	 * Methods *
+	 * * * * * */
 	boolean isMove(String str) {
 		//does NOT check if the move is legal, only if it looks like a move based on a string
 		if (!(str.length() == 4 || str.length() == 5)) return false;
@@ -101,17 +120,17 @@ public class Move {
 		return false;
 	}
 	
-	public void printMove(PrintStream out) {
-		out.printf("%c%d%c%d%c", from.getFile(), from.getRank(), to.getFile(), to.getRank(), promotion);
+	public boolean equals(Move m) {
+		if (!m.getFrom().equals(from)) return false;
+		if (!m.getTo().equals(to)) return false;
+		if (m.getPromotion() != promotion) return false;
+		return true;
 	}
 	
-	public Square getFrom() {
-		return from;
-	}
-	public Square getTo() {
-		return to;
-	}
-	public char getPromotion() {
-		return promotion;
+	/* * * *
+	 * IO  *
+	 * * * */
+	public void printMove(PrintStream out) {
+		out.printf("%c%d%c%d%c", from.getFile(), from.getRank(), to.getFile(), to.getRank(), promotion);
 	}
 }

@@ -1,29 +1,30 @@
 package chess;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 
 public class Board {
+	private Sides tomove;
 	private char[][] board = {
 			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
 			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
-			{ 0, 0,'R','N','B','Q','K','B','N','R', 0, 0 },
+			{ 0, 0,'R','N','B','Q',' ','B','N','R', 0, 0 },
 			{ 0, 0,'P','P','P','P','P','P','P','P', 0, 0 },
-			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
-			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
+			{ 0, 0,' ',' ',' ',' ','K',' ',' ',' ', 0, 0 },
+			{ 0, 0,' ',' ',' ','k',' ',' ',' ',' ', 0, 0 },
 			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
 			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
 			{ 0, 0,'p','p','p','p','p','p','p','p', 0, 0 },
-			{ 0, 0,'r','n','b','q','k','b','n','b', 0, 0 },
+			{ 0, 0,'r','n','b','q',' ','b','n','b', 0, 0 },
 			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
 			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 }
 		};
 	private boolean[] castlingRights = 	{ true, true, true, true}; 
 										//white kingside, queenside, black kingside, queenside
 	private Square enPassantTarget;
-	
 	private int fiftyMoveRule;
-	
-	Sides tomove;
+	private ArrayList<Move> legalMoves;
 	
 	
 	/* * * * * * * * *
@@ -33,6 +34,7 @@ public class Board {
 	public Board() {
 		enPassantTarget = new Square();
 		fiftyMoveRule = 0;
+		tomove = Sides.white;
 	}
 	
 	/*public Board(String fen) {
@@ -42,6 +44,10 @@ public class Board {
 	/* * * * * *
 	 * Getters *
 	 * * * * * */
+	
+	public Sides tomove() {
+		return tomove;
+	}
 
 	public boolean wKingSideCastling() {
 		return castlingRights[0];
@@ -135,10 +141,27 @@ public class Board {
 		out.printf("\n");
 	}
 	
+	@Override
+	public String toString() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        
+        PrintStream printStream = new PrintStream(outputStream);
+        
+        printToStream(printStream);
+        
+        String result = outputStream.toString();
+        return result;
+	}
+	
 	
 	/* * * * *
 	 * Moves *
 	 * * * * */
+	private void switchColor() {
+		if (tomove == Sides.black) tomove = Sides.white;
+		else tomove = Sides.black;
+	}
+	
 	public void makeMove(Move m) {
 		if (m.isNull()) return;
 		if (board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == ' ') return;
@@ -262,7 +285,110 @@ public class Board {
 		}
 		
 		board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] = ' ';
+		
+		switchColor();
+	}
+	
+	
+	/* * * * * * * *
+	 * Legal Moves *
+	 * * * * * * * */
+	public int generateLegalMoves() {
+		int count = 0;
+		count += addKnightMoves();
+		return count;
+	}
+	
+	public boolean inCheck(Sides tomove) {
+		int kingi = 0, kingj = 0;
+		for (int i = 2; i < 10; i++) {
+			for (int j = 2; j < 10; j++) {
+				if (board[i][j] == 'K' && tomove == Sides.white){
+					kingi = i;
+					kingj = j;
+					//break loops;
+				}
+				else if (board[i][j] == 'k' && tomove == Sides.black){
+					kingi = i;
+					kingj = j;
+					//break loops;
+				}
+			}
+		}
+		if (kingi * kingj == 0) {
+			/*if (tomove == Sides.white){ throw new IllegalPositionException("No white king found"); }
+			else { throw new IllegalPositionException("No black king found"); } */
+			//can't reach this if everything goes well: only made legal moves and the startpos was legal
+			return false;
+		}
+		
+		//to check if square + offset is q,r,b,n, or p, no matter the color
+		int colorOffset = (tomove == Sides.white ? 0 : 'a' - 'A');
+		
+		
+		//knight directions
+		for (int i = -1; i <= 1; i += 2) {
+			for (int j = -1; j <= 1; j += 2) {
+				if (board[kingi + i][kingj + 2 * j] + colorOffset == 'n') { return true; }
+			}
+		}
+		for (int i = -1; i <= 1; i += 2) {
+			for (int j = -1; j <= 1; j += 2) {
+				if (board[kingi + 2 * i][kingj + j] + colorOffset == 'n') { return true; }
+			}
+		}
+		
+		//bishop directions
+		for (int i = -1; i <= 1; i += 2) {
+			for (int j = -1; j <= 1; j += 2) {
+				int k = 1;
+				while (board[kingi + k * i][kingj + k * j] == ' ') { k++; }
+				
+				if (board[kingi + k * i][kingj + k * j] + colorOffset == 'b'
+					|| board[kingi + k * i][kingj + k * j] + colorOffset == 'q' ) { return true; }
+			}
+		}
+		
+		//rook direction
+		for (int i = -1; i <= 1; i += 2) {
+			int k = 1;
+			while (board[kingi + k * i][kingj] == ' ') { k++; }
+			
+			if (board[kingi + k * i][kingj] + colorOffset == 'r'
+				|| board[kingi + k * i][kingj] + colorOffset == 'q' ) { return true; }
+		}
+		for (int i = -1; i <= 1; i += 2) {
+			int k = 1;
+			while (board[kingi][k * i + kingj] == ' ') { k++; }
+			
+			if (board[kingi][k * i + kingj] + colorOffset == 'r'
+				|| board[kingi][k * i + kingj] + colorOffset == 'q' ) { return true; }
+		}
+		
+		//pawns
+		if (tomove == Sides.white) {
+			if (board[kingi + 1][kingj + 1] == 'p' || board[kingi + 1][kingj - 1] == 'p') { return true; }
+		}
+		else {
+			if (board[kingi - 1][kingj + 1] == 'P' || board[kingi - 1][kingj - 1] == 'P') { return true; }
+		}
+		
+		//kings can't get near each other, so let's test it by calling it a check
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				if (i == j && j == 0) { continue; }
+				if (board[kingi + i][kingj + j] + colorOffset == 'k') return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private int addKnightMoves() {
+		//for (int )
+		return 0;
 	}
 	
 	
 }
+
