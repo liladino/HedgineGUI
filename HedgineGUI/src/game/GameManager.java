@@ -90,6 +90,8 @@ public class GameManager {
 			else { System.out.print("Black to move\n"); }
 			
 			System.out.println(board);
+			System.out.println(board.convertToFEN());
+			
 		}
 		scanner.close();
 	}

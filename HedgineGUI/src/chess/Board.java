@@ -4,19 +4,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import chess.IO.FENmanager;
+
 public class Board {
 	private Sides tomove;
 	private char[][] board = {
 			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
 			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
-			{ 0, 0,'R','N','B','Q',' ','B','N','R', 0, 0 },
+			{ 0, 0,'R','N','B','Q','K','B','N','R', 0, 0 },
 			{ 0, 0,'P','P','P','P','P','P','P','P', 0, 0 },
-			{ 0, 0,' ',' ',' ',' ','K',' ',' ',' ', 0, 0 },
-			{ 0, 0,' ',' ',' ','k',' ',' ',' ',' ', 0, 0 },
+			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
+			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
 			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
 			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
 			{ 0, 0,'p','p','p','p','p','p','p','p', 0, 0 },
-			{ 0, 0,'r','n','b','q',' ','b','n','b', 0, 0 },
+			{ 0, 0,'r','n','b','q','k','b','n','b', 0, 0 },
 			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
 			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 }
 		};
@@ -24,6 +26,7 @@ public class Board {
 										//white kingside, queenside, black kingside, queenside
 	private Square enPassantTarget;
 	private int fiftyMoveRule;
+	private int fullMoveCount;
 	private ArrayList<Move> legalMoves;
 	
 	
@@ -35,6 +38,7 @@ public class Board {
 		enPassantTarget = new Square();
 		fiftyMoveRule = 0;
 		tomove = Sides.white;
+		fullMoveCount = 0;
 	}
 	
 	/*public Board(String fen) {
@@ -71,6 +75,10 @@ public class Board {
 	
 	public int getFiftyMoveRule() {
 		return fiftyMoveRule;
+	}
+	
+	public int getFullMoveCount() {
+		return fullMoveCount;
 	}
 	
 	public char boardAt(int row, int col) {
@@ -151,6 +159,11 @@ public class Board {
         
         String result = outputStream.toString();
         return result;
+	}
+	
+	public String convertToFEN() {
+		FENmanager f = new FENmanager();
+		return f.convertToFEN(this);
 	}
 	
 	
@@ -285,6 +298,10 @@ public class Board {
 		}
 		
 		board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] = ' ';
+		
+		if (tomove == Sides.black) {
+			fullMoveCount++;
+		}
 		
 		switchColor();
 	}

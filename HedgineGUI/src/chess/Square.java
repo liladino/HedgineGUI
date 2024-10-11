@@ -71,4 +71,11 @@ public class Square {
 		return true;
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(file);
+		sb.append(rank);
+		return new String(sb);
+	}
 }
