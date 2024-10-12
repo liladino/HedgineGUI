@@ -53,7 +53,7 @@ public class GameManager {
 		board = new Board();
 	}
 	public void setBoard(Board b) {
-		board = new Board();
+		board = b;
 	}
 	
 	/* * * * * * * *
@@ -63,15 +63,19 @@ public class GameManager {
 		if (board == null /*|| p1 == null || p2 == null*/) {
 			throw new GameStartException("One or more more components are not initialzed! (Board, Player1, Player 2)");
 		}
-		
-		
-		if (board.inCheck(board.tomove())) System.out.print("Check! ");
-		if (board.tomove() == Sides.white) { System.out.print("White to move\n");}
-		else { System.out.print("Black to move\n"); }
-		board.printToStream(System.out, Sides.white);
+
 		Scanner scanner = new Scanner(System.in);
-		Move m;
+		Move m = null;
 		while(true) {
+			if (m != null) if (m.isNull()) break;
+			
+			if (board.inCheck(board.tomove())) System.out.print("Check! ");
+			if (board.tomove() == Sides.white) { System.out.print("White to move\n");}
+			else { System.out.print("Black to move\n"); }
+			
+			System.out.println(board);
+			System.out.println(board.convertToFEN());
+			
 			String s;
 			if (scanner.hasNextLine()) {
 				s = scanner.nextLine();
@@ -81,17 +85,7 @@ public class GameManager {
 			}
 			m = new Move(s);
 			
-			if (m.isNull()) break;
-			
-			board.makeMove(m);
-			
-			if (board.inCheck(board.tomove())) System.out.print("Check! ");
-			if (board.tomove() == Sides.white) { System.out.print("White to move\n");}
-			else { System.out.print("Black to move\n"); }
-			
-			System.out.println(board);
-			System.out.println(board.convertToFEN());
-			
+			if (!m.isNull()) board.makeMove(m);			
 		}
 		scanner.close();
 	}

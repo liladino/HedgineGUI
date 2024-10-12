@@ -1,29 +1,17 @@
 package chess;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import chess.IO.FENException;
 import chess.IO.FENmanager;
 
 public class Board {
 	private Sides tomove;
-	private char[][] board = {
-			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
-			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
-			{ 0, 0,'R','N','B','Q','K','B','N','R', 0, 0 },
-			{ 0, 0,'P','P','P','P','P','P','P','P', 0, 0 },
-			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
-			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
-			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
-			{ 0, 0,' ',' ',' ',' ',' ',' ',' ',' ', 0, 0 },
-			{ 0, 0,'p','p','p','p','p','p','p','p', 0, 0 },
-			{ 0, 0,'r','n','b','q','k','b','n','b', 0, 0 },
-			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
-			{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 }
-		};
-	private boolean[] castlingRights = 	{ true, true, true, true}; 
-										//white kingside, queenside, black kingside, queenside
+	private char[][] board;
+	private boolean[] castlingRights; //white kingside, queenside, black kingside, queenside
 	private Square enPassantTarget;
 	private int fiftyMoveRule;
 	private int fullMoveCount;
@@ -34,21 +22,57 @@ public class Board {
 	 * Constructors  *
 	 * * * * * * * * */
 	
-	public Board() {
-		enPassantTarget = new Square();
-		fiftyMoveRule = 0;
-		tomove = Sides.white;
-		fullMoveCount = 0;
+	public Board(String FEN) throws FENException {
+		try {
+			setupBoard(FEN);
+		}
+		catch (FENException e) {
+			throw(e);
+		}
 	}
 	
-	/*public Board(String fen) {
-		chessBoard = new char[12][12];
-	}*/
+	public Board() {
+		try {
+			//setupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+
+			setupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - ");
+		}
+		catch (FENException e) {
+			//this can not be reached
+			System.out.println(e);
+		}
+	}
+	
+	private void setupBoard(String FEN) throws FENException {
+		FENmanager f = new FENmanager();
+		try {
+			board = f.parseBoard(FEN);
+			tomove = f.parseTomove(FEN);
+			castlingRights = f.parseCastlingRights(FEN);
+			enPassantTarget = f.parseEnPassant(FEN);
+			fiftyMoveRule = f.parseFiftyMoveRule(FEN);
+			fullMoveCount = f.parseMoveCount(FEN);
+		}
+		catch (FENException e) {
+			if (e.getSuccesfulFields() < 4) throw new FENException(e.getMessage() + " can't parse FEN", e.getSuccesfulFields());
+			//non-fatal:
+			System.out.print(e.getMessage() + ": ");			
+			if (e.getSuccesfulFields() == 4) {
+				System.out.print("fifty move rule counter is set to 0, ");
+				fiftyMoveRule = 0;
+			}
+			System.out.print("fullmove number is set to 1.");
+			fullMoveCount = 1;
+		}
+		
+		legalMoves = new ArrayList<Move>();
+	}
+	
 	
 	/* * * * * *
 	 * Getters *
 	 * * * * * */
-	
+
 	public Sides tomove() {
 		return tomove;
 	}
@@ -69,7 +93,7 @@ public class Board {
 		return castlingRights[3];
 	}
 	
-	public Square enPassantTarget() {
+	public Square getEnPassantTarget() {
 		return enPassantTarget;
 	}
 	
