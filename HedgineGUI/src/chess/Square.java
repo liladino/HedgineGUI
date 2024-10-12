@@ -16,8 +16,8 @@ public class Square {
 	
 	public Square(char file, int rank) {
 		if (file < 'a' || file > 'h' || rank < 1 || rank > 8) {
-			rank = -1;
-			file = 0;
+			this.rank = -1;
+			this.file = 0;
 			return;
 		}
 		this.rank = rank;
@@ -26,6 +26,11 @@ public class Square {
 	
 	//constructor for 12x12 board coordinates
 	public Square(int row, int col) {
+		if (row < 2 || row > 9 || col < 2 || col > 9) {
+			rank = -1;
+			file = 0;
+			return;
+		}
 		rank = row - 1;
 		file = (char)(col + 'a' - 2);
 	}
