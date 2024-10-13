@@ -15,10 +15,7 @@ public class Board {
 	private int fiftyMoveRule;
 	private int fullMoveCount;
 	
-	/* this should be a new class, LegalMoves, which extends ArrayList<Move>. 
-	 * That way te move generator functions could be put there, 
-	 * and it would not take up that much space */
-	private ArrayList<Move> legalMoves;
+	private LegalMoves legalMoves;
 	
 	
 	/* * * * * * * * *
@@ -66,8 +63,6 @@ public class Board {
 			System.out.print("fullmove number is set to 1.");
 			fullMoveCount = 1;
 		}
-		
-		legalMoves = new ArrayList<Move>();
 	}
 	
 	
@@ -336,10 +331,8 @@ public class Board {
 	/* * * * * * * *
 	 * Legal Moves *
 	 * * * * * * * */
-	public int generateLegalMoves() {
-		int count = 0;
-		count += addKnightMoves();
-		return count;
+	public void generateLegalMoves() {
+		legalMoves = new LegalMoves(this);
 	}
 	
 	public boolean inCheck(Sides tomove) {
@@ -426,12 +419,6 @@ public class Board {
 		
 		return false;
 	}
-	
-	private int addKnightMoves() {
-		//for (int )
-		return 0;
-	}
-	
 	
 }
 
