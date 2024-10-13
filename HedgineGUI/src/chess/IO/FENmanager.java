@@ -1,7 +1,5 @@
 package chess.IO;
 
-import java.io.IOException;
-
 import chess.Board;
 import chess.Sides;
 import chess.Square;

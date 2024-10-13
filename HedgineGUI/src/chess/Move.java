@@ -34,7 +34,7 @@ public class Move {
 		to = new Square(file, rank);
 		
 		if (str.length() == 5) {
-			promotion = str.charAt(5);
+			promotion = str.charAt(4);
 		}
 		else {
 			promotion = ' ';
@@ -42,7 +42,6 @@ public class Move {
 	}
 	
 	public Move(Square from, Square to, char promotion) {
-		//nullmove
 		this.from = from;
 		this.to = to;
 		switch (promotion) {
@@ -80,8 +79,8 @@ public class Move {
 	/* * * * * *
 	 * Methods *
 	 * * * * * */
-	boolean isMove(String str) {
-		//does NOT check if the move is legal, only if it looks like a move based on a string
+	private boolean isMove(String str) {
+		//does NOT check if the move is legal, checks only if the string looks like a move 
 		if (!(str.length() == 4 || str.length() == 5)) return false;
 		char file = str.charAt(0);
 		int rank = str.charAt(1) - '0';
@@ -96,7 +95,7 @@ public class Move {
 		if (t.isNull()) return false;
 		
 		if (str.length() == 5) {
-				switch (str.charAt(5)) {
+				switch (str.charAt(4)) {
 				case 'q':
 					break;
 				case 'r':
@@ -132,5 +131,16 @@ public class Move {
 	 * * * */
 	public void printMove(PrintStream out) {
 		out.printf("%c%d%c%d%c", from.getFile(), from.getRank(), to.getFile(), to.getRank(), promotion);
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(from.getFile());
+		sb.append(from.getRank());
+		sb.append(to.getFile());
+		sb.append(to.getRank());
+		sb.append(promotion);
+		return new String(sb);
 	}
 }

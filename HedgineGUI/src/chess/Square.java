@@ -40,19 +40,19 @@ public class Square {
 	 * * * * * */
 	
 	//get coordinates for the 12x12 array
-	int getRowCoord() {
+	public int getRowCoord() {
 		if (rank == -1) return -1;
 		return rank + 1;
 	}
-	int getColCoord() {
+	public int getColCoord() {
 		if (file == 0) return -1;
 		return file - 'a' + 2;
 	}
 	
-	int getRank() {
+	public int getRank() {
 		return rank;
 	}
-	char getFile() {
+	public char getFile() {
 		return file;
 	}
 

@@ -14,6 +14,10 @@ public class Board {
 	private Square enPassantTarget;
 	private int fiftyMoveRule;
 	private int fullMoveCount;
+	
+	/* this should be a new class, LegalMoves, which extends ArrayList<Move>. 
+	 * That way te move generator functions could be put there, 
+	 * and it would not take up that much space */
 	private ArrayList<Move> legalMoves;
 	
 	
