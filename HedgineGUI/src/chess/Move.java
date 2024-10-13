@@ -119,7 +119,11 @@ public class Move {
 		return false;
 	}
 	
-	public boolean equals(Move m) {
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		
+		Move m = (Move)o;
 		if (!m.getFrom().equals(from)) return false;
 		if (!m.getTo().equals(to)) return false;
 		if (m.getPromotion() != promotion) return false;

@@ -35,6 +35,12 @@ public class Square {
 		file = (char)(col + 'a' - 2);
 	}
 	
+	//copy
+	public Square(Square s) {
+		rank = s.rank;
+		file = s.file;
+	}
+	
 	/* * * * * *
 	 * Getters *
 	 * * * * * */
@@ -66,7 +72,11 @@ public class Square {
 		return false;
 	}
 	
-	public boolean equals(Square s) {
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) return true;
+		
+		Square s = (Square)o;
 		if (s.getFile() != file) {
 			return false;
 		}

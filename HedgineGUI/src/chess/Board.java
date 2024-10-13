@@ -8,8 +8,8 @@ import chess.IO.FENException;
 import chess.IO.FENmanager;
 
 public class Board {
-	private Sides tomove;
 	private char[][] board;
+	private Sides tomove;
 	private boolean[] castlingRights; //white kingside, queenside, black kingside, queenside
 	private Square enPassantTarget;
 	private int fiftyMoveRule;
@@ -63,6 +63,25 @@ public class Board {
 			System.out.print("fullmove number is set to 1.");
 			fullMoveCount = 1;
 		}
+	}
+	
+	//copy constructor
+	public Board(Board b) {
+		board = new char[12][12];
+		for (int i = 2; i < 10; i++) 
+			for (int j = 2; j < 10; j++) 
+				board[i][j] = b.board[i][j];
+		
+		if (b.tomove == Sides.white) tomove = Sides.white; else tomove = Sides.black;
+		castlingRights = new boolean[4];
+		for (int i = 0; i < 4; i++) 
+				castlingRights[i] = b.castlingRights[i];
+		
+		enPassantTarget = new Square(b.enPassantTarget);
+		fiftyMoveRule = b.fiftyMoveRule;
+		fullMoveCount = b.fullMoveCount;
+		
+		legalMoves = null;
 	}
 	
 	
@@ -187,6 +206,9 @@ public class Board {
 		return f.convertToFEN(this);
 	}
 	
+	public void printLegalMoves() {
+		System.out.println(legalMoves);
+	}
 	
 	/* * * * *
 	 * Moves *
@@ -320,6 +342,7 @@ public class Board {
 		
 		board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] = ' ';
 		
+		//set meta values
 		if (tomove == Sides.black) {
 			fullMoveCount++;
 		}
@@ -333,6 +356,10 @@ public class Board {
 	 * * * * * * * */
 	public void generateLegalMoves() {
 		legalMoves = new LegalMoves(this);
+	}
+	
+	public boolean isMoveLegal(Move m) {
+		return legalMoves.contains(m);
 	}
 	
 	public boolean inCheck(Sides tomove) {
