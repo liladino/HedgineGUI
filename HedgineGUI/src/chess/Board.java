@@ -354,12 +354,20 @@ public class Board {
 	/* * * * * * * *
 	 * Legal Moves *
 	 * * * * * * * */
-	public void generateLegalMoves() {
+	public int generateLegalMoves() {
 		legalMoves = new LegalMoves(this);
+		return legalMoves.size();
 	}
 	
 	public boolean isMoveLegal(Move m) {
 		return legalMoves.contains(m);
+	}
+	
+	public int numberOfLegalMoves() {
+		if (legalMoves == null) {
+			return generateLegalMoves();
+		}
+		return legalMoves.size();
 	}
 	
 	public boolean inCheck(Sides tomove) {

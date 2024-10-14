@@ -32,6 +32,17 @@ public class LegalMoves extends ArrayList<Move> {
 		}
 		return false;
 	}
+	private boolean enemyPiece(char c) {
+		if (c >= 'a' && c <= 'z') {
+			if (currentCol == Sides.white) return true;
+			else return false;
+		}
+		else if (c >= 'A' && c <= 'Z'){
+			if (currentCol == Sides.black) return true;
+			else return false;
+		}
+		return false;
+	}
 	
 	private void generateLegalMoves() {
 		int colorOffset = (board.tomove() == Sides.black ? 0 : 'a' - 'A');
@@ -43,6 +54,7 @@ public class LegalMoves extends ArrayList<Move> {
 					case 'b': addBishopMoves(k, l); break;
 					case 'q': addQueenMoves(k, l); break;
 					case 'k': addKingMoves(k, l); break;
+					case 'p': addPawnMoves(k, l); break;
 				}
 			}
 		}
@@ -249,6 +261,82 @@ public class LegalMoves extends ArrayList<Move> {
 			}
 			//undo move
 			board = new Board(copyBoard);
+		}
+	}
+	
+	private void addPawnMoves(int k, int l) {
+		Square from = new Square(k, l);
+		int dir = (currentCol == Sides.white ? 1 : -1);
+		
+		//no take
+		if (board.boardAt(k + dir, l) == ' ') {
+			if (k + dir != 9 && k + dir != 2) {
+				boolean moveForward = false;
+				Move m = new Move(from, new Square(k + dir, l), ' ');
+				//add move
+				board.makeMove(m);
+				if (!board.inCheck(currentCol)){
+					super.add(m);
+					moveForward = true;
+				}
+				//undo move
+				board = new Board(copyBoard);
+				//moving 2 squares
+				if (moveForward && ( (currentCol == Sides.white && k == 3) || (currentCol == Sides.black && k == 8) ) ){
+					m = new Move(from, new Square(k + 2 * dir, l), ' ');
+					//add move
+					board.makeMove(m);
+					if (!board.inCheck(currentCol)){
+						super.add(m);
+						moveForward = true;
+					}
+					//undo move
+					board = new Board(copyBoard);
+				}
+			}
+			else {
+				char[] prom = {'q', 'r', 'n', 'b'};
+				for (int i = 0; i < 4; i++) {
+					Move m = new Move(from, new Square(k + dir, l), prom[i]);
+					//add move
+					board.makeMove(m);
+					if (!board.inCheck(currentCol)){
+						super.add(m);
+					}
+					//undo move
+					board = new Board(copyBoard);
+				}
+			}
+		}
+		
+		//taking 
+		for (int y = -1; y <= 1; y += 2) {
+			if (!board.getEnPassantTarget().isNull() && board.getEnPassantTarget().equals(new Square(k + dir, l + y)) 
+				|| enemyPiece(board.boardAt(k + dir, l + y))) {
+				if (k + dir != 2 && k + dir != 9) {
+					Move m = new Move(from, new Square(k + dir, l + y), ' ');
+					//add move
+					board.makeMove(m);
+					if (!board.inCheck(currentCol)){
+						super.add(m);
+					}
+					//undo move
+					board = new Board(copyBoard);
+				}
+				else {
+					char[] prom = {'q', 'r', 'n', 'b'};
+					for (int i = 0; i < 4; i++) {
+						Move m = new Move(from, new Square(k + dir, l + y), prom[i]);
+						//add move
+						board.makeMove(m);
+						if (!board.inCheck(currentCol)){
+							super.add(m);
+						}
+						//undo move
+						board = new Board(copyBoard);
+					}				
+				}
+			}
 		}
 	}
 }

@@ -68,8 +68,8 @@ public class GameManager {
 		Move m = null;
 		while(true) {
 			if (m != null) if (m.isNull()) break;
-			board.generateLegalMoves();
-			board.printLegalMoves();
+			System.out.println(board.generateLegalMoves());
+			//board.printLegalMoves();
 			
 			if (board.inCheck(board.tomove())) System.out.print("Check! ");
 			if (board.tomove() == Sides.white) { System.out.print("White to move\n");}
@@ -77,8 +77,6 @@ public class GameManager {
 			
 			System.out.println(board);
 			System.out.println(board.convertToFEN());
-			
-			board.generateLegalMoves();
 			
 			String s;
 			if (scanner.hasNextLine()) {

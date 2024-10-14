@@ -42,6 +42,8 @@ public class FENmanager {
 		if (board.bKingSideCastling()) sb.append('k');
 		if (board.bQueenSideCastling()) sb.append('q');
 		
+		if (!board.wKingSideCastling() && !board.wQueenSideCastling() && !board.bKingSideCastling() && !board.bQueenSideCastling()) sb.append('-');
+		
 		sb.append(' ');
 		
 		if (board.getEnPassantTarget().isNull()) sb.append('-');
@@ -79,12 +81,12 @@ public class FENmanager {
 		
 		String[] s = FEN.split(" ");
 		
-		if (s.length < 1) {
-			throw new FENException("Missing element(s)", readSuccesses);
-		}
+		if (s[0].length() < 14) throw new FENException("Missing element(s)", readSuccesses);
 		
 		String[] pos = s[0].split("/");
 
+		if (pos.length != 8) throw new FENException("Missing element(s)", readSuccesses);
+		
 		int wking = 0, bking = 0;
 		int k = 0;
 		for (int i = 2; i < 10; i++) {
@@ -222,16 +224,20 @@ public class FENmanager {
 				return new Square();
 			}
 			else {
-				throw new FENException("Unexpected character in en passant: " + s[2].charAt(0), readSuccesses);
+				throw new FENException("Unexpected character in en passant: " + s[3].charAt(0), readSuccesses);
 			}
 		}
 		
 		if (s[3].length() != 2) {
-			throw new FENException("Unexpected character in en passant: " + s[2], readSuccesses);
+			throw new FENException("Unexpected character in en passant: " + s[3], readSuccesses);
 		}
 
+		Square s1 = new Square(s[3].charAt(0), s[3].charAt(1) - '0');
+		
+		if (s1.isNull()) throw new FENException("En passant square is not valid: " + s[3], readSuccesses);
+
 		readSuccesses[3] = true;
-		return new Square(s[2].charAt(0), s[2].charAt(1) - '0');
+		return s1;
 	}
 	
 	public int parseFiftyMoveRule(String FEN) throws FENException {
