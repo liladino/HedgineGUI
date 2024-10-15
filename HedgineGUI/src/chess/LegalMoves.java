@@ -101,10 +101,10 @@ public class LegalMoves extends ArrayList<Move> {
 		for (int j = 0; j <= 1; j++) {
 			for (int i = -1; i <= 1; i += 2) {
 				int a = 1;
-				while (board.boardAt(k + i * j * a, l + i * j * (1-a)) == ' ' || !friendlyPiece(board.boardAt(k + i * j * a, l + i * j * (1-a)))) {
-					if (friendlyPiece(board.boardAt(k + i * j * a, l + i * j * (1-a)))) break;
+				while (board.boardAt(k + i * j * a, l + i * (1-j) * a) == ' ' || !friendlyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) {
+					if (friendlyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) break;
 					
-					Move m = new Move(from, new Square(k + i * j * a, l + i * j * (1-a)), ' ');
+					Move m = new Move(from, new Square(k + i * j * a, l + i * (1-j) * a), ' ');
 					if (m.isNull()) break; //probably can't reach this
 					//add move
 					board.makeMove(m);
