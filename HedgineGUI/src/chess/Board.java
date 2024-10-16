@@ -33,11 +33,11 @@ public class Board {
 	
 	public Board() {
 		try {
+			//startpos
 			setupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-			//setupBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - ");
 		}
 		catch (FENException e) {
-			//this can not be reached
+			//this can't throw an exception if i didn't mess up
 			System.out.println(e);
 		}
 	}
@@ -370,6 +370,10 @@ public class Board {
 		return legalMoves.size();
 	}
 	
+	public Move getLegalmove(int i) {
+		return legalMoves.get(i);
+	}
+	
 	public boolean inCheck(Sides tomove) {
 		int kingi = 0, kingj = 0;
 		for (int i = 2; i < 10; i++) {
@@ -454,6 +458,30 @@ public class Board {
 		
 		return false;
 	}
+	
+	public int perfTest(int depth) {
+		Board temp = new Board(this);
+		return recursiveLegalMoves(depth, temp);
+	}
+	
+	private int recursiveLegalMoves(int depth, Board b) {
+		if (depth <= 0) {
+			return 1;
+		}
+		
+		Board temp = new Board(b);
+		
+		temp.generateLegalMoves();
+		int count = 0;
+		
+		for (Move i : temp.legalMoves) {
+			temp.makeMove(i);
+			count += recursiveLegalMoves(depth - 1, temp);
+			temp = new Board(b);
+		}
+		return count;
+	}
+	
 	
 }
 
