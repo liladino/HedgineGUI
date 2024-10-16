@@ -11,6 +11,8 @@ class LegalMovesTest {
 	
 	//Source: https://www.chessprogramming.org/Perft_Results
 	
+	//Last runtime: 21 seconds
+	
 	@Test
 	void startPos() {
 		b = new Board();
@@ -54,6 +56,20 @@ class LegalMovesTest {
 	void pos4() {
 		try {
 			b = new Board("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+		}
+		catch (FENException e) {
+			return;
+		}
+		assertEquals(6, b.perfTest(1));
+		assertEquals(264, b.perfTest(2));
+		assertEquals(9467, b.perfTest(3));
+		assertEquals(422333, b.perfTest(4));
+	}
+	
+	@Test
+	void pos4b() {
+		try {
+			b = new Board("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1 ");
 		}
 		catch (FENException e) {
 			return;

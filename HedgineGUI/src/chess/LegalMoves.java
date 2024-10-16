@@ -102,7 +102,7 @@ public class LegalMoves extends ArrayList<Move> {
 			for (int i = -1; i <= 1; i += 2) {
 				int a = 1;
 				while (board.boardAt(k + i * j * a, l + i * (1-j) * a) == ' ' || enemyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) {
-					if (friendlyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) break;
+					if (friendlyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) break; //probably removable line
 					
 					Move m = new Move(from, new Square(k + i * j * a, l + i * (1-j) * a), ' ');
 					if (m.isNull()) break; //probably can't reach this
@@ -224,13 +224,17 @@ public class LegalMoves extends ArrayList<Move> {
 				}
 				//undo move
 				board = new Board(copyBoard);
+				
+				if (j == 0 && i == 1 && enemyPiece(board.boardAt(k + j, l + i))) movingRightWasLegal = false;
+				if (j == 0 && i == -1 && enemyPiece(board.boardAt(k + j, l + i))) movingLeftWasLegal = false;
 			}
 		}
 		if (l != 6) return;
 		if (board.inCheck(currentCol)) return;
 		
 		//short castle
-		if (currentCol == Sides.white && k == 2 && movingRightWasLegal && board.wKingSideCastling()) {
+		if (currentCol == Sides.white && k == 2 && movingRightWasLegal && board.wKingSideCastling() 
+				&& board.boardAt(k, l + 2) == ' ') {
 			Move m = new Move(from, new Square(2, 8), ' ');
 			//add move
 			board.makeMove(m);
@@ -240,7 +244,8 @@ public class LegalMoves extends ArrayList<Move> {
 			//undo move
 			board = new Board(copyBoard);
 		}
-		if (currentCol == Sides.black && k == 9 && movingRightWasLegal && board.bKingSideCastling()) {
+		if (currentCol == Sides.black && k == 9 && movingRightWasLegal && board.bKingSideCastling() 
+				&& board.boardAt(k, l + 2) == ' ')  {
 			Move m = new Move(from, new Square(9, 8), ' ');
 			//add move
 			board.makeMove(m);
@@ -251,7 +256,8 @@ public class LegalMoves extends ArrayList<Move> {
 			board = new Board(copyBoard);
 		}
 		//long castle
-		if (currentCol == Sides.white && k == 2 && movingLeftWasLegal && board.wQueenSideCastling()) {
+		if (currentCol == Sides.white && k == 2 && movingLeftWasLegal && board.wQueenSideCastling() 
+				&& board.boardAt(k, l - 2) == ' ' && board.boardAt(k, l - 3) == ' ') {
 			Move m = new Move(from, new Square(2, 4), ' ');
 			//add move
 			board.makeMove(m);
@@ -261,7 +267,8 @@ public class LegalMoves extends ArrayList<Move> {
 			//undo move
 			board = new Board(copyBoard);
 		}
-		if (currentCol == Sides.black && k == 9 && movingLeftWasLegal && board.bQueenSideCastling()) {
+		if (currentCol == Sides.black && k == 9 && movingLeftWasLegal && board.bQueenSideCastling() 
+				&& board.boardAt(k, l - 2) == ' ' && board.boardAt(k, l - 3) == ' ')  {
 			Move m = new Move(from, new Square(9, 4), ' ');
 			//add move
 			board.makeMove(m);
