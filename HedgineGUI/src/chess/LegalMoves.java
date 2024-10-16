@@ -101,7 +101,7 @@ public class LegalMoves extends ArrayList<Move> {
 		for (int j = 0; j <= 1; j++) {
 			for (int i = -1; i <= 1; i += 2) {
 				int a = 1;
-				while (board.boardAt(k + i * j * a, l + i * (1-j) * a) == ' ' || !friendlyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) {
+				while (board.boardAt(k + i * j * a, l + i * (1-j) * a) == ' ' || enemyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) {
 					if (friendlyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) break;
 					
 					Move m = new Move(from, new Square(k + i * j * a, l + i * (1-j) * a), ' ');
@@ -113,6 +113,8 @@ public class LegalMoves extends ArrayList<Move> {
 					}
 					//undo move
 					board = new Board(copyBoard);
+					
+					if (enemyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) break;
 					
 					a++;
 				}
@@ -126,7 +128,7 @@ public class LegalMoves extends ArrayList<Move> {
 		for (int i = -1; i <= 1; i += 2) {
 			for (int j = -1; j <= 1; j += 2) {
 				int a = 1;
-				while (board.boardAt(k + a * j, l + a * i) == ' ' || !friendlyPiece(board.boardAt(k + a * j, l + a * i))) {
+				while (board.boardAt(k + a * j, l + a * i) == ' ' || enemyPiece(board.boardAt(k + a * j, l + a * i))) {
 					if (friendlyPiece(board.boardAt(k + a * j, l + a * i))) break;
 					
 					Move m = new Move(from, new Square(k + a * j, l + a * i), ' ');
@@ -138,6 +140,8 @@ public class LegalMoves extends ArrayList<Move> {
 					}
 					//undo move
 					board = new Board(copyBoard);
+					
+					if (enemyPiece(board.boardAt(k + a * j, l + a * i))) break;
 					
 					a++;
 				}
@@ -152,7 +156,7 @@ public class LegalMoves extends ArrayList<Move> {
 		for (int i = -1; i <= 1; i += 2) {
 			for (int j = -1; j <= 1; j += 2) {
 				int a = 1;
-				while (board.boardAt(k + a * j, l + a * i) == ' ' || !friendlyPiece(board.boardAt(k + a * j, l + a * i))) {
+				while (board.boardAt(k + a * j, l + a * i) == ' ' || enemyPiece(board.boardAt(k + a * j, l + a * i))) {
 					if (friendlyPiece(board.boardAt(k + a * j, l + a * i))) break;
 					
 					Move m = new Move(from, new Square(k + a * j, l + a * i), ' ');
@@ -165,6 +169,8 @@ public class LegalMoves extends ArrayList<Move> {
 					//undo move
 					board = new Board(copyBoard);
 					
+					if (enemyPiece(board.boardAt(k + a * j, l + a * i))) break;
+					
 					a++;
 				}
 			}
@@ -174,10 +180,10 @@ public class LegalMoves extends ArrayList<Move> {
 		for (int j = 0; j <= 1; j++) {
 			for (int i = -1; i <= 1; i += 2) {
 				int a = 1;
-				while (board.boardAt(k + i * j * a, l + i * j * (1-a)) == ' ' || !friendlyPiece(board.boardAt(k + i * j * a, l + i * j * (1-a)))) {
-					if (friendlyPiece(board.boardAt(k + i * j * a, l + i * j * (1-a)))) break;
+				while (board.boardAt(k + i * j * a, l + i * (1-j) * a) == ' ' || enemyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) {
+					if (friendlyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) break;
 					
-					Move m = new Move(from, new Square(k + i * j * a, l + i * j * (1-a)), ' ');
+					Move m = new Move(from, new Square(k + i * j * a, l + i * (1-j) * a), ' ');
 					if (m.isNull()) break; //probably can't reach this
 					//add move
 					board.makeMove(m);
@@ -186,6 +192,8 @@ public class LegalMoves extends ArrayList<Move> {
 					}
 					//undo move
 					board = new Board(copyBoard);
+					
+					if (enemyPiece(board.boardAt(k + i * j * a, l + i * (1-j) * a))) break;
 					
 					a++;
 				}
@@ -211,14 +219,15 @@ public class LegalMoves extends ArrayList<Move> {
 				board.makeMove(m);
 				if (!board.inCheck(currentCol)){
 					super.add(m);
-					if (i == 0 && j == 1) movingRightWasLegal = true;
-					if (i == 0 && j == -1) movingLeftWasLegal = true;
+					if (j == 0 && i == 1) movingRightWasLegal = true;
+					if (j == 0 && i == -1) movingLeftWasLegal = true;
 				}
 				//undo move
 				board = new Board(copyBoard);
 			}
 		}
 		if (l != 6) return;
+		if (board.inCheck(currentCol)) return;
 		
 		//short castle
 		if (currentCol == Sides.white && k == 2 && movingRightWasLegal && board.wKingSideCastling()) {
@@ -271,24 +280,22 @@ public class LegalMoves extends ArrayList<Move> {
 		//no take
 		if (board.boardAt(k + dir, l) == ' ') {
 			if (k + dir != 9 && k + dir != 2) {
-				boolean moveForward = false;
 				Move m = new Move(from, new Square(k + dir, l), ' ');
 				//add move
 				board.makeMove(m);
 				if (!board.inCheck(currentCol)){
 					super.add(m);
-					moveForward = true;
 				}
 				//undo move
 				board = new Board(copyBoard);
 				//moving 2 squares
-				if (moveForward && ( (currentCol == Sides.white && k == 3) || (currentCol == Sides.black && k == 8) ) ){
+				if (((currentCol == Sides.white && k == 3) || (currentCol == Sides.black && k == 8))
+					&& board.boardAt(k + 2 * dir, l) == ' '){
 					m = new Move(from, new Square(k + 2 * dir, l), ' ');
 					//add move
 					board.makeMove(m);
 					if (!board.inCheck(currentCol)){
 						super.add(m);
-						moveForward = true;
 					}
 					//undo move
 					board = new Board(copyBoard);

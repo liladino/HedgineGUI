@@ -60,7 +60,7 @@ public class Board {
 				System.out.print("fifty move rule counter is set to 0, ");
 				fiftyMoveRule = 0;
 			}
-			System.out.print("fullmove number is set to 1.");
+			System.out.println("fullmove number is set to 1.");
 			fullMoveCount = 1;
 		}
 	}
@@ -207,6 +207,9 @@ public class Board {
 	}
 	
 	public void printLegalMoves() {
+		if (legalMoves == null) {
+			generateLegalMoves();
+		}
 		System.out.println(legalMoves);
 	}
 	
@@ -370,7 +373,7 @@ public class Board {
 		return legalMoves.size();
 	}
 	
-	public Move getLegalmove(int i) {
+	public Move getLegalMove(int i) {
 		return legalMoves.get(i);
 	}
 	
@@ -460,8 +463,18 @@ public class Board {
 	}
 	
 	public int perfTest(int depth) {
+		return perfTest(depth, false);
+	}
+	
+	public int perfTest(int depth, boolean print) {
 		Board temp = new Board(this);
-		return recursiveLegalMoves(depth, temp);
+		if (print == false) {
+			return recursiveLegalMoves(depth, temp);
+		}
+		int r = recursiveLegalMoves(depth, temp);
+		System.out.println(temp);
+		System.out.printf("Number of legal moves %d plies deep: %d\n", depth, r);
+		return r;
 	}
 	
 	private int recursiveLegalMoves(int depth, Board b) {
