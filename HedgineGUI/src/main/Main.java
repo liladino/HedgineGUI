@@ -1,22 +1,10 @@
 package main;
 
-import chess.*;
-import chess.IO.FENException;
-import game.*;
+import graphics.mainWindow.MainWindow;
 
 public class Main {
 	public static void main(String[] args) {
-		Board b;
-		try {
-			b = new Board("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
-		}
-		catch (FENException e) {
-			return;
-		}
-		b.perfTest(1, true);
-		b.printLegalMoves();
-		//assertEquals(9, b.perfTest(1));
-		
+		new MainWindow();
 		/*
 		GameManager g = new GameManager();
 		g.setBoard(new Board());
