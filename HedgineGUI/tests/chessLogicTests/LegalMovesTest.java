@@ -7,7 +7,7 @@ import chess.IO.FENException;
 import org.junit.jupiter.api.Test;
 
 class LegalMovesTest {
-	Board b;
+	Board b = null;
 	
 	//Source: https://www.chessprogramming.org/Perft_Results
 	

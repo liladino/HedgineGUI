@@ -1,15 +1,18 @@
 package main;
 
-import graphics.mainWindow.MainWindow;
+import chess.Board;
+import game.GameManager;
+import game.GameStartException;
+import graphics.MainWindow;
 
 public class Main {
 	public static void main(String[] args) {
-		new MainWindow();
-		/*
 		GameManager g = new GameManager();
 		g.setBoard(new Board());
-		/*try { g.setBoard(new Board("rnbq1bnr/pppppkpp/8/8/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 4")); }
-		catch(FENException e){ System.out.println(e.getMessage()); return; }
+		new MainWindow(g);
+		
+		/*GameManager g = new GameManager();
+		g.setBoard(new Board());
 		
 		try {
 			g.startGame();

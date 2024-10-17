@@ -9,9 +9,9 @@ import chess.Sides;
 import utility.Pair;
 
 public class GameManager {
-	private Player p1;
-	private Player p2;
-	private Board board;
+	private Player p1 = null;
+	private Player p2 = null;
+	private Board board = null;
 	
 	/* * * * * * * * * * *
 	 * Time information  *
@@ -56,9 +56,21 @@ public class GameManager {
 		board = b;
 	}
 	
+	/* * * * * *
+	 * Getters *
+	 * * * * * */
+	public Board getBoard() {
+		return new Board(board);
+	}
+	
+	public int getMoveCount() {
+		return moveCount;
+	}
+	
 	/* * * * * * * *
 	 * Game Logic  *
 	 * * * * * * * */
+	//Command line 2 player game
 	public void startGame() throws GameStartException {
 		if (board == null /*|| p1 == null || p2 == null*/) {
 			throw new GameStartException("One or more more components are not initialzed! (Board, Player1, Player 2)");
@@ -90,10 +102,26 @@ public class GameManager {
 			if (m.isNull()) break;
 			if (!board.isMoveLegal(m)) break;
 			board.makeMove(m);			
+			moveCount++;
 		}
 		scanner.close();
 	}
 	
+	public void initialzeGame(Board b, Player p1, Player p2) throws GameStartException {
+		setBoard(b);
+		setPlayer1(p1);
+		setPlayer2(p2);
+		if (board == null || p1 == null || p2 == null) {
+			throw new GameStartException("One or more more components are not initialzed! (Board, Player1, Player 2)");
+		}
+	}
 	
+	public boolean handleMove(Move m) {
+        if (board.isMoveLegal(m)) {
+            board.makeMove(m);
+            return true;
+        }
+        return false;
+    }
 	
 }

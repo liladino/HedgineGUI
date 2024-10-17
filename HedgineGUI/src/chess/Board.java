@@ -15,7 +15,7 @@ public class Board {
 	private int fiftyMoveRule;
 	private int fullMoveCount;
 	
-	private LegalMoves legalMoves;
+	private LegalMoves legalMoves = null;
 	
 	
 	/* * * * * * * * *
@@ -225,7 +225,7 @@ public class Board {
 		if (m.isNull()) return;
 		if (board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == ' ') return;
 		
-		fiftyMoveRule++;
+		legalMoves = null;
 		
 		//setting castling rights
 		//if anything moves to one of the corners, no castling that way
@@ -363,6 +363,9 @@ public class Board {
 	}
 	
 	public boolean isMoveLegal(Move m) {
+		if (legalMoves == null) {
+			generateLegalMoves();
+		}
 		return legalMoves.contains(m);
 	}
 	
