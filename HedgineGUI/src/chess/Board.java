@@ -380,6 +380,9 @@ public class Board {
 		return legalMoves.get(i);
 	}
 	
+	public boolean inCheck() {
+		return inCheck(tomove);
+	}
 	public boolean inCheck(Sides tomove) {
 		int kingi = 0, kingj = 0;
 		for (int i = 2; i < 10; i++) {

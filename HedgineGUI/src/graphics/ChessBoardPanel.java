@@ -26,10 +26,10 @@ public class ChessBoardPanel extends JPanel {
     private int xDim;
     private int yDim;
     private int squareSize;
-    private HashMap<Character, BufferedImage>  pieceImages;
+    private HashMap<Character, BufferedImage>  images;
 
 	public ChessBoardPanel(GameManager gameManager) {
-		pieceImages = new HashMap<Character, BufferedImage>();
+		images = new HashMap<Character, BufferedImage>();
 		loadPieces();
 		
 		yDim = xDim = 480;
@@ -51,19 +51,23 @@ public class ChessBoardPanel extends JPanel {
 	
 	void loadPieces() {
 		String imagesPath = "../resources/pieces/";
+		String selectionPath = "../resources/select/";
 
-        try { pieceImages.put('P', ImageIO.read(new File(imagesPath + "wp.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('R', ImageIO.read(new File(imagesPath + "wr.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('B', ImageIO.read(new File(imagesPath + "wb.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('N', ImageIO.read(new File(imagesPath + "wn.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('Q', ImageIO.read(new File(imagesPath + "wq.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('K', ImageIO.read(new File(imagesPath + "wk.png"))); } catch (IOException e) { e.printStackTrace(); } 
-        try { pieceImages.put('p', ImageIO.read(new File(imagesPath + "bp.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('r', ImageIO.read(new File(imagesPath + "br.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('b', ImageIO.read(new File(imagesPath + "bb.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('n', ImageIO.read(new File(imagesPath + "bn.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('q', ImageIO.read(new File(imagesPath + "bq.png"))); } catch (IOException e) { e.printStackTrace(); }
-        try { pieceImages.put('k', ImageIO.read(new File(imagesPath + "bk.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('P', ImageIO.read(new File(imagesPath + "wp.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('R', ImageIO.read(new File(imagesPath + "wr.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('B', ImageIO.read(new File(imagesPath + "wb.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('N', ImageIO.read(new File(imagesPath + "wn.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('Q', ImageIO.read(new File(imagesPath + "wq.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('K', ImageIO.read(new File(imagesPath + "wk.png"))); } catch (IOException e) { e.printStackTrace(); } 
+        try { images.put('p', ImageIO.read(new File(imagesPath + "bp.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('r', ImageIO.read(new File(imagesPath + "br.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('b', ImageIO.read(new File(imagesPath + "bb.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('n', ImageIO.read(new File(imagesPath + "bn.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('q', ImageIO.read(new File(imagesPath + "bq.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('k', ImageIO.read(new File(imagesPath + "bk.png"))); } catch (IOException e) { e.printStackTrace(); }
+        
+        try { images.put('S', ImageIO.read(new File(selectionPath + "blue.png"))); } catch (IOException e) { e.printStackTrace(); }
+        try { images.put('C', ImageIO.read(new File(selectionPath + "magenta.png"))); } catch (IOException e) { e.printStackTrace(); }
 	}
 
     private void handleSquareClick(char file, int rank) {
@@ -74,15 +78,16 @@ public class ChessBoardPanel extends JPanel {
         } else {
             // Second click, try to move the piece
             if (gameManager.handleMove(new Move(new Square(selectedFile, selectedRank), new Square(file, rank), ' '))) {
-                repaint();
+                //repaint();
             }
             if (gameManager.handleMove(new Move(new Square(file, rank), new Square(selectedFile, selectedRank), ' '))) {
-                repaint();
+                //repaint();
             }
             // Reset selection
             selectedFile = 0;
         	selectedRank = -1;
         }
+        repaint();
     }
 
     @Override
@@ -112,9 +117,22 @@ public class ChessBoardPanel extends JPanel {
                 //g.drawString(Character.toString(file) + Character.toString((char)(rank + '0')), xCoord + squareSize/2, yCoord + squareSize/2);
                 
                 // Draw pieces
+                if (file == selectedFile && rank == selectedRank) {
+                	if (images.containsKey('S')) {
+                    	g.drawImage(images.get('S'), xCoord, yCoord, squareSize, squareSize, this);
+                	}
+                }
+                if (((board.boardAt(file, rank) == 'K' && board.tomove() == Sides.white) 
+                	|| (board.boardAt(file, rank) == 'k' && board.tomove() == Sides.black))
+                		&& board.inCheck()){
+                	if (images.containsKey('C')) {
+                    	g.drawImage(images.get('C'), xCoord, yCoord, squareSize, squareSize, this);
+                	}
+                }
+                
                 if (board.boardAt(file, rank) != ' ') {
-                	if (pieceImages.containsKey(board.boardAt(file, rank))) {
-                    	g.drawImage(pieceImages.get(board.boardAt(file, rank)), xCoord, yCoord, squareSize, squareSize, this);
+                	if (images.containsKey(board.boardAt(file, rank))) {
+                    	g.drawImage(images.get(board.boardAt(file, rank)), xCoord, yCoord, squareSize, squareSize, this);
                 	}
                 	else {
                 		g.setColor(Color.RED);
