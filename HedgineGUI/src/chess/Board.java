@@ -53,7 +53,10 @@ public class Board {
 			fullMoveCount = f.parseMoveCount(FEN);
 		}
 		catch (FENException e) {
-			if (e.getSuccesfulFields() < 4) throw new FENException(e.getMessage() + " can't parse FEN", e.getSuccesfulFields());
+			if (e.getSuccesfulFields() < 4) {
+				System.out.println("ez egy teszt");
+				throw new FENException(e.getMessage() + " can't parse FEN", e.getSuccesfulFields());
+			}
 			//non-fatal:
 			System.out.print(e.getMessage() + ": ");			
 			if (e.getSuccesfulFields() == 4) {
@@ -62,6 +65,10 @@ public class Board {
 			}
 			System.out.println("fullmove number is set to 1.");
 			fullMoveCount = 1;
+		}
+		Sides notToMove = (tomove == Sides.white ? Sides.black : Sides.white);
+		if (inCheck(notToMove)) {
+			throw new FENException("Illegal board: The side not to move is in check.", 6);
 		}
 	}
 	
@@ -473,17 +480,16 @@ public class Board {
 	}
 	
 	public int perfTest(int depth, boolean print) {
-		Board temp = new Board(this);
 		if (print == false) {
-			return recursiveLegalMoves(depth, temp);
+			return recursiveLegalMoves(depth, this);
 		}
-		int r = recursiveLegalMoves(depth, temp);
-		System.out.println(temp);
+		int r = recursiveLegalMoves(depth, this);
+		System.out.println(this);
 		System.out.printf("Number of legal moves %d plies deep: %d\n", depth, r);
 		return r;
 	}
 	
-	private int recursiveLegalMoves(int depth, Board b) {
+	private int recursiveLegalMoves(int depth, final Board b) {
 		if (depth <= 0) {
 			return 1;
 		}

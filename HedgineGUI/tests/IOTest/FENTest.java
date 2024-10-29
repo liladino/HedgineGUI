@@ -16,11 +16,6 @@ class FENTest {
 	Board d;
 	Board badFEN;
 	
-	@BeforeEach
-	void setUp() {
-		start = new Board();
-	}
-	
 	@Test
 	void testRandomPositionConversions() {
 		assertDoesNotThrow(() -> a = new Board("2b5/p2NBp1p/1bp1nPPr/3P4/2pRnr1P/1k1B1Ppp/1P1P1pQP/Rq1N3K b - - 0 1"));
@@ -46,11 +41,23 @@ class FENTest {
 		assertThrows(FENException.class, () -> badFEN = new Board("2b5/p2NBp1p/1bp1nPPr/3P4/2pRnr1P/1k1B1Ppp/1P1P1pQP/Rq1N3K w a"));
 		assertThrows(FENException.class, () -> badFEN = new Board("2b5/p2NBp1p/1bp1nPPr/3P4/2pRnr1P/1k1B1Ppp/1P1P1pQP/Rq1N3K w KQkqq"));
 		assertThrows(FENException.class, () -> badFEN = new Board("2b5/p2NBp1p/1bp1nPPr/3P4/2pRnr1P/1k1B1Ppp/1P1P1pQP/Rq1N3K w - e9"));
+		
+		assertDoesNotThrow(() -> d = new Board("r2qk2r/pppbbppp/2n5/1B1p4/3P4/5N2/P1P2PPP/R1BQR1K1 b kq -"));
+		assertEquals(d.getFiftyMoveRule(), 0);
+		assertEquals(d.getFullMoveCount(), 1);
+		
+		assertDoesNotThrow(() -> d = new Board("r2qk2r/pppbbppp/2n5/1B1p4/3P4/5N2/P1P2PPP/R1BQR1K1 b kq - 2"));
+		assertEquals(d.getFiftyMoveRule(), 2);
+		assertEquals(d.getFullMoveCount(), 1);
+		assertEquals(d.convertToFEN(), "r2qk2r/pppbbppp/2n5/1B1p4/3P4/5N2/P1P2PPP/R1BQR1K1 b kq - 2 1");
 	}
 	
 	
 	@Test
 	void testConvertToFEN() {
+		start = new Board();
+		assertEquals(start.getFiftyMoveRule(), 0);
+		assertEquals(start.getFullMoveCount(), 1);
 		assertEquals(start.convertToFEN(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	}
 

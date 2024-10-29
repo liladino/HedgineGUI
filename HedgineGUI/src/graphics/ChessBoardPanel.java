@@ -3,6 +3,8 @@ package graphics;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -28,11 +30,11 @@ public class ChessBoardPanel extends JPanel {
     private int squareSize;
     private HashMap<Character, BufferedImage>  images;
 
-	public ChessBoardPanel(GameManager gameManager) {
+	public ChessBoardPanel(GameManager gameManager, int size) {
 		images = new HashMap<Character, BufferedImage>();
 		loadPieces();
 		
-		yDim = xDim = 480;
+		yDim = xDim = size;
 		squareSize = xDim / 8;
         this.gameManager = gameManager;
         setPreferredSize(new Dimension(xDim, yDim));
@@ -83,7 +85,6 @@ public class ChessBoardPanel extends JPanel {
             if (gameManager.handleMove(new Move(new Square(file, rank), new Square(selectedFile, selectedRank), ' '))) {
                 //repaint();
             }
-            // Reset selection
             selectedFile = 0;
         	selectedRank = -1;
         }
@@ -93,18 +94,29 @@ public class ChessBoardPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        
+        int panelWidth = getWidth();
+        int panelHeight = getHeight();
 
+        xDim = yDim = Math.min(panelWidth, panelHeight);
+        squareSize = xDim / 8;
+        
+        /*Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        drawBoard(g2d);*/
         drawBoard(g);
+        
         //g.setColor(Color.RED);
         //g.drawString("♔", 70, 70);
     }
 
     private void drawBoard(Graphics g) {
+    	
         Board board = gameManager.getBoard();
 
         for (int rank = 1; rank <= 8; rank++) {
             for (char file = 'a'; file <= 'h'; file++) {
-            	int xCoord = (file - 'a') * squareSize, yCoord = (8 - rank) * squareSize;
+            	int xCoord = (file - 'a') * squareSize + (getWidth() - xDim) / 2, yCoord = (8 - rank) * squareSize;
             	
                 if ((file-'a' + rank) % 2 == 0) {
                     g.setColor(Color.WHITE);

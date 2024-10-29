@@ -71,4 +71,6 @@ nb-configuration.xml
 ## Miscellaneous
 *.log
 *.svg
+*.odt
+*.pdf
 log.txt
