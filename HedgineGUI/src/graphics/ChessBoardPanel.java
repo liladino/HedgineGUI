@@ -3,8 +3,6 @@ package graphics;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -22,6 +20,7 @@ import chess.Square;
 import game.GameManager;
 
 public class ChessBoardPanel extends JPanel {
+	private static final long serialVersionUID = 987168713547L;
 	private GameManager gameManager;
     private int selectedRank = -1;
     private char selectedFile= 0; 
@@ -74,16 +73,16 @@ public class ChessBoardPanel extends JPanel {
 
     private void handleSquareClick(char file, int rank) {
         if (selectedFile == 0 && selectedRank == -1) {
-            // First click, select the piece
-        	selectedFile = file;
-        	selectedRank = rank;
+        	if (gameManager.getBoard().boardAt(file, rank) != ' ') {
+        		//allow only piece selection
+	        	selectedFile = file;
+	        	selectedRank = rank;
+	        }
         } else {
-            // Second click, try to move the piece
-            if (gameManager.handleMove(new Move(new Square(selectedFile, selectedRank), new Square(file, rank), ' '))) {
-                //repaint();
-            }
-            if (gameManager.handleMove(new Move(new Square(file, rank), new Square(selectedFile, selectedRank), ' '))) {
-                //repaint();
+            // second click, try moving the piece
+            if (!gameManager.handleMove(new Move(new Square(selectedFile, selectedRank), new Square(file, rank), ' '))) {
+            	//if the opponent piece was selected first. try to take it
+                gameManager.handleMove(new Move(new Square(file, rank), new Square(selectedFile, selectedRank), ' '));
             }
             selectedFile = 0;
         	selectedRank = -1;

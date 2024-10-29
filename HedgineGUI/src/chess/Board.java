@@ -2,7 +2,6 @@ package chess;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
 
 import chess.IO.FENException;
 import chess.IO.FENmanager;
@@ -54,7 +53,7 @@ public class Board {
 		}
 		catch (FENException e) {
 			if (e.getSuccesfulFields() < 4) {
-				System.out.println("ez egy teszt");
+				//System.out.println("This is a test");
 				throw new FENException(e.getMessage() + " can't parse FEN", e.getSuccesfulFields());
 			}
 			//non-fatal:
