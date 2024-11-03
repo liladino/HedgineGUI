@@ -18,7 +18,7 @@ import javax.swing.SwingConstants;
 
 import org.junit.validator.PublicClassValidator;
 
-import chess.Sides;
+import utility.Sides;
 
 public class PromotionDialog extends JDialog{
 	private static final long serialVersionUID = 1687874164L;

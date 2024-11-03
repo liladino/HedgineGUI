@@ -5,6 +5,8 @@ import java.io.PrintStream;
 
 import chess.IO.FENException;
 import chess.IO.FENmanager;
+import utility.Result;
+import utility.Sides;
 
 public class Board {
 	private char[][] board;
@@ -384,6 +386,52 @@ public class Board {
 	
 	public Move getLegalMove(int i) {
 		return legalMoves.get(i);
+	}
+	
+	public Result getResult() {
+		if (legalMoves == null) {
+			generateLegalMoves();
+		}
+		
+		if (legalMoves.size() == 0) {
+			if (inCheck()) {
+				if (tomove == Sides.white) return Result.blackWon;
+				return Result.whiteWon;
+			}
+			return Result.stalemate;
+		}
+		
+		int wKnightCount = 0, wBishopCount = 0, bKnightCount = 0, bBishopCount = 0;
+		for (int i = 2; i < 10; i++) {
+			for (int j = 2; j < 10; j++) {
+				switch (board[i][j]) {
+					case 'R': return Result.onGoing;
+					case 'Q': return Result.onGoing;
+					case 'q': return Result.onGoing;
+					case 'r': return Result.onGoing;
+					case 'P': return Result.onGoing;
+					case 'p': return Result.onGoing;
+					case 'N': 
+						wKnightCount++;
+						break;
+					case 'B': 
+						wBishopCount++;
+						break;
+					case 'n': 
+						bKnightCount++;
+						break;
+					case 'b': 
+						bBishopCount++;
+						break;
+				}
+				if (wKnightCount + wBishopCount + bKnightCount + bBishopCount > 1) {
+					return Result.onGoing;
+				}
+			}
+		}
+		
+		
+		return Result.draw;
 	}
 	
 	public boolean inCheck() {

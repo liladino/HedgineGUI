@@ -1,7 +1,7 @@
 package game;
 
 import chess.Move;
-import chess.Sides;
+import utility.Sides;
 
 public abstract class Player {
 	protected String name;

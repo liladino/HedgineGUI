@@ -5,8 +5,7 @@ import java.util.Scanner;
 
 import chess.Board;
 import chess.Move;
-import chess.Sides;
-import utility.Pair;
+import utility.*;
 
 public class GameManager {
 	private Player p1 = null;
@@ -119,6 +118,12 @@ public class GameManager {
 	public boolean handleMove(Move m) {
         if (board.isMoveLegal(m)) {
             board.makeMove(m);
+            
+            if (board.getResult() != Result.onGoing) {
+            	//the game ended
+            	System.exit(0);
+            }
+            
             return true;
         }
         return false;

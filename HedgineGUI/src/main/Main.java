@@ -10,7 +10,7 @@ public class Main {
 	public static void main(String[] args) {
 		GameManager g = new GameManager();
 		try{
-			g.setBoard(new Board("k7/7P/8/8/8/8/8/K7 w KQkq - 0 1"));
+			g.setBoard(new Board("k7/7P/8/K7/8/8/8/8 w KQkq - 0 1"));
 		}
 		catch(FENException e) {
 			g.setBoard(new Board());

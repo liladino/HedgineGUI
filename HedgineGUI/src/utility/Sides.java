@@ -1,4 +1,4 @@
-package chess;
+package utility;
 
 public enum Sides {
 	white, black

@@ -2,6 +2,8 @@ package chess;
 
 import java.util.ArrayList;
 
+import utility.Sides;
+
 public class LegalMoves extends ArrayList<Move> {
 	private static final long serialVersionUID = 9706338641357L;
 	

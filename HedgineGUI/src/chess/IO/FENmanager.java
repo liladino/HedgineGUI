@@ -1,7 +1,7 @@
 package chess.IO;
 
 import chess.Board;
-import chess.Sides;
+import utility.Sides;
 import chess.Square;
 
 public class FENmanager {

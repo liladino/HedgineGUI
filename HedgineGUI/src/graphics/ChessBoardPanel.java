@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import chess.Board;
 import chess.Move;
-import chess.Sides;
+import utility.*;
 import chess.Square;
 import game.GameManager;
 
@@ -81,7 +81,8 @@ public class ChessBoardPanel extends JPanel {
 
     private void handleSquareClick(char file, int rank) {
         if (selectedFile == 0 && selectedRank == -1) {
-        	if (gameManager.getBoard().boardAt(file, rank) != ' ') {
+        	if (gameManager.getBoard().boardAt(file, rank) != ' ' 
+        			&& pieceColor(gameManager.getBoard().boardAt(file, rank)) == gameManager.getBoard().tomove()) {
         		//allow only piece selection
 	        	selectedFile = file;
 	        	selectedRank = rank;
