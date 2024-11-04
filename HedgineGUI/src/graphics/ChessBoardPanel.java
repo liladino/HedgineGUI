@@ -2,6 +2,7 @@ package graphics;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -187,6 +188,7 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
                 	}
                 	else {
                 		g.setColor(Color.RED);
+                		g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
                 		g.drawString(Character.toString(board.boardAt(file, rank)), 
                 				xCoord + squareSize/2, yCoord + squareSize/2);
                     }
