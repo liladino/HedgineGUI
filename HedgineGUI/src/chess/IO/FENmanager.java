@@ -118,7 +118,7 @@ public class FENmanager {
 					default:
 						if (pos[i-2].charAt(j) < '9' && '0' < pos[i-2].charAt(j)) {
 							int temp = pos[i-2].charAt(j) - '0';
-							if (k % 8 + temp > 8) {
+							if (k % 8 + temp > 8 || k + temp > 64) {
 								throw new FENException("Too long row", 0);
 							}
 							for (int l = 0; l < temp; l++) {

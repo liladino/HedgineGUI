@@ -63,6 +63,12 @@ public class Move {
 		}
 	}
 	
+	public Move(Move m) {
+		from = new Square(m.from);
+		to = new Square(m.to);
+		promotion = m.promotion;
+	}
+
 	/* * * * * *
 	 * Getters *
 	 * * * * * */

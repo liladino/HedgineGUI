@@ -24,8 +24,10 @@ import chess.Move;
 import utility.*;
 import chess.Square;
 import game.GameManager;
+import game.GameUpdateListener;
+import game.Human;
 
-public class ChessBoardPanel extends JPanel {
+public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 	private static final long serialVersionUID = 987168713547L;
 	private GameManager gameManager;
     private int selectedRank = -1;
@@ -42,6 +44,8 @@ public class ChessBoardPanel extends JPanel {
 		yDim = xDim = size;
 		squareSize = xDim / 8;
         this.gameManager = gameManager;
+        gameManager.addGameUpdateListener(this);
+        
         setPreferredSize(new Dimension(xDim, yDim));
 
         // Add a mouse listener to handle piece selection and movement
@@ -78,8 +82,17 @@ public class ChessBoardPanel extends JPanel {
         //check
         try { images.put('C', ImageIO.read(new File(selectionPath + "magenta.png"))); } catch (IOException e) { e.printStackTrace(); }
 	}
+	
+    Sides pieceColor(char c) {
+    	if (c >= 'a' && c <= 'z') return Sides.black;
+    	return Sides.white;
+    }
 
     private void handleSquareClick(char file, int rank) {
+    	if (!gameManager.getCurrentPlayer().isHuman()) {
+    		return;
+    	}
+    	
         if (selectedFile == 0 && selectedRank == -1) {
         	if (gameManager.getBoard().boardAt(file, rank) != ' ' 
         			&& pieceColor(gameManager.getBoard().boardAt(file, rank)) == gameManager.getBoard().tomove()) {
@@ -93,21 +106,33 @@ public class ChessBoardPanel extends JPanel {
         	char promotion = ' ';
         	Square from = new Square(selectedFile, selectedRank);
         	Square to = new Square(file, rank);
-        	
+        	        	
         	if (Character.toLowerCase(gameManager.getBoard().boardAt(from)) == 'p' && 
         			(to.getRank() == 8 || to.getRank() == 1) ) {
-        		//handle promotion
-        		PromotionDialog dialog = new PromotionDialog(
-        				(JFrame) SwingUtilities.getWindowAncestor(this), images, gameManager.getBoard().tomove());
-        		dialog.setVisible(true);
-        		promotion = dialog.getSelectedPiece();
+            	//check if any promotion is legal
+        		char[] promPieces = {'q', 'r', 'k', 'b'};
+            	boolean isPromLegal = false;
+        		for (char c : promPieces) {
+        			if (gameManager.getBoard().isMoveLegal(new Move(from, to, c))){
+        				isPromLegal = true;
+        				break;
+        			}
+        		}
+        		if (isPromLegal) {
+	        		//handle promotion
+	        		PromotionDialog dialog = new PromotionDialog(
+	        				(JFrame) SwingUtilities.getWindowAncestor(this), images, gameManager.getBoard().tomove());
+	        		dialog.setVisible(true);
+	        		promotion = dialog.getSelectedPiece();
+        		}
         	}
-        	//System.out.println(promotion);
-        	boolean b = gameManager.handleMove(new Move(from, to, promotion));
+        	
             selectedFile = 0;
         	selectedRank = -1;
     		repaint();
-    		if (b) gameManager.handlePossibleGameEnd();
+    		
+    		Human h = (Human) (gameManager.getCurrentPlayer());
+        	h.makeMove(gameManager, new Move(from, to, promotion));
         }
     }
 
@@ -121,16 +146,7 @@ public class ChessBoardPanel extends JPanel {
         xDim = yDim = Math.min(panelWidth, panelHeight);
         squareSize = xDim / 8;
         
-        /*Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
-        drawBoard(g2d);*/
         drawBoard(g);
-        
-        //g.setColor(Color.RED);
-        //g.drawString("♔", 70, 70);
     }
 
     private void drawBoard(Graphics g) {
@@ -149,12 +165,6 @@ public class ChessBoardPanel extends JPanel {
                 g.fillRect(xCoord, yCoord, squareSize, squareSize);
                 
                 // Draw pieces
-                if (file == selectedFile && rank == selectedRank) {
-                	//mark piece selection
-                	if (images.containsKey('S')) {
-                    	g.drawImage(images.get('S'), xCoord, yCoord, squareSize, squareSize, this);
-                	}
-                }
                 if (((board.boardAt(file, rank) == 'K' && board.tomove() == Sides.white) 
                 	|| (board.boardAt(file, rank) == 'k' && board.tomove() == Sides.black))
                 		&& board.inCheck()){
@@ -163,10 +173,16 @@ public class ChessBoardPanel extends JPanel {
                     	g.drawImage(images.get('C'), xCoord, yCoord, squareSize, squareSize, this);
                 	}
                 }
+                if (file == selectedFile && rank == selectedRank) {
+                	//mark piece selection
+                	if (images.containsKey('S')) {
+                    	g.drawImage(images.get('S'), xCoord, yCoord, squareSize, squareSize, this);
+                	}
+                }
                 
                 if (board.boardAt(file, rank) != ' ') {
                 	if (images.containsKey(board.boardAt(file, rank))) {
-                    	g.drawImage(images.get(board.boardAt(file, rank))/*.getScaledInstance(squareSize, squareSize, Image.SCALE_SMOOTH)*/
+                    	g.drawImage(images.get(board.boardAt(file, rank)).getScaledInstance(squareSize, squareSize, Image.SCALE_SMOOTH)
                     			, xCoord, yCoord, squareSize, squareSize, this);
                 	}
                 	else {
@@ -178,9 +194,11 @@ public class ChessBoardPanel extends JPanel {
             }
         }
     }
+
+	@Override
+	public void onGameStateChanged() {
+		//System.out.println("Szoveg");
+		repaint();
+	}
     
-    Sides pieceColor(char c) {
-    	if (c >= 'a' && c <= 'z') return Sides.black;
-    	return Sides.white;
-    }
 }

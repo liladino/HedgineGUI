@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import chess.Board;
@@ -8,11 +9,15 @@ import chess.Move;
 import graphics.GameEventListener;
 import utility.*;
 
-public class GameManager {
-	private Player p1 = null;
-	private Player p2 = null;
+public class GameManager implements Runnable, MoveListener{
+	private Player black = null;
+	private Player white = null;
+	private Player currentPlayer;
 	private Board board = null;
+	private Move currentMove = null;
+	private boolean moveReady;
 	private GameEventListener gameEventListener;
+	private List<GameUpdateListener> listeners;
 	
 	/* * * * * * * * * * *
 	 * Time information  *
@@ -39,17 +44,12 @@ public class GameManager {
 		controlType = TimeControl.noControl;
 		moveCount = 0;
 		extraTimes = new ArrayList<Pair<Integer, Integer>>();
+		listeners = new ArrayList<>();
 	}
 	
 	/* * * * * *
 	 * Setters *
 	 * * * * * */
-	public void setPlayer1(Player p) {
-		p1 = p;
-	}
-	public void setPlayer2(Player p) {
-		p2 = p;
-	}
 	public void setBoard() {
 		board = new Board();
 	}
@@ -60,11 +60,26 @@ public class GameManager {
 		gameEventListener = listener; 
 	}
 	
+    public void addGameUpdateListener(GameUpdateListener listener) {
+        listeners.add(listener);
+    }
+
+    private void notifyGameStateChanged() {
+        for (GameUpdateListener listener : listeners) {
+            listener.onGameStateChanged();
+        }
+    }
+	
 	/* * * * * *
 	 * Getters *
 	 * * * * * */
 	public Board getBoard() {
-		return new Board(board);
+		return board;
+		//return new Board(board);
+	}
+	
+	public Player getCurrentPlayer() {
+		return currentPlayer;
 	}
 	
 	public int getMoveCount() {
@@ -74,62 +89,65 @@ public class GameManager {
 	/* * * * * * * *
 	 * Game Logic  *
 	 * * * * * * * */
-	//Command line 2 player game
-	public void startGame() throws GameStartException {
-		if (board == null /*|| p1 == null || p2 == null*/) {
-			throw new GameStartException("One or more more components are not initialzed! (Board, Player1, Player 2)");
-		}
-
-		Scanner scanner = new Scanner(System.in);
-		Move m = null;
-		while(true) {
-			if (m != null) if (m.isNull()) break;
-			System.out.println(board.generateLegalMoves());
-			//board.printLegalMoves();
-			
-			if (board.inCheck(board.tomove())) System.out.print("Check! ");
-			if (board.tomove() == Sides.white) { System.out.print("White to move\n");}
-			else { System.out.print("Black to move\n"); }
-			
-			System.out.println(board);
-			System.out.println(board.convertToFEN());
-			
-			String s;
-			if (scanner.hasNextLine()) {
-				s = scanner.nextLine();
-			}
-			else {
-				break;
-			}
-			m = new Move(s);
-			
-			if (m.isNull()) break;
-			if (!board.isMoveLegal(m)) break;
-			board.makeMove(m);			
-			moveCount++;
-		}
-		scanner.close();
-	}
-	
 	public void initialzeGame(Board b, Player p1, Player p2) throws GameStartException {
+		if (p1.getSide() == Sides.white) {
+			white = p1;
+			black = p2;
+		}
+		else {
+			white = p2;
+			black = p1;
+		}
 		setBoard(b);
-		setPlayer1(p1);
-		setPlayer2(p2);
 		if (board == null || p1 == null || p2 == null) {
 			throw new GameStartException("One or more more components are not initialzed! (Board, Player1, Player 2)");
 		}
+		
+		currentPlayer = white;
 	}
 	
-	public boolean handleMove(Move m) {
-        if (board.isMoveLegal(m)) {
-            board.makeMove(m);
-            
-            return true;
+	@Override
+    public void run() throws GameStartException {
+		if (board == null || white == null || black == null) {
+			throw new GameStartException("One or more more components are not initialzed! (Board, Player1, Player 2)");
+		}
+
+		while (true) {
+            synchronized (this) {
+                moveReady = false;
+
+                while (!moveReady) {
+                    try {
+                        wait(); 
+                    } catch (InterruptedException e) {
+                    	//time ran out maybe?
+                        Thread.currentThread().interrupt(); 
+                    }
+                }
+                
+                if (board.isMoveLegal(currentMove)) {
+                	board.makeMove(currentMove);
+                	currentPlayer = (currentPlayer == white) ? black : white;
+                	
+                	notifyGameStateChanged();
+                    checkGameEnd();
+                }
+                else {
+                	System.out.print("Illegal input: ");
+                }
+                System.out.println(currentMove);
+            }
         }
-        return false;
-    }
+	}
 	
-	public void handlePossibleGameEnd() {
+	@Override
+	public synchronized void onMoveReady(Move m) {
+		currentMove = m;
+        moveReady = true;
+        notify();
+	}
+	
+	public void checkGameEnd() {
 		if (board.getResult() == Result.onGoing) {
 			return;
 		}
@@ -152,4 +170,6 @@ public class GameManager {
         	
         System.exit(0);
 	}
+
+	
 }
