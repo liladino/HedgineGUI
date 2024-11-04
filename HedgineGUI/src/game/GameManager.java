@@ -5,12 +5,14 @@ import java.util.Scanner;
 
 import chess.Board;
 import chess.Move;
+import graphics.GameEventListener;
 import utility.*;
 
 public class GameManager {
 	private Player p1 = null;
 	private Player p2 = null;
 	private Board board = null;
+	private GameEventListener gameEventListener;
 	
 	/* * * * * * * * * * *
 	 * Time information  *
@@ -53,6 +55,9 @@ public class GameManager {
 	}
 	public void setBoard(Board b) {
 		board = b;
+	}
+	public void setGameEventListener(GameEventListener listener) {
+		gameEventListener = listener; 
 	}
 	
 	/* * * * * *
@@ -119,14 +124,32 @@ public class GameManager {
         if (board.isMoveLegal(m)) {
             board.makeMove(m);
             
-            if (board.getResult() != Result.onGoing) {
-            	//the game ended
-            	System.exit(0);
-            }
-            
             return true;
         }
         return false;
     }
 	
+	public void handlePossibleGameEnd() {
+		if (board.getResult() == Result.onGoing) {
+			return;
+		}
+    	//the game ended
+    	if (gameEventListener != null) {
+        	if (Result.whiteWon == board.getResult()) {
+        		gameEventListener.onCheckmate(Sides.white);
+        	}
+        	else if (Result.blackWon == board.getResult()){
+        		gameEventListener.onCheckmate(Sides.black);
+        	}
+        	else if (Result.stalemate == board.getResult()) {
+        		gameEventListener.onStalemate();
+        	}
+        	else if (Result.draw == board.getResult()) {
+        		//if the board signals a draw, the material is insufficient.
+        		gameEventListener.onInsufficientMaterial();
+        	}
+    	}
+        	
+        System.exit(0);
+	}
 }

@@ -96,20 +96,18 @@ public class ChessBoardPanel extends JPanel {
         	
         	if (Character.toLowerCase(gameManager.getBoard().boardAt(from)) == 'p' && 
         			(to.getRank() == 8 || to.getRank() == 1) ) {
+        		//handle promotion
         		PromotionDialog dialog = new PromotionDialog(
         				(JFrame) SwingUtilities.getWindowAncestor(this), images, gameManager.getBoard().tomove());
         		dialog.setVisible(true);
         		promotion = dialog.getSelectedPiece();
         	}
-        	System.out.println(promotion);
-        	gameManager.handleMove(new Move(from, to, promotion));
-            /*if (!gameManager.handleMove(new Move(new Square(selectedFile, selectedRank), new Square(file, rank), ' '))) {
-            	//if the opponent piece was selected first. try to take it
-                gameManager.handleMove(new Move(new Square(file, rank), new Square(selectedFile, selectedRank), ' '));
-            }*/
+        	//System.out.println(promotion);
+        	boolean b = gameManager.handleMove(new Move(from, to, promotion));
             selectedFile = 0;
         	selectedRank = -1;
-        	repaint();
+    		repaint();
+    		if (b) gameManager.handlePossibleGameEnd();
         }
     }
 
