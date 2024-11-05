@@ -1,13 +1,10 @@
 package graphics;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.net.http.WebSocket.Listener;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
@@ -16,8 +13,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-
-import org.junit.validator.PublicClassValidator;
 
 import utility.Sides;
 
