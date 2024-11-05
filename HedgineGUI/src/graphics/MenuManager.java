@@ -35,13 +35,17 @@ public class MenuManager implements ActionListener {
 		gameMenuElements = new ArrayList<>();
 		viewMenuElements = new ArrayList<>();
 		colors = new ArrayList<>();
+
+		file = new JMenu("File");
+		game = new JMenu("Game");
+		view = new JMenu("View");
+		colorScheme = new JMenu("Color scheme");
 		setUpMenuBar();
 	}	
 
 	private void setUpMenuBar() {
 		menuBar = new JMenuBar();
-		
-		file = new JMenu("File");
+				
 		menuBar.add(file);
 		fileMenuElements.add(new JMenuItem("Load FEN"));
 		fileMenuElements.add(new JMenuItem("Save FEN"));
@@ -51,8 +55,7 @@ public class MenuManager implements ActionListener {
 			file.add(m);
 			m.addActionListener(this);
 		}
-		
-		game = new JMenu("Game");
+				
 		menuBar.add(game);
 		gameMenuElements.add(new JMenuItem("New game"));
 		gameMenuElements.add(new JMenuItem("Resign"));
@@ -61,10 +64,8 @@ public class MenuManager implements ActionListener {
 			m.addActionListener(this);
 		}
 		
-		view = new JMenu("View");
 		menuBar.add(view);
 		viewMenuElements.add(new JMenuItem("Rotate board"));
-		colorScheme = new JMenu("Color scheme");
 		viewMenuElements.add(colorScheme);
 		
 		for (JMenuItem m : viewMenuElements) {
