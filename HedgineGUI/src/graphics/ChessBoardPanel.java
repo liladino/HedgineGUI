@@ -199,6 +199,7 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
                     			, xCoord, yCoord, squareSize, squareSize, this);
                 	}
                 	else {
+                		//piece image isn't available
                 		g.setColor(Color.RED);
                 		g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
                 		g.drawString(Character.toString(board.boardAt(file, rank)), 

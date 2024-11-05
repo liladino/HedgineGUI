@@ -12,13 +12,11 @@ public abstract class Player {
 	public Player(Sides side, String name, int rating) {
 		this.name = name;
 		this.side = side;
-		this.human = human;
 		this.rating = rating;
 	}
 	public Player(Sides side, String name) {
 		this.name = name;
 		this.side = side;
-		this.human = human;
 		rating = 0;
 	}
 	/*public Player() {

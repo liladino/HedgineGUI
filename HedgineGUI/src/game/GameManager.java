@@ -60,15 +60,15 @@ public class GameManager implements Runnable, MoveListener{
 		gameEventListener = listener; 
 	}
 	
-    public void addGameUpdateListener(GameUpdateListener listener) {
-        listeners.add(listener);
-    }
+	public void addGameUpdateListener(GameUpdateListener listener) {
+		listeners.add(listener);
+	}
 
-    private void notifyGameStateChanged() {
-        for (GameUpdateListener listener : listeners) {
-            listener.onGameStateChanged();
-        }
-    }
+	private void notifyGameStateChanged() {
+		for (GameUpdateListener listener : listeners) {
+			listener.onGameStateChanged();
+		}
+	}
 	
 	/* * * * * *
 	 * Getters *
@@ -107,69 +107,69 @@ public class GameManager implements Runnable, MoveListener{
 	}
 	
 	@Override
-    public void run() throws GameStartException {
+	public void run() throws GameStartException {
 		if (board == null || white == null || black == null) {
 			throw new GameStartException("One or more more components are not initialzed! (Board, Player1, Player 2)");
 		}
 
 		while (true) {
-            synchronized (this) {
-                System.out.println((board.tomove() == Sides.white ? "White to move" : "Black to move"));
-                moveReady = false;
-
-                while (!moveReady) {
-                    try {
-                        wait(); 
-                    } catch (InterruptedException e) {
-                    	//time ran out maybe?
-                        Thread.currentThread().interrupt(); 
-                    }
-                }
-                
-                if (board.isMoveLegal(currentMove)) {
-                	board.makeMove(currentMove);
-                	currentPlayer = (currentPlayer == white) ? black : white;
-                	
-                	notifyGameStateChanged();
-                    checkGameEnd();
-                }
-                else {
-                	System.out.print("Illegal input: ");
-                }
-                System.out.println(currentMove);
-            }
-        }
+			synchronized (this) {
+				System.out.println((board.tomove() == Sides.white ? "White to move" : "Black to move"));
+				moveReady = false;
+				
+				while (!moveReady) {
+					try {
+						wait(); 
+					} catch (InterruptedException e) {
+						//time ran out maybe?
+						Thread.currentThread().interrupt(); 
+					}
+				}
+				
+				if (board.isMoveLegal(currentMove)) {
+					board.makeMove(currentMove);
+					currentPlayer = (currentPlayer == white) ? black : white;
+					
+					notifyGameStateChanged();
+					checkGameEnd();
+				}
+				else {
+					System.out.print("Illegal input: ");
+				}
+				System.out.println(currentMove);
+			}
+		}
 	}
 	
 	@Override
 	public synchronized void onMoveReady(Move m) {
 		currentMove = m;
-        moveReady = true;
-        notify();
+		moveReady = true;
+		notify();
 	}
 	
 	public void checkGameEnd() {
 		if (board.getResult() == Result.onGoing) {
 			return;
 		}
-    	//the game ended
-    	if (gameEventListener != null) {
-        	if (Result.whiteWon == board.getResult()) {
-        		gameEventListener.onCheckmate(Sides.white);
-        	}
-        	else if (Result.blackWon == board.getResult()){
-        		gameEventListener.onCheckmate(Sides.black);
-        	}
-        	else if (Result.stalemate == board.getResult()) {
-        		gameEventListener.onStalemate();
-        	}
-        	else if (Result.draw == board.getResult()) {
-        		//if the board signals a draw, the material is insufficient.
-        		gameEventListener.onInsufficientMaterial();
-        	}
-    	}
-        	
-        System.exit(0);
+		//the game ended
+		if (gameEventListener != null) {
+			if (Result.whiteWon == board.getResult()) {
+				gameEventListener.onCheckmate(Sides.white);
+			}
+			else if (Result.blackWon == board.getResult()){
+				gameEventListener.onCheckmate(Sides.black);
+			}
+			else if (Result.stalemate == board.getResult()) {
+				gameEventListener.onStalemate();
+			}
+			else if (Result.draw == board.getResult()) {
+				//if the board signals a draw, the material is insufficient.
+				gameEventListener.onInsufficientMaterial();
+			}
+		}
+			
+		System.exit(0);
 	}
 
 	
