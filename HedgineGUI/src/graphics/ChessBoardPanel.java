@@ -32,6 +32,7 @@ import game.Human;
 public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 	private static final long serialVersionUID = 987168713547L;
 	private GameManager gameManager;
+	private MenuManager menuManager;
     private int selectedRank = -1;
     private char selectedFile= 0; 
     private int xDim;
@@ -39,14 +40,16 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
     private int squareSize;
     private HashMap<Character, BufferedImage>  images;
 
-	public ChessBoardPanel(GameManager gameManager, int size) {
+	public ChessBoardPanel(GameManager gameManager, int size, MenuManager menuManager) {
 		images = new HashMap<Character, BufferedImage>();
 		loadPieces();
 		
 		yDim = xDim = size;
 		squareSize = xDim / 8;
         this.gameManager = gameManager;
+        this.menuManager = menuManager;
         gameManager.addGameUpdateListener(this);
+        menuManager.addGameUpdateListener(this);
         
         setPreferredSize(new Dimension(xDim, yDim));
 
@@ -54,8 +57,15 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int rank = 7 - e.getY() / squareSize + 1; 
+                int rank;
                 char file = (char)((e.getX() - (getWidth() - xDim) / 2)/ squareSize + 'a');
+                if (GraphicSettings.rotateBoard) {
+                	rank = e.getY() / squareSize + 1; 
+                	file = (char)(7 - file + 'a' + 'a');
+                }
+                else {
+                	rank = 7 - e.getY() / squareSize + 1; 
+				}
                 
                 System.out.printf("w: %d, h: %d\nfile: %c, rank: %d\n", getWidth(), getHeight(), file, rank);
                 handleSquareClick(file, rank);
@@ -168,12 +178,20 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 
         for (int rank = 1; rank <= 8; rank++) {
             for (char file = 'a'; file <= 'h'; file++) {
-            	int xCoord = (file - 'a') * squareSize + (getWidth() - xDim) / 2, yCoord = (8 - rank) * squareSize;
+            	int xCoord, yCoord;
+            	if (GraphicSettings.rotateBoard) {
+            		yCoord = (rank - 1) * squareSize;
+            		xCoord = (7 - file + 'a') * squareSize + (getWidth() - xDim) / 2;
+            	}
+            	else {
+            		yCoord = (8 - rank) * squareSize;
+            		xCoord = (file - 'a') * squareSize + (getWidth() - xDim) / 2;
+            	}
             	
                 if ((file-'a' + rank) % 2 == 0) {
-                    g.setColor(Color.WHITE);
+                    g.setColor(getColor(Sides.white));
                 } else {
-                    g.setColor(Color.GRAY);
+                    g.setColor(getColor(Sides.black));
                 }
                 g.fillRect(xCoord, yCoord, squareSize, squareSize);
                 
@@ -209,10 +227,29 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
             }
         }
     }
+    
+    private Color getColor(Sides s) {
+    	if (s == Sides.white) {
+    		if (GraphicSettings.colors.get(GraphicSettings.selectedScheme) != null)
+    			return GraphicSettings.colors.get(GraphicSettings.selectedScheme).first;	
+    		return Color.white;
+    	}
+    	else {
+    		if (GraphicSettings.colors.get(GraphicSettings.selectedScheme) != null)
+    			return GraphicSettings.colors.get(GraphicSettings.selectedScheme).second;
+    		
+    		return Color.gray;
+    	}
+    }
 
 	@Override
 	public void onGameStateChanged() {
 		//System.out.println("Szoveg");
+		repaint();
+	}
+
+	@Override
+	public void onGameLooksChanged() {
 		repaint();
 	}
     

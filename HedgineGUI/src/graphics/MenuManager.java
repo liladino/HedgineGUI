@@ -8,6 +8,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import game.GameUpdateListener;
+
 public class MenuManager implements ActionListener {
 	private MainWindow mainWindow;
 	
@@ -15,14 +17,24 @@ public class MenuManager implements ActionListener {
 	private JMenu file;
 	private ArrayList<JMenuItem> fileMenuElements;
 	
+	private JMenu game;
+	private ArrayList<JMenuItem> gameMenuElements;
+	
 	private JMenu view;
 	private ArrayList<JMenuItem> viewMenuElements;
 	
 	private JMenu colorScheme;
 	private ArrayList<JMenuItem> colors;
 	
+	private GameUpdateListener listener;
+	
 	public MenuManager(MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
+
+		fileMenuElements = new ArrayList<>();
+		gameMenuElements = new ArrayList<>();
+		viewMenuElements = new ArrayList<>();
+		colors = new ArrayList<>();
 		setUpMenuBar();
 	}	
 
@@ -31,18 +43,26 @@ public class MenuManager implements ActionListener {
 		
 		file = new JMenu("File");
 		menuBar.add(file);
-		
-		fileMenuElements = new ArrayList<>();
+		fileMenuElements.add(new JMenuItem("Load FEN"));
+		fileMenuElements.add(new JMenuItem("Save FEN"));
+		fileMenuElements.add(new JMenuItem("Save PGN"));
 		fileMenuElements.add(new JMenuItem("Quit"));
 		for (JMenuItem m : fileMenuElements) {
 			file.add(m);
 			m.addActionListener(this);
 		}
 		
+		game = new JMenu("Game");
+		menuBar.add(game);
+		gameMenuElements.add(new JMenuItem("New game"));
+		gameMenuElements.add(new JMenuItem("Resign"));
+		for (JMenuItem m : gameMenuElements) {
+			game.add(m);
+			m.addActionListener(this);
+		}
+		
 		view = new JMenu("View");
 		menuBar.add(view);
-		
-		viewMenuElements = new ArrayList<>();
 		viewMenuElements.add(new JMenuItem("Rotate board"));
 		colorScheme = new JMenu("Color scheme");
 		viewMenuElements.add(colorScheme);
@@ -52,11 +72,9 @@ public class MenuManager implements ActionListener {
 			m.addActionListener(this);
 		}
 		
-		colors = new ArrayList<>();
-		colors.add(new JMenuItem("Gray"));
-		colors.add(new JMenuItem("Bubble gum"));
-		colors.add(new JMenuItem("Wood"));
-		colors.add(new JMenuItem("Green"));
+		for (String s : GraphicSettings.colors.keySet()) {
+			colors.add(new JMenuItem(s));
+		}
 		for (JMenuItem m : colors) {
 			colorScheme.add(m);
 			m.addActionListener(this);
@@ -74,5 +92,17 @@ public class MenuManager implements ActionListener {
         if (s.equals("Quit")) {
         	System.exit(0);
         }
+        else if (s.equals("Rotate board")) {
+        	GraphicSettings.rotateBoard = !GraphicSettings.rotateBoard;
+        	listener.onGameLooksChanged();
+        }
+        else if (GraphicSettings.colors.containsKey(s)) {
+        	GraphicSettings.selectedScheme = s;
+        	listener.onGameLooksChanged();
+        }
+	}
+	
+	public void addGameUpdateListener(GameUpdateListener listener) {
+		this.listener = listener;
 	}
 }

@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 import chess.Board;
 import chess.Move;
-import graphics.GameEventListener;
 import utility.*;
 
 public class GameManager implements Runnable, MoveListener{
