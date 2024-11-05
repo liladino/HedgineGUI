@@ -15,13 +15,13 @@ public class Main {
 		Human w = new Human(Sides.white, "vilagos");
 		Human b = new Human(Sides.black, "sotet");
 		
-		try{
+		/*try{
 			gameManager.initialzeGame(new Board("k7/7P/8/K7/8/8/8/8 w KQkq - 0 1"), w, b);
 		}
 		catch(FENException e) {
-			System.out.println(e.getMessage());
+			System.out.println(e.getMessage());*/
 			gameManager.initialzeGame(new Board(), w, b);
-		}
+		//}
 		
 		new MainWindow(gameManager);
 		

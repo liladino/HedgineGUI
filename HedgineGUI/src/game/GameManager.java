@@ -114,6 +114,7 @@ public class GameManager implements Runnable, MoveListener{
 
 		while (true) {
             synchronized (this) {
+                System.out.println((board.tomove() == Sides.white ? "White to move" : "Black to move"));
                 moveReady = false;
 
                 while (!moveReady) {

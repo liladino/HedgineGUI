@@ -4,6 +4,7 @@ import game.GameManager;
 import utility.Sides;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.*;
 
@@ -13,6 +14,7 @@ public class MainWindow extends JFrame implements GameEventListener {
 
     public MainWindow(GameManager gameManager) {
         setTitle("Chess Game");
+        setMinimumSize(new Dimension(240, 280));
         setSize(600 + getInsets().left + getInsets().right, 600 + getInsets().top + getInsets().bottom);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameManager.setGameEventListener(this);

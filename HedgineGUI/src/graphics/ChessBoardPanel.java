@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -54,8 +55,9 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int rank = 7 - e.getY() / squareSize + 1; 
-                char file = (char)(e.getX() / squareSize + 'a');
+                char file = (char)((e.getX() - (getWidth() - xDim) / 2)/ squareSize + 'a');
                 
+                System.out.printf("w: %d, h: %d\nfile: %c, rank: %d\n", getWidth(), getHeight(), file, rank);
                 handleSquareClick(file, rank);
             }
         });
@@ -95,8 +97,8 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
     	}
     	
         if (selectedFile == 0 && selectedRank == -1) {
-        	if (gameManager.getBoard().boardAt(file, rank) != ' ' 
-        			&& pieceColor(gameManager.getBoard().boardAt(file, rank)) == gameManager.getBoard().tomove()) {
+        	if (gameManager.getBoard().boardAt(file, rank) != ' ' && 
+        			pieceColor(gameManager.getBoard().boardAt(file, rank)) == gameManager.getBoard().tomove()) {
         		//allow only piece selection
 	        	selectedFile = file;
 	        	selectedRank = rank;
@@ -107,33 +109,45 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
         	char promotion = ' ';
         	Square from = new Square(selectedFile, selectedRank);
         	Square to = new Square(file, rank);
-        	        	
-        	if (Character.toLowerCase(gameManager.getBoard().boardAt(from)) == 'p' && 
-        			(to.getRank() == 8 || to.getRank() == 1) ) {
-            	//check if any promotion is legal
-        		char[] promPieces = {'q', 'r', 'k', 'b'};
-            	boolean isPromLegal = false;
-        		for (char c : promPieces) {
-        			if (gameManager.getBoard().isMoveLegal(new Move(from, to, c))){
-        				isPromLegal = true;
-        				break;
-        			}
-        		}
-        		if (isPromLegal) {
-	        		//handle promotion
-	        		PromotionDialog dialog = new PromotionDialog(
-	        				(JFrame) SwingUtilities.getWindowAncestor(this), images, gameManager.getBoard().tomove());
-	        		dialog.setVisible(true);
-	        		promotion = dialog.getSelectedPiece();
-        		}
-        	}
         	
-            selectedFile = 0;
-        	selectedRank = -1;
-    		repaint();
-    		
-    		Human h = (Human) (gameManager.getCurrentPlayer());
-        	h.makeMove(gameManager, new Move(from, to, promotion));
+        	if (	
+        		gameManager.getBoard().boardAt(from) != ' ' &&
+        		gameManager.getBoard().boardAt(to) != ' ' &&
+        		pieceColor(gameManager.getBoard().boardAt(from)) == pieceColor(gameManager.getBoard().boardAt(to))
+        			) {
+        		//same side's piece selected, move the selection
+        		selectedFile = file;
+        		selectedRank = rank;
+        		repaint();
+        	}
+        	else {	       	
+		    	if (Character.toLowerCase(gameManager.getBoard().boardAt(from)) == 'p' && 
+		    			(to.getRank() == 8 || to.getRank() == 1) ) {
+		        	//check if any promotion is legal
+		    		char[] promPieces = {'q', 'r', 'k', 'b'};
+		        	boolean isPromLegal = false;
+		    		for (char c : promPieces) {
+		    			if (gameManager.getBoard().isMoveLegal(new Move(from, to, c))){
+		    				isPromLegal = true;
+		    				break;
+		    			}
+		    		}
+		    		if (isPromLegal) {
+		        		//handle promotion
+		        		PromotionDialog dialog = new PromotionDialog(
+		        				(JFrame) SwingUtilities.getWindowAncestor(this), images, gameManager.getBoard().tomove());
+		        		dialog.setVisible(true);
+		        		promotion = dialog.getSelectedPiece();
+		    		}
+		    	}
+		    	
+		        selectedFile = 0;
+		    	selectedRank = -1;
+				repaint();
+				
+				Human h = (Human) (gameManager.getCurrentPlayer());
+		    	h.makeMove(gameManager, new Move(from, to, promotion));
+        	}
         }
     }
 
@@ -141,10 +155,8 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         
-        int panelWidth = getWidth();
-        int panelHeight = getHeight();
-
-        xDim = yDim = Math.min(panelWidth, panelHeight);
+        xDim = yDim = Math.min(getWidth(), getHeight());
+        
         squareSize = xDim / 8;
         
         drawBoard(g);
