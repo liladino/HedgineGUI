@@ -34,10 +34,10 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
     private int xDim;
     private int yDim;
     private int squareSize;
-    private HashMap<Character, BufferedImage>  images;
+    private transient HashMap<Character, BufferedImage> images;
 
 	public ChessBoardPanel(GameManager gameManager, int size, MenuManager menuManager) {
-		images = new HashMap<Character, BufferedImage>();
+		images = new HashMap<>();
 		loadPieces();
 		selected = new Square();
 		
@@ -71,8 +71,8 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
     }
 	
 	void loadPieces() {
-		String imagesPath = "../resources/pieces/";
-		String selectionPath = "../resources/select/";
+		String imagesPath = System.getProperty("user.dir") + "/resources/pieces/";
+		String selectionPath = System.getProperty("user.dir") + "/resources/select/";
 
         try { images.put('P', ImageIO.read(new File(imagesPath + "wp.png"))); } catch (IOException e) { e.printStackTrace(); }
         try { images.put('R', ImageIO.read(new File(imagesPath + "wr.png"))); } catch (IOException e) { e.printStackTrace(); }
@@ -198,17 +198,17 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
                 // Draw pieces
                 if (((board.boardAt(file, rank) == 'K' && board.tomove() == Sides.white) 
                 	|| (board.boardAt(file, rank) == 'k' && board.tomove() == Sides.black))
-                		&& board.inCheck()){
+                		&& board.inCheck()
+						&& images.containsKey('C')
+						){
                 	//mark check
-                	if (images.containsKey('C')) {
-                    	g.drawImage(images.get('C'), xCoord, yCoord, squareSize, squareSize, this);
-                	}
+                	g.drawImage(images.get('C'), xCoord, yCoord, squareSize, squareSize, this);
                 }
-                if (file == selected.getFile() && rank == selected.getRank()) {
+                if (file == selected.getFile() 
+					&& rank == selected.getRank()
+					&& images.containsKey('S')) {
                 	//mark piece selection
-                	if (images.containsKey('S')) {
-                    	g.drawImage(images.get('S'), xCoord, yCoord, squareSize, squareSize, this);
-                	}
+                   	g.drawImage(images.get('S'), xCoord, yCoord, squareSize, squareSize, this);
                 }
                 
                 if (board.boardAt(file, rank) != ' ') {
@@ -244,7 +244,6 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 
 	@Override
 	public void onGameStateChanged() {
-		//System.out.println("Szoveg");
 		repaint();
 	}
 

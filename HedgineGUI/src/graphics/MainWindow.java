@@ -11,13 +11,13 @@ import javax.swing.*;
 public class MainWindow extends JFrame implements GameEventListener {
 	private static final long serialVersionUID = 38435486L;
 	private ChessBoardPanel chessBoardPanel;
-	private MenuManager menuManager;
+	private transient MenuManager menuManager;
 	
 	public MainWindow(GameManager gameManager) {
 		setTitle("Chess");
 		setMinimumSize(new Dimension(240, 280));
 		setSize(600 + getInsets().left + getInsets().right, 600 + getInsets().top + getInsets().bottom);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		gameManager.setGameEventListener(this);
 		
 		GraphicSettings.initializeGraphicSettings();

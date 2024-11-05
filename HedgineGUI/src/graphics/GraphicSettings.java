@@ -1,6 +1,6 @@
 package graphics;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -21,9 +21,11 @@ public class GraphicSettings {
 		
 		colors.put("Gray", new Pair<>(Color.WHITE, Color.GRAY));
 		colors.put("Wood", new Pair<>(new Color(255, 178, 102), new Color(153, 76, 0)));
-		colors.put("Green", new Pair<>(new Color(178, 255, 102), new Color(76, 153, 0)));
+		colors.put("Green", new Pair<>(new Color(229, 255, 204), new Color(76, 153, 0)));
 		colors.put("Candy", new Pair<>(Color.PINK, Color.RED));
 		colors.put("Bubble gum", new Pair<>(new Color(204, 0, 204), new Color(76, 0, 153)));
 		colors.put("Sunny", new Pair<>(new Color(255, 255, 153), new Color(255, 128, 0)));
+		
+		colors = Collections.unmodifiableMap(colors);
 	}
 }

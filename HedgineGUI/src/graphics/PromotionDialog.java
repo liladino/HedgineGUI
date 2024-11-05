@@ -2,7 +2,7 @@ package graphics;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
 import org.junit.validator.PublicClassValidator;
 
@@ -28,10 +29,11 @@ public class PromotionDialog extends JDialog{
 		super(parent, "Pawn promotion", true);
 		this.images = images;
 		selectedPiece = ' '; //this space works as a cancel operation too (like on exit)
-		setLayout(new FlowLayout());
-		setSize(350, 90 + parent.getInsets().top + parent.getInsets().bottom);
+		setLayout(new GridLayout(1, 4));
+		setSize(400, 90 + parent.getInsets().top + parent.getInsets().bottom);
+		setResizable(false);
 		setLocationRelativeTo(parent);
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		if (tomove == Sides.white) {
 			addPieceButton('Q');
@@ -63,13 +65,13 @@ public class PromotionDialog extends JDialog{
 		}
 		button.setPreferredSize(new Dimension(80, 80));
 		button.setHorizontalTextPosition(SwingConstants.CENTER);
-		button.addActionListener(new ActionListener() {	
-			@Override
-			public void actionPerformed(ActionEvent e) {
+		button.addActionListener(
+			(ActionEvent e) -> {
 				selectedPiece = piece;
 				dispose();
 			}
-		});		
+		);
+		
 		add(button);
 	}
 }
