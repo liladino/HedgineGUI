@@ -29,10 +29,18 @@ class MoveTest {
 	@Test
 	void testConstructors() {
 		assertTrue(nm.isNull());
+		assertTrue(badString.isNull());
+		Move ng1f3 = new Move(g1f3);
+		assertEquals(ng1f3, g1f3);
 		assertFalse(g1f3.isNull());
 		assertFalse(a1a2.isNull());
 		assertFalse(e7e8q.isNull());
 		assertTrue(badString.isNull());
 	}
 
+	@Test
+	void testStrings(){
+		assertEquals("g1f3 ", g1f3.toString());
+		assertEquals("e7e8q", e7e8q.toString());	
+	}
 }
