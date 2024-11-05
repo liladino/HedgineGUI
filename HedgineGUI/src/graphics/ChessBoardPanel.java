@@ -4,9 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -15,7 +13,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -32,9 +29,8 @@ import game.Human;
 public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 	private static final long serialVersionUID = 987168713547L;
 	private GameManager gameManager;
-	private MenuManager menuManager;
-    private int selectedRank = -1;
-    private char selectedFile= 0; 
+	//private MenuManager menuManager;
+    private Square selected;
     private int xDim;
     private int yDim;
     private int squareSize;
@@ -43,11 +39,12 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 	public ChessBoardPanel(GameManager gameManager, int size, MenuManager menuManager) {
 		images = new HashMap<Character, BufferedImage>();
 		loadPieces();
+		selected = new Square();
 		
 		yDim = xDim = size;
 		squareSize = xDim / 8;
         this.gameManager = gameManager;
-        this.menuManager = menuManager;
+        //this.menuManager = menuManager;
         gameManager.addGameUpdateListener(this);
         menuManager.addGameUpdateListener(this);
         
@@ -67,7 +64,7 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
                 	rank = 7 - e.getY() / squareSize + 1; 
 				}
                 
-                System.out.printf("w: %d, h: %d\nfile: %c, rank: %d\n", getWidth(), getHeight(), file, rank);
+                System.out.printf("file: %c, rank: %d\n", file, rank);
                 handleSquareClick(file, rank);
             }
         });
@@ -106,18 +103,17 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
     		return;
     	}
     	
-        if (selectedFile == 0 && selectedRank == -1) {
+        if (selected.isNull()) {
         	if (gameManager.getBoard().boardAt(file, rank) != ' ' && 
         			pieceColor(gameManager.getBoard().boardAt(file, rank)) == gameManager.getBoard().tomove()) {
         		//allow only piece selection
-	        	selectedFile = file;
-	        	selectedRank = rank;
+	        	selected = new Square(file, rank);
 	        	repaint();
 	        }
         } else {
             // second click, try moving the piece
         	char promotion = ' ';
-        	Square from = new Square(selectedFile, selectedRank);
+        	Square from = new Square(selected);
         	Square to = new Square(file, rank);
         	
         	if (	
@@ -126,8 +122,13 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
         		pieceColor(gameManager.getBoard().boardAt(from)) == pieceColor(gameManager.getBoard().boardAt(to))
         			) {
         		//same side's piece selected, move the selection
-        		selectedFile = file;
-        		selectedRank = rank;
+        		
+        		if (from.equals(to)) {
+        			selected = new Square();
+        		}
+        		else {
+        			selected = new Square(file, rank);
+        		}
         		repaint();
         	}
         	else {	       	
@@ -151,8 +152,7 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 		    		}
 		    	}
 		    	
-		        selectedFile = 0;
-		    	selectedRank = -1;
+		    	selected = new Square();
 				repaint();
 				
 				Human h = (Human) (gameManager.getCurrentPlayer());
@@ -204,7 +204,7 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
                     	g.drawImage(images.get('C'), xCoord, yCoord, squareSize, squareSize, this);
                 	}
                 }
-                if (file == selectedFile && rank == selectedRank) {
+                if (file == selected.getFile() && rank == selected.getRank()) {
                 	//mark piece selection
                 	if (images.containsKey('S')) {
                     	g.drawImage(images.get('S'), xCoord, yCoord, squareSize, squareSize, this);
