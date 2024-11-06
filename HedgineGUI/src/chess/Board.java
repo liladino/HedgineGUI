@@ -2,6 +2,7 @@ package chess;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 
 import chess.IO.FENException;
 import chess.IO.FENmanager;
@@ -55,7 +56,6 @@ public class Board {
 		}
 		catch (FENException e) {
 			if (e.getSuccesfulFields() < 4) {
-				//System.out.println("This is a test");
 				throw new FENException(e.getMessage() + " can't parse FEN", e.getSuccesfulFields());
 			}
 			//non-fatal:
@@ -81,9 +81,8 @@ public class Board {
 				board[i][j] = b.board[i][j];
 		
 		if (b.tomove == Sides.WHITE) tomove = Sides.WHITE; else tomove = Sides.BLACK;
-		castlingRights = new boolean[4];
-		for (int i = 0; i < 4; i++) 
-				castlingRights[i] = b.castlingRights[i];
+		
+		castlingRights = Arrays.copyOf(b.castlingRights, 4);
 		
 		enPassantTarget = new Square(b.enPassantTarget);
 		fiftyMoveRule = b.fiftyMoveRule;
@@ -157,24 +156,7 @@ public class Board {
 	 * IO  *
 	 * * * */
 	public void printToStream(PrintStream out) {
-		out.printf("|");
-		for (int j = 2; j < 9; j++){
-			out.printf("---+");
-		}
-		out.printf("---|\n");
-		
-		for (int i = 9; i > 1; i--){
-			out.printf("|");
-			for (int j = 2; j < 10; j++){
-				out.printf(" %c |", board[i][j]);
-			}
-			out.printf("\n|");
-			for (int j = 2; j < 9; j++){
-				out.printf("---+");
-			}
-			out.printf("---|\n");
-		}
-		out.printf("\n");
+		printToStream(out, Sides.WHITE);
 	}
 	
 	public void printToStream(PrintStream out, Sides t) {
@@ -294,19 +276,15 @@ public class Board {
 				board[m.getTo().getRowCoord()][m.getTo().getColCoord()] = board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()];
 			}
 		}
-		else if (board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'P' && m.getTo().getRank() == 6 
-				&& board[m.getFrom().getRowCoord()][m.getTo().getColCoord()] == 'p'
-				&& board[m.getTo().getRowCoord()][m.getTo().getColCoord()] == ' ') {
+		else if ( (	board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'P' && m.getTo().getRank() == 6 
+					&& board[m.getFrom().getRowCoord()][m.getTo().getColCoord()] == 'p'
+					&& board[m.getTo().getRowCoord()][m.getTo().getColCoord()] == ' ') 
+				||  
+					(board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'p' && m.getTo().getRank() == 3 
+					&& board[m.getFrom().getRowCoord()][m.getTo().getColCoord()] == 'P'
+					&& board[m.getTo().getRowCoord()][m.getTo().getColCoord()] == ' ')) {
 			fiftyMoveRule = 0;
-			//en passant white
-			board[m.getFrom().getRowCoord()][m.getTo().getColCoord()] = ' ';
-			board[m.getTo().getRowCoord()][m.getTo().getColCoord()] = board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()];
-		}
-		else if (board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'p' && m.getTo().getRank() == 3 
-				&& board[m.getFrom().getRowCoord()][m.getTo().getColCoord()] == 'P'
-				&& board[m.getTo().getRowCoord()][m.getTo().getColCoord()] == ' ') {
-			fiftyMoveRule = 0;
-			//en passant black
+			//en passant
 			board[m.getFrom().getRowCoord()][m.getTo().getColCoord()] = ' ';
 			board[m.getTo().getRowCoord()][m.getTo().getColCoord()] = board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()];
 		}
@@ -393,7 +371,7 @@ public class Board {
 			generateLegalMoves();
 		}
 		
-		if (legalMoves.size() == 0) {
+		if (legalMoves.isEmpty()) {
 			if (inCheck()) {
 				if (tomove == Sides.WHITE) return Result.BLACK_WON;
 				return Result.WHITE_WON;
@@ -441,15 +419,9 @@ public class Board {
 		int kingi = 0, kingj = 0;
 		for (int i = 2; i < 10; i++) {
 			for (int j = 2; j < 10; j++) {
-				if (board[i][j] == 'K' && tomove == Sides.WHITE){
+				if ((board[i][j] == 'K' && tomove == Sides.WHITE) || (board[i][j] == 'k' && tomove == Sides.BLACK)){
 					kingi = i;
 					kingj = j;
-					//break loops;
-				}
-				else if (board[i][j] == 'k' && tomove == Sides.BLACK){
-					kingi = i;
-					kingj = j;
-					//break loops;
 				}
 			}
 		}
@@ -525,7 +497,7 @@ public class Board {
 	}
 	
 	public int perfTest(int depth, boolean print) {
-		if (print == false) {
+		if (!print) {
 			return recursiveLegalMoves(depth, this);
 		}
 		int r = recursiveLegalMoves(depth, this);
