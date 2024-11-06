@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import utility.*;
 
 public class Clock implements Runnable {
-    /* * * * * * * * * * *
-	 * Time information  *
-	 * * * * * * * * * * */
 	private TimeControl controlType;
 	private int whiteTime; 
 	private int blackTime;
