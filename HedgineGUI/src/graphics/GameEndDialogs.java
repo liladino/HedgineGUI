@@ -7,7 +7,7 @@ import utility.Sides;
 
 public class GameEndDialogs {
 	public static void showCheckmate(JFrame parent, Sides won) {
-		String message = "Ckeckmate! " + (won == Sides.white ? "White" : "Black") + " won.";
+		String message = "Ckeckmate! " + (won == Sides.WHITE ? "White" : "Black") + " won.";
 		JOptionPane.showMessageDialog(parent, message, "Game over", JOptionPane.INFORMATION_MESSAGE);
 	}
 	public static void showStalemate(JFrame parent) {

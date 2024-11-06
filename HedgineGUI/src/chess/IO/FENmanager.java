@@ -34,7 +34,7 @@ public class FENmanager {
 		
 		sb.append(' ');
 		
-		if (board.tomove() == Sides.white) sb.append("w ");
+		if (board.tomove() == Sides.WHITE) sb.append("w ");
 		else sb.append("b ");
 		
 		if (board.wKingSideCastling()) sb.append('K');
@@ -89,9 +89,7 @@ public class FENmanager {
 		
 		int wking = 0, bking = 0;
 		int k = 0;
-		for (int i = 2; i < 10; i++) {
-		//	System.out.println(pos[i-2]);
-			
+		for (int i = 2; i < 10; i++) {			
 			for (int j = 0; j < pos[i-2].length(); j++){
 				switch (pos[i-2].charAt(j)) {
 					case 'p': board[7 - k / 8 + 2][k % 8 + 2] = 'p'; break;
@@ -157,13 +155,12 @@ public class FENmanager {
 		switch(s[1].charAt(0)) {
 			case 'w': 
 				readSuccesses[1] = true;
-				return Sides.white;
+				return Sides.WHITE;
 			case 'b': 
 				readSuccesses[1] = true;
-				return Sides.black;
+				return Sides.BLACK;
 		}
 
-		readSuccesses[1] = true;
 		throw new FENException("Can't parse color", readSuccesses);
 	}
 	

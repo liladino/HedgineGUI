@@ -12,8 +12,8 @@ public class Main {
 	public static void main(String[] args) {
 		GameManager gameManager = new GameManager();
 		
-		Human w = new Human(Sides.white, "vilagos");
-		Human b = new Human(Sides.black, "sotet");
+		Human w = new Human(Sides.WHITE, "vilagos");
+		Human b = new Human(Sides.BLACK, "sotet");
 		
 		/*try{
 			gameManager.initialzeGame(new Board("k7/7P/8/K7/8/8/8/8 w KQkq - 0 1"), w, b);

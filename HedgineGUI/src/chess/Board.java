@@ -67,7 +67,7 @@ public class Board {
 			System.out.println("fullmove number is set to 1.");
 			fullMoveCount = 1;
 		}
-		Sides notToMove = (tomove == Sides.white ? Sides.black : Sides.white);
+		Sides notToMove = (tomove == Sides.WHITE ? Sides.BLACK : Sides.WHITE);
 		if (inCheck(notToMove)) {
 			throw new FENException("Illegal board: The side not to move is in check.", 6);
 		}
@@ -80,7 +80,7 @@ public class Board {
 			for (int j = 2; j < 10; j++) 
 				board[i][j] = b.board[i][j];
 		
-		if (b.tomove == Sides.white) tomove = Sides.white; else tomove = Sides.black;
+		if (b.tomove == Sides.WHITE) tomove = Sides.WHITE; else tomove = Sides.BLACK;
 		castlingRights = new boolean[4];
 		for (int i = 0; i < 4; i++) 
 				castlingRights[i] = b.castlingRights[i];
@@ -183,7 +183,7 @@ public class Board {
 			out.printf("---+");
 		}
 		out.printf("---|\n");
-		for (int i = (t == Sides.white ? 9 : 2); i > 1 && i < 10; i += (t == Sides.white ? -1 : 1)){
+		for (int i = (t == Sides.WHITE ? 9 : 2); i > 1 && i < 10; i += (t == Sides.WHITE ? -1 : 1)){
 			out.printf("|");
 			for (int j = 2; j < 10; j++){
 				out.printf(" %c |", board[i][j]);
@@ -225,8 +225,8 @@ public class Board {
 	 * Moves *
 	 * * * * */
 	private void switchColor() {
-		if (tomove == Sides.black) tomove = Sides.white;
-		else tomove = Sides.black;
+		if (tomove == Sides.BLACK) tomove = Sides.WHITE;
+		else tomove = Sides.BLACK;
 	}
 	
 	public void makeMove(Move m) {
@@ -354,7 +354,7 @@ public class Board {
 		board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] = ' ';
 		
 		//set meta values
-		if (tomove == Sides.black) {
+		if (tomove == Sides.BLACK) {
 			fullMoveCount++;
 		}
 		
@@ -395,22 +395,22 @@ public class Board {
 		
 		if (legalMoves.size() == 0) {
 			if (inCheck()) {
-				if (tomove == Sides.white) return Result.blackWon;
-				return Result.whiteWon;
+				if (tomove == Sides.WHITE) return Result.BLACK_WON;
+				return Result.WHITE_WON;
 			}
-			return Result.stalemate;
+			return Result.STALEMATE;
 		}
 		
 		int wKnightCount = 0, wBishopCount = 0, bKnightCount = 0, bBishopCount = 0;
 		for (int i = 2; i < 10; i++) {
 			for (int j = 2; j < 10; j++) {
 				switch (board[i][j]) {
-					case 'R': return Result.onGoing;
-					case 'Q': return Result.onGoing;
-					case 'q': return Result.onGoing;
-					case 'r': return Result.onGoing;
-					case 'P': return Result.onGoing;
-					case 'p': return Result.onGoing;
+					case 'R': return Result.ONGOING;
+					case 'Q': return Result.ONGOING;
+					case 'q': return Result.ONGOING;
+					case 'r': return Result.ONGOING;
+					case 'P': return Result.ONGOING;
+					case 'p': return Result.ONGOING;
 					case 'N': 
 						wKnightCount++;
 						break;
@@ -425,13 +425,13 @@ public class Board {
 						break;
 				}
 				if (wKnightCount + wBishopCount + bKnightCount + bBishopCount > 1) {
-					return Result.onGoing;
+					return Result.ONGOING;
 				}
 			}
 		}
 		
 		
-		return Result.draw;
+		return Result.DRAW;
 	}
 	
 	public boolean inCheck() {
@@ -441,12 +441,12 @@ public class Board {
 		int kingi = 0, kingj = 0;
 		for (int i = 2; i < 10; i++) {
 			for (int j = 2; j < 10; j++) {
-				if (board[i][j] == 'K' && tomove == Sides.white){
+				if (board[i][j] == 'K' && tomove == Sides.WHITE){
 					kingi = i;
 					kingj = j;
 					//break loops;
 				}
-				else if (board[i][j] == 'k' && tomove == Sides.black){
+				else if (board[i][j] == 'k' && tomove == Sides.BLACK){
 					kingi = i;
 					kingj = j;
 					//break loops;
@@ -454,14 +454,12 @@ public class Board {
 			}
 		}
 		if (kingi * kingj == 0) {
-			/*if (tomove == Sides.white){ throw new IllegalPositionException("No white king found"); }
-			else { throw new IllegalPositionException("No black king found"); } */
 			//can't reach this if everything goes well: only made legal moves and the startpos was legal
 			return false;
 		}
 		
 		//to check if square + offset is q,r,b,n, or p, no matter the color
-		int colorOffset = (tomove == Sides.white ? 0 : 'a' - 'A');
+		int colorOffset = (tomove == Sides.WHITE ? 0 : 'a' - 'A');
 		
 		
 		//knight directions
@@ -504,7 +502,7 @@ public class Board {
 		}
 		
 		//pawns
-		if (tomove == Sides.white) {
+		if (tomove == Sides.WHITE) {
 			if (board[kingi + 1][kingj + 1] == 'p' || board[kingi + 1][kingj - 1] == 'p') { return true; }
 		}
 		else {

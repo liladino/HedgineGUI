@@ -5,7 +5,7 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -19,8 +19,8 @@ import utility.Sides;
 public class PromotionDialog extends JDialog{
 	private static final long serialVersionUID = 1687874164L;
 	private char selectedPiece;
-	private HashMap<Character, BufferedImage>  images;
-	public PromotionDialog(JFrame parent, HashMap<Character, BufferedImage> images, Sides tomove) {
+	private Map<Character, BufferedImage>  images;
+	public PromotionDialog(JFrame parent, Map<Character, BufferedImage> images, Sides tomove) {
 		super(parent, "Pawn promotion", true);
 		this.images = images;
 		selectedPiece = ' '; //this space works as a cancel operation too (like on exit)
@@ -30,7 +30,7 @@ public class PromotionDialog extends JDialog{
 		setLocationRelativeTo(parent);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
-		if (tomove == Sides.white) {
+		if (tomove == Sides.WHITE) {
 			addPieceButton('Q');
 			addPieceButton('R');
 			addPieceButton('B');

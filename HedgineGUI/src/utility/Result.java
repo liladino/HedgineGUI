@@ -1,5 +1,5 @@
 package utility;
 
 public enum Result {
-	whiteWon, blackWon, draw, onGoing, stalemate
+	WHITE_WON, BLACK_WON, DRAW, ONGOING, STALEMATE
 }

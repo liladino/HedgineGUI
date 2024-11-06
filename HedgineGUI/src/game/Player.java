@@ -49,7 +49,7 @@ public abstract class Player {
 	}
 	
 	public void switchSide() {
-		if (side == Sides.black) side = Sides.white;
-		else side = Sides.black;
+		if (side == Sides.BLACK) side = Sides.WHITE;
+		else side = Sides.BLACK;
 	}
 }

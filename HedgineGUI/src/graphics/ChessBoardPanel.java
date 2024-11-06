@@ -94,8 +94,8 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 	}
 	
     Sides pieceColor(char c) {
-    	if (c >= 'a' && c <= 'z') return Sides.black;
-    	return Sides.white;
+    	if (c >= 'a' && c <= 'z') return Sides.BLACK;
+    	return Sides.WHITE;
     }
 
     private void handleSquareClick(char file, int rank) {
@@ -189,15 +189,15 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
             	}
             	
                 if ((file-'a' + rank) % 2 == 0) {
-                    g.setColor(getColor(Sides.white));
+                    g.setColor(getColor(Sides.WHITE));
                 } else {
-                    g.setColor(getColor(Sides.black));
+                    g.setColor(getColor(Sides.BLACK));
                 }
                 g.fillRect(xCoord, yCoord, squareSize, squareSize);
                 
                 // Draw pieces
-                if (((board.boardAt(file, rank) == 'K' && board.tomove() == Sides.white) 
-                	|| (board.boardAt(file, rank) == 'k' && board.tomove() == Sides.black))
+                if (((board.boardAt(file, rank) == 'K' && board.tomove() == Sides.WHITE) 
+                	|| (board.boardAt(file, rank) == 'k' && board.tomove() == Sides.BLACK))
                 		&& board.inCheck()
 						&& images.containsKey('C')
 						){
@@ -229,7 +229,7 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
     }
     
     private Color getColor(Sides s) {
-    	if (s == Sides.white) {
+    	if (s == Sides.WHITE) {
     		if (GraphicSettings.colors.get(GraphicSettings.selectedScheme) != null)
     			return GraphicSettings.colors.get(GraphicSettings.selectedScheme).first;	
     		return Color.white;
