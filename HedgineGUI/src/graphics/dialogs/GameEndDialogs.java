@@ -1,4 +1,4 @@
-package graphics;
+package graphics.dialogs;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;

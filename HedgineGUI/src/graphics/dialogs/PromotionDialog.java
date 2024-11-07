@@ -1,4 +1,4 @@
-package graphics;
+package graphics.dialogs;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;

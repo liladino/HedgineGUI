@@ -76,10 +76,10 @@ public class FENmanager {
 		return board;
 	}
 	
-	public char[][] parseBoard(String FEN) throws FENException{
+	public char[][] parseBoard(String fen) throws FENException{
 		char[][] board = startpos();
 		
-		String[] s = FEN.split(" ");
+		String[] s = fen.split(" ");
 		
 		if (s[0].length() < 14) throw new FENException("Missing element(s)", readSuccesses);
 		
@@ -141,8 +141,8 @@ public class FENmanager {
 		return board;
 	}
 	
-	public Sides parseTomove(String FEN) throws FENException{
-		String[] s = FEN.split(" ");
+	public Sides parseTomove(String fen) throws FENException{
+		String[] s = fen.split(" ");
 		
 		if (s.length < 2) {
 			throw new FENException("Missing element(s)", readSuccesses);
@@ -152,11 +152,11 @@ public class FENmanager {
 			throw new FENException("Can't parse color", readSuccesses);
 		}
 		
-		switch(s[1].charAt(0)) {
-			case 'w': 
+		if(s[1].charAt(0) == 'w'){ 
 				readSuccesses[1] = true;
 				return Sides.WHITE;
-			case 'b': 
+		}
+		if (s[1].charAt(0) == 'b'){ 
 				readSuccesses[1] = true;
 				return Sides.BLACK;
 		}
@@ -164,8 +164,8 @@ public class FENmanager {
 		throw new FENException("Can't parse color", readSuccesses);
 	}
 	
-	public boolean[] parseCastlingRights(String FEN) throws FENException{
-		String[] s = FEN.split(" ");
+	public boolean[] parseCastlingRights(String fen) throws FENException{
+		String[] s = fen.split(" ");
 		
 		if (s.length < 3) {
 			throw new FENException("Missing element(s)", readSuccesses);
@@ -205,8 +205,8 @@ public class FENmanager {
 		return castlingRights;
 	}
 	
-	public Square parseEnPassant(String FEN) throws FENException {
-		String[] s = FEN.split(" ");
+	public Square parseEnPassant(String fen) throws FENException {
+		String[] s = fen.split(" ");
 		
 		if (s.length < 4) {
 			throw new FENException("Missing element(s)", readSuccesses);
@@ -237,8 +237,8 @@ public class FENmanager {
 		return s1;
 	}
 	
-	public int parseFiftyMoveRule(String FEN) throws FENException {
-		String[] s = FEN.split(" ");
+	public int parseFiftyMoveRule(String fen) throws FENException {
+		String[] s = fen.split(" ");
 		
 		if (s.length < 5) {
 			throw new FENException("Missing element(s)", readSuccesses);
@@ -255,8 +255,8 @@ public class FENmanager {
 		return num;
 	}
 	
-	public int parseMoveCount(String FEN) throws FENException {
-		String[] s = FEN.split(" ");
+	public int parseMoveCount(String fen) throws FENException {
+		String[] s = fen.split(" ");
 		
 		if (s.length < 6) {
 			throw new FENException("Missing element(s)", readSuccesses);

@@ -1,4 +1,4 @@
-package graphics;
+package graphics.panels;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -25,11 +25,14 @@ import chess.Square;
 import game.GameManager;
 import game.GameUpdateListener;
 import game.Human;
+import graphics.GraphicSettings;
+import graphics.MenuManager;
+import graphics.dialogs.PromotionDialog;
 
 public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 	private static final long serialVersionUID = 987168713547L;
 	private transient GameManager gameManager;
-    private Square selected;
+    private transient Square selected;
     private int xDim;
     private int yDim;
     private int squareSize;
@@ -62,7 +65,7 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
                 	rank = 7 - e.getY() / squareSize + 1; 
 				}
                 
-                System.out.printf("file: %c, rank: %d\n", file, rank);
+                System.out.printf("file: %c, rank: %d%n", file, rank);
                 handleSquareClick(file, rank);
             }
         });
