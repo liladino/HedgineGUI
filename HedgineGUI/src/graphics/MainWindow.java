@@ -1,8 +1,7 @@
 package graphics;
 
-import game.GameEventListener;
 import game.GameManager;
-import game.TimeEventListener;
+import game.interfaces.GameEventListener;
 import graphics.dialogs.GameEndDialogs;
 import graphics.panels.ChessBoardPanel;
 import graphics.panels.RightPanel;
@@ -20,7 +19,7 @@ public class MainWindow extends JFrame implements GameEventListener {
 	
 	public MainWindow(GameManager gameManager) {
 		setTitle("Chess");
-		setMinimumSize(new Dimension(240, 280));
+		setMinimumSize(new Dimension(600 + getInsets().left + getInsets().right, 400 + getInsets().top + getInsets().bottom));
 		setSize(830 + getInsets().left + getInsets().right, 600 + getInsets().top + getInsets().bottom);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -29,7 +28,7 @@ public class MainWindow extends JFrame implements GameEventListener {
 		GraphicSettings.initializeGraphicSettings();
 		menuManager = new MenuManager(this);
 		chessBoardPanel = new ChessBoardPanel(gameManager, 100, menuManager);
-		rightPanel = new RightPanel();
+		rightPanel = new RightPanel(gameManager);
 		
 		setLayout(new BorderLayout());
 		

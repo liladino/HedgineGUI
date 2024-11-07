@@ -8,7 +8,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
-import game.GameUpdateListener;
+import game.interfaces.VisualChangeListener;
 
 public class MenuManager implements ActionListener {
 	private MainWindow mainWindow;
@@ -26,7 +26,7 @@ public class MenuManager implements ActionListener {
 	private JMenu colorScheme;
 	private ArrayList<JMenuItem> colors;
 	
-	private GameUpdateListener listener;
+	private VisualChangeListener listener;
 	
 	public MenuManager(MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
@@ -103,7 +103,7 @@ public class MenuManager implements ActionListener {
         }
 	}
 	
-	public void addGameUpdateListener(GameUpdateListener listener) {
+	public void addGameUpdateListener(VisualChangeListener listener) {
 		this.listener = listener;
 	}
 }

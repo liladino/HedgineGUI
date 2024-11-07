@@ -1,6 +1,7 @@
 package game;
 
 import chess.Move;
+import game.interfaces.MoveListener;
 import utility.Sides;
 
 public class Human extends Player{

@@ -3,7 +3,6 @@ package main;
 import chess.Board;
 import chess.IO.FENException;
 import game.GameManager;
-import game.GameStartException;
 import game.Human;
 import graphics.MainWindow;
 import utility.Sides;

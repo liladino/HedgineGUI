@@ -5,6 +5,11 @@ import java.util.List;
 
 import chess.Board;
 import chess.Move;
+import game.interfaces.ClockListener;
+import game.interfaces.GameEventListener;
+import game.interfaces.VisualChangeListener;
+import game.interfaces.MoveListener;
+import game.interfaces.TimeEventListener;
 import utility.*;
 
 public class GameManager implements Runnable, MoveListener, TimeEventListener{
@@ -14,8 +19,8 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	private Board board = null;
 	private volatile boolean moveReady;
 	private volatile boolean timeExpired;
-	private List<GameEventListener> eventListeners = null;
-	private List<GameUpdateListener> updateListeners;
+	private List<GameEventListener> eventListeners;
+	private List<VisualChangeListener> updateListeners;
 	private Clock clock = null;
 
 	/* * * * *
@@ -42,17 +47,24 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	 * Setters *
 	 * * * * * */
 	public void setBoard() {
-		board = new Board();
+		setBoard(new Board());
 	}
 	public void setBoard(Board b) {
 		board = b;
+		int plies = b.getFullMoveCount() * 2 + (b.tomove() == Sides.WHITE ? 0 : 1);
+		clock.setPlyCount(plies);
+		clock.setActiveSide(b.tomove());
 	}
 	public void addGameEventListener(GameEventListener listener) {
 		eventListeners.add(listener); 
 	}
 	
-	public void addGameUpdateListener(GameUpdateListener listener) {
+	public void addGameUpdateListener(VisualChangeListener listener) {
 		updateListeners.add(listener);
+	}
+
+	public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
+		clock.setClockPanels(whiteClockPanel, blackClockPanel);
 	}
 	
 	/* * * * * *
@@ -73,11 +85,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	/* * * * * * * *
 	 * Game Logic  *
 	 * * * * * * * */
-	public void initialzeGame(Board b, Player p1, Player p2) throws GameStartException {
-		if (b == null || p1 == null || p2 == null) {
-			throw new GameStartException("One or more more components are not initialzed! (Board, Player1, Player 2)");
-		}
-		
+	public void initialzeGame(Board b, Player p1, Player p2) {
 		if (p1.getSide() == Sides.WHITE) {
 			white = p1;
 			black = p2;
@@ -92,16 +100,13 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	}
 	
 	@Override
-	public void run() throws GameStartException {
-		if (board == null || white == null || black == null || eventListeners == null) {
-			throw new GameStartException("One or more more components are not initialzed! (Board/Player1/Player2/GameEventListener)");
-		}
-		
+	public void run() {
 		Thread t = null;
 		boolean clockStarted = false;
 		if (clock.getTimeControl() != TimeControl.NO_CONTROL){
-			clock.setTicking(true);
+			clock.setTicking(false);
 			t = new Thread(clock);
+			t.start();
 		}
 
 		while (true) {
@@ -125,11 +130,12 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 				if (board.isMoveLegal(currentMove)) {
 					board.makeMove(currentMove);
 					currentPlayer = (currentPlayer == white) ? black : white;
+					moves.add(currentMove);
 					
 					if (t != null){
 						if (!clockStarted){
 							clockStarted = true;
-							t.start();
+							clock.setTicking(true);
 						}
 						clock.pressClock();
 					}
@@ -150,7 +156,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	 * * * * * * * * */
 	
 	private void notifyGameStateChanged() {
-		for (GameUpdateListener listener : updateListeners) {
+		for (VisualChangeListener listener : updateListeners) {
 			listener.onGameStateChanged();
 		}
 	}

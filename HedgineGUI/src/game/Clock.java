@@ -2,6 +2,9 @@ package game;
 
 import java.util.ArrayList;
 
+import game.interfaces.ClockListener;
+import game.interfaces.GameEventListener;
+import game.interfaces.TimeEventListener;
 import utility.*;
 
 public class Clock implements Runnable, GameEventListener {
@@ -11,24 +14,26 @@ public class Clock implements Runnable, GameEventListener {
 	private int increment; 
 	private int incrementStartMove; //e.g. increment comes after the 40th move
 
-	//TODO the starting player and plies should be from the fen
 	private int plies; //how many times the clock was pressed
 	private int moveTime; 
 	private boolean isWhiteActive;
-	private TimeEventListener timeEventListener;
 	private ArrayList<Pair<Integer, Integer>> extraTimes; //after move X give players Y time (moveCount, extraTime)
+	
+	private TimeEventListener timeEventListener;
+	private ClockListener whiteClockPanel;
+	private ClockListener blackClockPanel;
 
 	private volatile boolean clockWasPressed;
 	private volatile boolean timerUp; // signal for time expiration
-    private volatile boolean ticking; // tracks if the timer should be ticking
+	private volatile boolean ticking; // tracks if the timer should be ticking
 
-    public Clock(TimeControl controlType, GameManager gameManager){
-        this.controlType = controlType;
+	public Clock(TimeControl controlType, GameManager gameManager){
+		this.controlType = controlType;
 		extraTimes = new ArrayList<>();
 		isWhiteActive = true;
 		plies = 0;
 		gameManager.addGameEventListener(this);
-    }
+	}
 
 	/* * * * * *
 	 * SETTERS *
@@ -49,6 +54,22 @@ public class Clock implements Runnable, GameEventListener {
 	public void setTimeEventListener(TimeEventListener timeEventListener){
 		this.timeEventListener = timeEventListener;
 	}
+	public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
+		this.whiteClockPanel = whiteClockPanel;
+		this.blackClockPanel = blackClockPanel;
+
+		if (controlType != TimeControl.NO_CONTROL){
+			updateDisplay();
+			whiteClockPanel.stoppedClock();
+			blackClockPanel.stoppedClock();
+		}
+	}
+	public void setPlyCount(int plies){
+		this.plies = plies;
+	}
+	public void setActiveSide(Sides side){
+		isWhiteActive = (side == Sides.WHITE);
+	}
 
 	/* * * * * *
 	 * GETTERS *
@@ -66,12 +87,12 @@ public class Clock implements Runnable, GameEventListener {
 	 * MAIN METHOD *
 	 * * * * * * * */
 
-    @Override
-    public void run() {
+	@Override
+	public void run() {
 		long startTime = System.currentTimeMillis();
-        while (!timerUp) {
+		while (!timerUp) {
 			int tikRateMillis = 500;
-            synchronized (this){
+			synchronized (this){
 				clockWasPressed = false;
 				try {
 					wait(tikRateMillis);
@@ -100,15 +121,15 @@ public class Clock implements Runnable, GameEventListener {
 				if (clockWasPressed){
 					updateClockData();
 				}
-                updateDisplay();
-            }
+				updateDisplay();
+			}
 			startTime = System.currentTimeMillis();
-        }
-    }
+		}
+	}
 
 	private void signalTimeIsUp() {
 		timeEventListener.onTimeIsUp();
-    }
+	}
 
 	public synchronized void pressClock(){
 		clockWasPressed = true;
@@ -136,12 +157,13 @@ public class Clock implements Runnable, GameEventListener {
 		isWhiteActive = !isWhiteActive;
 	}
 
-	public void setTicking(boolean ticking) {
-        this.ticking = ticking;
-    }
+	public synchronized void setTicking(boolean ticking) {
+		this.ticking = ticking;
+	}
 
 	private void updateDisplay(){
-		System.out.printf("Time remaining: white: %d, black: %d%n", whiteTime, blackTime);
+		whiteClockPanel.updateClock((isWhiteActive ? Sides.WHITE : Sides.BLACK), whiteTime, blackTime);
+		blackClockPanel.updateClock((isWhiteActive ? Sides.WHITE : Sides.BLACK), whiteTime, blackTime);
 	}
 
 	/* * * * * * * * * * *
@@ -175,5 +197,5 @@ public class Clock implements Runnable, GameEventListener {
 	@Override
 	public void onTimeIsUp() {
 		ticking = false;
-	}    
+	}	
 }
