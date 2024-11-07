@@ -16,7 +16,8 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	private volatile boolean timeExpired;
 	private GameEventListener gameEventListener;
 	private List<GameUpdateListener> listeners;
-	
+	private Clock clock = null;
+
 	/* * * * *
 	 * Moves *
 	 * * * * */
@@ -31,6 +32,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		moves = new ArrayList<>();
 		moveCount = 0;
 		listeners = new ArrayList<>();
+		clock = new Clock(TimeControl.NO_BONUS);
+		clock.setStartTime(5000);
+		clock.setTimeEventListener(this);
 	}
 	
 	/* * * * * *
@@ -97,6 +101,13 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		if (board == null || white == null || black == null || gameEventListener == null) {
 			throw new GameStartException("One or more more components are not initialzed! (Board/Player1/Player 2/GameEventListener)");
 		}
+		
+		Thread t;
+		if (clock.getTimeControl() != TimeControl.NO_CONTROL){
+			clock.setTicking(true);
+			t = new Thread(clock);
+			t.start();
+		}
 
 		while (true) {
 			synchronized (this) {
@@ -121,6 +132,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 					board.makeMove(currentMove);
 					currentPlayer = (currentPlayer == white) ? black : white;
 					
+					clock.pressClock();
 					notifyGameStateChanged();
 					checkGameEnd();
 				}

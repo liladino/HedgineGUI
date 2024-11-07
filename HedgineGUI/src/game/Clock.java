@@ -1,5 +1,6 @@
 package game;
 
+import java.sql.Time;
 import java.util.ArrayList;
 
 import utility.*;
@@ -26,15 +27,41 @@ public class Clock implements Runnable, GameEventListener {
 		plies = 0;
     }
 
-	public Sides activePlayer(){
-		if (isWhiteActive) return Sides.WHITE;
-		return Sides.BLACK;
+	/* * * * * *
+	 * SETTERS *
+	 * * * * * */
+	public void setStartTime(int startTime){
+		whiteTime = blackTime = startTime;
 	}
-
+	public void setMoveTime(int moveTime){
+		whiteTime = blackTime = this.moveTime = moveTime;
+	}
+	public void setIncrement(int increment, int incrementStartMove){
+		this.increment = increment;
+		this.incrementStartMove = incrementStartMove;
+	}
+	public void addExtraTime(int afterMoveX, int addTimeY){
+		extraTimes.add(new Pair<>(afterMoveX, addTimeY));
+	}
 	public void setTimeEventListener(TimeEventListener timeEventListener){
 		this.timeEventListener = timeEventListener;
 	}
 
+	/* * * * * *
+	 * GETTERS *
+	 * * * * * */
+	public TimeControl getTimeControl(){
+		return controlType;
+	}
+
+	public Sides activeSide(){
+		if (isWhiteActive) return Sides.WHITE;
+		return Sides.BLACK;
+	}
+
+	/* * * * * * * *
+	 * MAIN METHOD *
+	 * * * * * * * */
 
     @Override
     public void run() {
@@ -45,6 +72,7 @@ public class Clock implements Runnable, GameEventListener {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+
 			if (ticking) {
                 if (isWhiteActive) {
                     whiteTime -= tikRateMillis;
@@ -59,7 +87,7 @@ public class Clock implements Runnable, GameEventListener {
 						notifyTimeIsUp();
                     }
                 }
-                //updateDisplay(); // method to update GUI timer display
+                updateDisplay();
             }
         }
     }
@@ -91,6 +119,14 @@ public class Clock implements Runnable, GameEventListener {
 	public void setTicking(boolean ticking) {
         this.ticking = ticking;
     }
+
+	private void updateDisplay(){
+		System.out.printf("Time remaining: white: %d, black: %d%n", whiteTime, blackTime);
+	}
+
+	/* * * * * * * * * * *
+	 * INTERFACE METHODS *
+	 * * * * * * * * * * */
 
 	@Override
 	public void onCheckmate(Sides won) {
