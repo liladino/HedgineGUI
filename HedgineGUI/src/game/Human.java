@@ -1,11 +1,6 @@
 package game;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import chess.Move;
-import chess.Square;
-import graphics.PromotionDialog;
 import utility.Sides;
 
 public class Human extends Player{

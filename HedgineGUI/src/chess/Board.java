@@ -379,16 +379,21 @@ public class Board {
 			return Result.STALEMATE;
 		}
 		
+		if (sufficientMaterial()) return Result.ONGOING;
+		return Result.DRAW;
+	}
+
+	private boolean sufficientMaterial(){
 		int wKnightCount = 0, wBishopCount = 0, bKnightCount = 0, bBishopCount = 0;
 		for (int i = 2; i < 10; i++) {
 			for (int j = 2; j < 10; j++) {
 				switch (board[i][j]) {
-					case 'R': return Result.ONGOING;
-					case 'Q': return Result.ONGOING;
-					case 'q': return Result.ONGOING;
-					case 'r': return Result.ONGOING;
-					case 'P': return Result.ONGOING;
-					case 'p': return Result.ONGOING;
+					case 'R': return true;
+					case 'Q': return true;
+					case 'q': return true;
+					case 'r': return true;
+					case 'P': return true;
+					case 'p': return true;
 					case 'N': 
 						wKnightCount++;
 						break;
@@ -403,13 +408,24 @@ public class Board {
 						break;
 				}
 				if (wKnightCount + wBishopCount + bKnightCount + bBishopCount > 1) {
-					return Result.ONGOING;
+					return true;
 				}
 			}
 		}
-		
-		
-		return Result.DRAW;
+		return false;
+	}
+
+	public boolean sufficientMaterial(Sides current){
+		for (int i = 2; i < 10; i++) {
+			for (int j = 2; j < 10; j++) {
+				if ((current == Sides.WHITE && board[i][j] >= 'A' && board[i][j] <= 'Z' && board[i][j] != 'K') 
+					|| (current == Sides.BLACK && board[i][j] >= 'a' && board[i][j] <= 'z' && board[i][j] != 'K')){
+					//check if the active side has anything but a king. This is needed to be checked if the time is up
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public boolean inCheck() {

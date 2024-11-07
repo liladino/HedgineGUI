@@ -19,12 +19,6 @@ public abstract class Player {
 		this.side = side;
 		rating = 0;
 	}
-	/*public Player() {
-		name = "default player";
-		side = Sides.white;
-		rating = 0;
-		human = true;
-	}*/
 	
 	public abstract void makeMove(MoveListener listener, Move m);
 	

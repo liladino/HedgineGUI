@@ -7,4 +7,6 @@ public interface GameEventListener {
 	void onDraw();
 	void onStalemate();
 	void onInsufficientMaterial();
+	void onTimeIsUp(Sides won);
+	void onTimeIsUp();
 }

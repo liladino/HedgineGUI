@@ -28,8 +28,7 @@ import game.Human;
 
 public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 	private static final long serialVersionUID = 987168713547L;
-	private GameManager gameManager;
-	//private MenuManager menuManager;
+	private transient GameManager gameManager;
     private Square selected;
     private int xDim;
     private int yDim;
@@ -40,11 +39,10 @@ public class ChessBoardPanel extends JPanel implements GameUpdateListener {
 		images = new HashMap<>();
 		loadPieces();
 		selected = new Square();
-		
+
 		yDim = xDim = size;
 		squareSize = xDim / 8;
         this.gameManager = gameManager;
-        //this.menuManager = menuManager;
         gameManager.addGameUpdateListener(this);
         menuManager.addGameUpdateListener(this);
         

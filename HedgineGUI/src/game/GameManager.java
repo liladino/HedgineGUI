@@ -7,12 +7,13 @@ import chess.Board;
 import chess.Move;
 import utility.*;
 
-public class GameManager implements Runnable, MoveListener{
+public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	private Player black = null;
 	private Player white = null;
 	private Player currentPlayer;
 	private Board board = null;
-	private boolean moveReady;
+	private volatile boolean moveReady;
+	private volatile boolean timeExpired;
 	private GameEventListener gameEventListener;
 	private List<GameUpdateListener> listeners;
 	
@@ -93,8 +94,8 @@ public class GameManager implements Runnable, MoveListener{
 	
 	@Override
 	public void run() throws GameStartException {
-		if (board == null || white == null || black == null) {
-			throw new GameStartException("One or more more components are not initialzed! (Board, Player1, Player 2)");
+		if (board == null || white == null || black == null || gameEventListener == null) {
+			throw new GameStartException("One or more more components are not initialzed! (Board/Player1/Player 2/GameEventListener)");
 		}
 
 		while (true) {
@@ -102,13 +103,18 @@ public class GameManager implements Runnable, MoveListener{
 				System.out.println((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
 				moveReady = false;
 				
-				while (!moveReady) {
+				while (!moveReady && !timeExpired) {
 					try {
 						wait(); 
 					} catch (InterruptedException e) {
-						//time ran out maybe?
 						Thread.currentThread().interrupt(); 
 					}
+				}
+
+				if (timeExpired) {
+					System.out.println("Time expired for " + currentPlayer);
+					handleTimeExpired(); // e.g., declare victory for the opponent
+					break; // Exit the game loop if needed
 				}
 				
 				if (board.isMoveLegal(currentMove)) {
@@ -133,29 +139,54 @@ public class GameManager implements Runnable, MoveListener{
 		notify();
 	}
 	
-	public void checkGameEnd() {
+	private void checkGameEnd() {
 		if (board.getResult() == Result.ONGOING) {
 			return;
 		}
 		//the game ended
-		if (gameEventListener != null) {
-			if (Result.WHITE_WON == board.getResult()) {
-				gameEventListener.onCheckmate(Sides.WHITE);
-			}
-			else if (Result.BLACK_WON == board.getResult()){
-				gameEventListener.onCheckmate(Sides.BLACK);
-			}
-			else if (Result.STALEMATE == board.getResult()) {
-				gameEventListener.onStalemate();
-			}
-			else if (Result.DRAW == board.getResult()) {
-				//if the board signals a draw, the material is insufficient.
-				gameEventListener.onInsufficientMaterial();
-			}
+		if (Result.WHITE_WON == board.getResult()) {
+			gameEventListener.onCheckmate(Sides.WHITE);
+		}
+		else if (Result.BLACK_WON == board.getResult()){
+			gameEventListener.onCheckmate(Sides.BLACK);
+		}
+		else if (Result.STALEMATE == board.getResult()) {
+			gameEventListener.onStalemate();
+		}
+		else if (Result.DRAW == board.getResult()) {
+			//if the board signals a draw, the material is insufficient.
+			gameEventListener.onInsufficientMaterial();
 		}
 			
 		System.exit(0);
 	}
+
+	private void handleTimeExpired(){
+		if (board.tomove() == Sides.WHITE){
+			if (board.sufficientMaterial(Sides.BLACK)){
+				gameEventListener.onTimeIsUp(Sides.BLACK);
+			}
+			else{
+				gameEventListener.onTimeIsUp();
+			}
+		}
+		else {
+			if (board.sufficientMaterial(Sides.WHITE)){
+				gameEventListener.onTimeIsUp(Sides.WHITE);
+			}
+			else{
+				gameEventListener.onTimeIsUp();
+			}
+		}
+
+		System.exit(0);
+	}
+
+	@Override
+	public void onTimeIsUp() {
+		handleTimeExpired();
+	}
+	
 
 	
 }

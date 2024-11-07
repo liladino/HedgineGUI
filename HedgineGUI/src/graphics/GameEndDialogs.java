@@ -6,6 +6,7 @@ import javax.swing.JOptionPane;
 import utility.Sides;
 
 public class GameEndDialogs {
+	private GameEndDialogs(){}
 	public static void showCheckmate(JFrame parent, Sides won) {
 		String message = "Ckeckmate! " + (won == Sides.WHITE ? "White" : "Black") + " won.";
 		JOptionPane.showMessageDialog(parent, message, "Game over", JOptionPane.INFORMATION_MESSAGE);
@@ -22,6 +23,9 @@ public class GameEndDialogs {
 		String message = "Draw." ;
 		JOptionPane.showMessageDialog(parent, message, "Game over", JOptionPane.INFORMATION_MESSAGE);
 	}
-	
+	public static void showWonOnTime(JFrame parent, Sides won){
+		String message = (won == Sides.WHITE ? "White won on time." : "Black won on time.") ;
+		JOptionPane.showMessageDialog(parent, message, "Game over", JOptionPane.INFORMATION_MESSAGE);
+	}
 	
 }

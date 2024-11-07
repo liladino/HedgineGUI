@@ -2,6 +2,7 @@ package graphics;
 
 import game.GameEventListener;
 import game.GameManager;
+import game.TimeEventListener;
 import utility.Sides;
 
 import java.awt.BorderLayout;
@@ -49,5 +50,15 @@ public class MainWindow extends JFrame implements GameEventListener {
 	@Override
 	public void onInsufficientMaterial() {
 		GameEndDialogs.showInsufficientMaterial(this);
+	}
+
+	@Override
+	public void onTimeIsUp(Sides won) {
+		GameEndDialogs.showWonOnTime(this, won);
+	}
+
+	@Override
+	public void onTimeIsUp() {
+		GameEndDialogs.showDraw(this);
 	}
 }
