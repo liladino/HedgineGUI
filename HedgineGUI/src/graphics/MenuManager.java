@@ -9,6 +9,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import game.interfaces.VisualChangeListener;
+import graphics.dialogs.NewGame;
 
 public class MenuManager implements ActionListener {
 	private MainWindow mainWindow;
@@ -98,10 +99,14 @@ public class MenuManager implements ActionListener {
         	GraphicSettings.rotateBoard = !GraphicSettings.rotateBoard;
         	listener.onGameLooksChanged();
         }
-        else if (GraphicSettings.colors.containsKey(s)) {
+        else if (s.equals("New game")){
+			NewGame newGameWindow = new NewGame(); 
+		}
+		else if (GraphicSettings.colors.containsKey(s)) {
         	GraphicSettings.selectedScheme = s;
         	listener.onGameLooksChanged();
         }
+
 	}
 	
 	public void addGameUpdateListener(VisualChangeListener listener) {
