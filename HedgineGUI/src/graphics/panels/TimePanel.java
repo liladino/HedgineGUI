@@ -29,7 +29,11 @@ public class TimePanel extends JPanel implements ClockListener {
 	private String formatTime(long time) {
 		long minutes = time / 60000;
 		long seconds = (time / 1000) % 60;
-		return String.format("%02d:%02d", minutes, seconds);
+		long centiSeconds = (time - minutes * 60000 - seconds * 1000) / 10;
+		String r;
+		if (time > 30 * 1000) r = String.format("%02d:%02d", minutes, seconds);
+		else r = String.format("%02d:%02d", seconds, centiSeconds);
+		return r;
 	}
 
 	@Override

@@ -26,12 +26,14 @@ public class Clock implements Runnable, GameEventListener {
 	private volatile boolean clockWasPressed;
 	private volatile boolean timerUp; // signal for time expiration
 	private volatile boolean ticking; // tracks if the timer should be ticking
+	private volatile boolean gameEnded;
 
 	public Clock(TimeControl controlType, GameManager gameManager){
 		this.controlType = controlType;
 		extraTimes = new ArrayList<>();
 		isWhiteActive = true;
 		plies = 0;
+		gameEnded = false;
 		gameManager.addGameEventListener(this);
 	}
 
@@ -90,8 +92,8 @@ public class Clock implements Runnable, GameEventListener {
 	@Override
 	public void run() {
 		long startTime = System.currentTimeMillis();
-		while (!timerUp) {
-			int tikRateMillis = 500;
+		while (!timerUp && !gameEnded) {
+			int tikRateMillis = 50;
 			synchronized (this){
 				clockWasPressed = false;
 				try {
@@ -108,17 +110,20 @@ public class Clock implements Runnable, GameEventListener {
 					whiteTime -= (int)elapsed;
 					if (whiteTime <= 0) {
 						timerUp = true;
-						signalTimeIsUp();
+						whiteTime = 0;
 					}
 				} else {
 					blackTime -= (int)elapsed;
 					if (blackTime <= 0) {
 						timerUp = true;
-						signalTimeIsUp();
+						blackTime = 0;
 					}
 				}
-				
-				if (clockWasPressed){
+				if (timerUp){
+					updateDisplay();
+					signalTimeIsUp();
+				}
+				else if (clockWasPressed){
 					updateClockData();
 				}
 				updateDisplay();
@@ -169,33 +174,38 @@ public class Clock implements Runnable, GameEventListener {
 	/* * * * * * * * * * *
 	 * INTERFACE METHODS *
 	 * * * * * * * * * * */
+	private void onGameEnd(){
+		ticking = false;
+		gameEnded = true;
+	}
+
 	@Override
 	public void onCheckmate(Sides won) {
-		ticking = false;
+		onGameEnd();
 	}
 
 	@Override
 	public void onDraw() {
-		ticking = false;
+		onGameEnd();
 	}
 
 	@Override
 	public void onStalemate() {
-		ticking = false;
+		onGameEnd();
 	}
 
 	@Override
 	public void onInsufficientMaterial() {
-		ticking = false;
+		onGameEnd();
 	}
 
 	@Override
 	public void onTimeIsUp(Sides won) {
-		ticking = false;
+		onGameEnd();
 	}
 
 	@Override
 	public void onTimeIsUp() {
-		ticking = false;
+		onGameEnd();
 	}	
 }

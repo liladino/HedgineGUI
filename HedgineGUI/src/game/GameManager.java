@@ -39,7 +39,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		updateListeners = new ArrayList<>();
 		eventListeners = new ArrayList<>();
 		clock = new Clock(TimeControl.NO_BONUS, this);
-		clock.setStartTime(60 * 1000);
+		clock.setStartTime(10 * 1000);
 		clock.setTimeEventListener(this);
 	}
 	
@@ -212,7 +212,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 			}
 		}
 
-		System.exit(0);
+		//System.exit(0);
 	}
 
 	@Override
