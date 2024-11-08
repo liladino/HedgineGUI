@@ -38,12 +38,12 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 	private int squareSize;
 	private transient HashMap<Character, BufferedImage> images;
 
-	public ChessBoardPanel(GameManager gameManager, int size, MenuManager menuManager) {
+	public ChessBoardPanel(GameManager gameManager, MenuManager menuManager) {
 		images = new HashMap<>();
 		loadPieces();
 		selected = new Square();
 
-		yDim = xDim = size;
+		yDim = xDim = Math.min(getWidth(), getHeight());
 		squareSize = xDim / 8;
 		this.gameManager = gameManager;
 		gameManager.addGameUpdateListener(this);

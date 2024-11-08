@@ -27,7 +27,7 @@ public class MainWindow extends JFrame implements GameEventListener {
 		
 		GraphicSettings.initializeGraphicSettings();
 		menuManager = new MenuManager(this);
-		chessBoardPanel = new ChessBoardPanel(gameManager, 100, menuManager);
+		chessBoardPanel = new ChessBoardPanel(gameManager, menuManager);
 		rightPanel = new RightPanel(gameManager);
 		
 		setLayout(new BorderLayout());

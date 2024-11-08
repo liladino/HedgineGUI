@@ -123,7 +123,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 				}
 
 				if (timeExpired) {
-					handleTimeExpired();
 					break; 
 				}
 				
@@ -139,9 +138,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 						}
 						clock.pressClock();
 					}
+
 					notifyGameStateChanged();
 					checkGameEnd();
-
 				}
 				else {
 					System.out.print("Illegal input: ");
@@ -188,8 +187,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 				listener.onInsufficientMaterial();
 			}
 		}
-		
-		System.exit(0);
 	}
 
 	private void handleTimeExpired(){
@@ -211,12 +208,11 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 				}
 			}
 		}
-
-		//System.exit(0);
 	}
 
 	@Override
 	public void onTimeIsUp() {
+		timeExpired = true;
 		handleTimeExpired();
 	}
 	
