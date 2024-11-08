@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class FENException extends IOException{
 	private static final long serialVersionUID = 6430546L;
-	private int succesfulFields;
+	private final int succesfulFields;
 		
 	public FENException(String message, int succesfulFields) {
 		super(message); 
