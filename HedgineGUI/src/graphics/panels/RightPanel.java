@@ -21,18 +21,34 @@ public class RightPanel extends JPanel{
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(5, 5, 5, 5);
+
+		//TODO: these should be a fix sized objects
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.weighty = 0.5;
-        gbc.gridx = 0;
-		gbc.gridy = 2;
+		gbc.weighty = 0.05;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
 		TimePanel whiteClockPanel = new TimePanel(Sides.WHITE);
 		add(whiteClockPanel, gbc);
 
 		gbc.gridx = 1;
-		gbc.gridy = 2;
+		gbc.gridy = 0;
+		TimePanel blackClockPanel = new TimePanel(Sides.BLACK);
+		add(blackClockPanel, gbc);
+		
+		gbc.weighty = 0.1;
+		gbc.gridx = 0;
+		gbc.gridy = 1;
 		JPanel whiteNamePanel = new JPanel();
 		whiteNamePanel.add(new JLabel("White Player Name")); // Replace with actual name display
 		add(whiteNamePanel, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		JPanel blackNamePanel = new JPanel();
+		blackNamePanel.add(new JLabel("Black Player Name")); // Replace with actual name display
+		add(blackNamePanel, gbc);
+
+        gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
 		
 		
 		JTextArea movesArea = new JTextArea(10, 20);
@@ -40,28 +56,12 @@ public class RightPanel extends JPanel{
 		JScrollPane movesScrollPane = new JScrollPane(movesArea);
  
 		gbc.gridx = 0;
-		gbc.gridy = 1;
+		gbc.gridy = 2;
 		gbc.gridwidth = 2;  // Span both columns
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		add(movesScrollPane, gbc);
-
-		gbc.gridwidth = 1;  
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.weighty = 0.5;
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		TimePanel blackClockPanel = new TimePanel(Sides.BLACK);
-		add(blackClockPanel, gbc);
-
-		gbc.gridx = 1;
-		gbc.gridy = 0;
-		JPanel blackNamePanel = new JPanel();
-		blackNamePanel.add(new JLabel("Black Player Name")); // Replace with actual name display
-		add(blackNamePanel, gbc);
-
-        gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
 	}
 
 

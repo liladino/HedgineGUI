@@ -15,7 +15,7 @@ public class TimePanel extends JPanel implements ClockListener {
 	public TimePanel(Sides side){
 		this.side = side;
 		timeLabel = new JLabel();
-		timeLabel.setFont(new Font("Courier new", Font.PLAIN, 20));
+		timeLabel.setFont(new Font("Courier new", Font.BOLD, 20));
 		timeLabel.setForeground(Color.GRAY);
 		timeLabel.setBackground(Color.WHITE);
 		updateTime(0);
