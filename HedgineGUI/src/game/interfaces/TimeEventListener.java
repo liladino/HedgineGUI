@@ -1,5 +1,7 @@
 package game.interfaces;
 
+import utility.Sides;
+
 public interface TimeEventListener {
-	void onTimeIsUp();
+	void onTimeIsUp(Sides active);
 }

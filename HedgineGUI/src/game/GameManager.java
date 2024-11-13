@@ -179,9 +179,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	}
 
 	@Override
-	public void onTimeIsUp() {
+	public void onTimeIsUp(Sides active) {
 		timeExpired = true;
-		handleTimeExpired();
+		handleTimeExpired(active);
 	}
 
 	public void stopRunning(){
@@ -211,9 +211,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		}
 	}
 
-	private void handleTimeExpired(){
+	private void handleTimeExpired(Sides active){
 		for (GameEventListener listener : eventListeners) {
-			if (board.tomove() == Sides.WHITE){
+			if (active == Sides.WHITE){
 				if (board.sufficientMaterial(Sides.BLACK)){
 					listener.onTimeIsUp(Sides.BLACK);
 				}

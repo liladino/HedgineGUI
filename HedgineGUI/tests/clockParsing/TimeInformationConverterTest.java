@@ -62,4 +62,6 @@ public class TimeInformationConverterTest {
 		assertEquals(15 * 60 * 1000, extraTimes.get(1).second);
 
 	}
+
+	//TODO probably should write some tests for invalid strings too
 }
