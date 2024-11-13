@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import game.interfaces.ClockListener;
 import game.interfaces.GameEventListener;
@@ -23,36 +24,41 @@ public class Clock implements Runnable, GameEventListener {
 	private ClockListener whiteClockPanel;
 	private ClockListener blackClockPanel;
 
-	private volatile boolean clockWasPressed;
-	private volatile boolean timerUp; // signal for time expiration
-	private volatile boolean ticking; // tracks if the timer should be ticking
+	private boolean clockWasPressed;
+	private boolean timerUp; // signal for time expiration
+	private boolean ticking; // tracks if the timer should be ticking
 	private volatile boolean gameEnded;
 
-	public Clock(TimeControl controlType, GameManager gameManager){
-		this.controlType = controlType;
+	public Clock(GameManager gameManager){
+		controlType = TimeControl.NO_CONTROL;
 		extraTimes = new ArrayList<>();
 		isWhiteActive = true;
 		plies = 0;
-		gameEnded = false;
+		increment = 0;
+		incrementStartMove = 0;
+		gameEnded = timerUp = gameEnded = ticking = false;
 		gameManager.addGameEventListener(this);
 	}
 
 	/* * * * * *
 	 * SETTERS *
 	 * * * * * */
-	public void setStartTime(int startTime){
-		whiteTime = blackTime = startTime;
-		if (controlType == TimeControl.FIX_TIME_PER_MOVE) moveTime = startTime;
+	public void setStartTime(Second startTime){
+		whiteTime = blackTime = 1000 * startTime.time;
+		if (controlType == TimeControl.FIX_TIME_PER_MOVE) moveTime = whiteTime;
 	}
-	public void setMoveTime(int moveTime){
-		this.moveTime = whiteTime = blackTime = moveTime;
+	public void setControlType(TimeControl controlType){
+		this.controlType = controlType;
 	}
-	public void setIncrement(int increment, int incrementStartMove){
-		this.increment = increment;
+	public void setMoveTime(Second moveTime){
+		this.moveTime = whiteTime = blackTime = 1000 * moveTime.time;
+	}
+	public void setIncrement(Second increment, int incrementStartMove){
+		this.increment = 1000 * increment.time;
 		this.incrementStartMove = incrementStartMove;
 	}
-	public void addExtraTime(int afterMoveX, int addTimeY){
-		extraTimes.add(new Pair<>(afterMoveX, addTimeY));
+	public void addExtraTime(int afterMove, Second addTime){
+		extraTimes.add(new Pair<>(afterMove, 1000 * addTime.time));
 	}
 	public void setTimeEventListener(TimeEventListener timeEventListener){
 		this.timeEventListener = timeEventListener;
@@ -79,6 +85,22 @@ public class Clock implements Runnable, GameEventListener {
 	 * * * * * */
 	public TimeControl getTimeControl(){
 		return controlType;
+	}
+
+	public int getWhiteTime(){
+		return whiteTime;
+	}
+	public int getBlackTime(){
+		return blackTime;
+	}
+	public int getIncrement(){
+		return increment;
+	}
+	public int getIncrementStartMove(){
+		return incrementStartMove;
+	}
+	public List<Pair<Integer, Integer>> getExtraTime(){
+		return extraTimes;
 	}
 
 	public Sides activeSide(){
@@ -142,7 +164,7 @@ public class Clock implements Runnable, GameEventListener {
 		notifyAll();
 	}
 
-	public void updateClockData(){
+	private void updateClockData(){
 		plies++;
 
 		if (controlType == TimeControl.FIX_TIME_PER_MOVE){
@@ -167,7 +189,7 @@ public class Clock implements Runnable, GameEventListener {
 		this.ticking = ticking;
 	}
 
-	private void updateDisplay(){
+	public void updateDisplay(){
 		whiteClockPanel.updateClock((isWhiteActive ? Sides.WHITE : Sides.BLACK), whiteTime, blackTime);
 		blackClockPanel.updateClock((isWhiteActive ? Sides.WHITE : Sides.BLACK), whiteTime, blackTime);
 	}

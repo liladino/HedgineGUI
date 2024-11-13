@@ -16,28 +16,28 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 public class NewGame extends JFrame {
-    private JComboBox<String> comboWhitePlayer;
-    private JTextField whiteEnginePath;
-    private JComboBox<String> comboBlackPlayer;
-    private JTextField blackEnginePath; 
-    ButtonGroup timeControlSelectionGroup;
+	private JComboBox<String> comboWhitePlayer;
+	private JTextField whiteEnginePath;
+	private JComboBox<String> comboBlackPlayer;
+	private JTextField blackEnginePath; 
+	ButtonGroup timeControlSelectionGroup;
 
 	public NewGame(){
-        initialzeWindow();
-        initialze();
+		initialzeWindow();
+		initialze();
 		pack();
-    }
+	}
 
-    void initialzeWindow(){
-        setTitle("New game");
+	void initialzeWindow(){
+		setTitle("New game");
 		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setVisible(true);
 		
 		setLayout(new GridBagLayout());
-    }
+	}
 
-    void initialze(){
+	void initialze(){
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(5, 10, 5, 10);
 		gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -48,38 +48,39 @@ public class NewGame extends JFrame {
 
 		gbc.gridx = 0;
 		gbc.gridy++;
-        add(new JLabel("White:"), gbc);
+		add(new JLabel("White:"), gbc);
 
+		//TODO: add name field for player
 		gbc.gridx = 1;
 		String[] playertypes = {"Human", "Engine"};
-        comboWhitePlayer = new JComboBox<>(playertypes);
+		comboWhitePlayer = new JComboBox<>(playertypes);
 		add(comboWhitePlayer, gbc);
 
-        gbc.gridwidth = 2;
+		gbc.gridwidth = 2;
 		gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 0;
-        gbc.gridy++;
-        whiteEnginePath = new JTextField(20);
-        add(whiteEnginePath, gbc);
-        whiteEnginePath.setVisible(false);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		whiteEnginePath = new JTextField(20);
+		add(whiteEnginePath, gbc);
+		whiteEnginePath.setVisible(false);
 
-        gbc.gridwidth = 1;
+		gbc.gridwidth = 1;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy++;
 		add(new JLabel("Black:"), gbc);
 
-        gbc.gridx = 1;
-        comboBlackPlayer = new JComboBox<>(playertypes);
+		gbc.gridx = 1;
+		comboBlackPlayer = new JComboBox<>(playertypes);
 		add(comboBlackPlayer, gbc);
 
-        gbc.gridwidth = 2;
+		gbc.gridwidth = 2;
 		gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 0;
-        gbc.gridy++;
-        blackEnginePath = new JTextField(20);
-        add(blackEnginePath, gbc);
-        blackEnginePath.setVisible(false);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		blackEnginePath = new JTextField(20);
+		add(blackEnginePath, gbc);
+		blackEnginePath.setVisible(false);
 
 		
 		timeControlSelectionGroup = new ButtonGroup();
@@ -90,13 +91,16 @@ public class NewGame extends JFrame {
 		timeControlSelectionGroup.add(radioNoControl);
 		timeControlSelectionGroup.add(radioFischer);
 		timeControlSelectionGroup.add(radioFixTime);
-        
-        String[] presets = {"No preset", "Bullet 1+0", "Blitz 3+2", "Blitz 5+0", "Rapid 10+10", "Tournament", "WCC"};
-        JComboBox<String> fischerPresets = new JComboBox<>(presets);
-        fischerPresets.setSelectedIndex(1);
+		
+		String[] presets = {"No preset", "Bullet 1+0", "Blitz 3+2", "Blitz 5+0", "Rapid 10+10", "Tournament", "WCC"};
+		JComboBox<String> fischerPresets = new JComboBox<>(presets);
+		fischerPresets.setSelectedIndex(1);
+		fischerPresets.setVisible(false);
 
-        JTextField fischerControl = new JTextField(10);
-        JTextField fixTimeControl = new JTextField(5);
+		JTextField fischerControl = new JTextField(10);
+		fischerControl.setVisible(false);
+		JTextField fixTimeControl = new JTextField(5);
+		fixTimeControl.setVisible(false);
 		
 
 		gbc.weighty = 0.05;
@@ -119,26 +123,26 @@ public class NewGame extends JFrame {
 		gbc.gridx = 0;
 		gbc.gridy++;
 		add(radioFixTime, gbc);
-        gbc.gridx = 1;
+		gbc.gridx = 1;
 		add(fixTimeControl, gbc);
 
 
-        JButton startGame = new JButton("Start");
-        gbc.gridwidth = 2;
+		JButton startGame = new JButton("Start");
+		gbc.gridwidth = 2;
 		gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 0;
+		gbc.gridx = 0;
 		gbc.gridy++;
-        add(startGame, gbc);
+		add(startGame, gbc);
 
-        startGame.addActionListener(new StartGameAction());
+		startGame.addActionListener(new StartGameAction());
 	}
 
-    private class StartGameAction implements ActionListener{
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            
-        }
-    } 
+	private class StartGameAction implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+		}
+	} 
 
 
 }

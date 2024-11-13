@@ -19,6 +19,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	private Board board = null;
 	private volatile boolean moveReady;
 	private volatile boolean timeExpired;
+	private volatile boolean running;
 	private List<GameEventListener> eventListeners;
 	private List<VisualChangeListener> updateListeners;
 	private Clock clock = null;
@@ -38,7 +39,12 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		moveCount = 0;
 		updateListeners = new ArrayList<>();
 		eventListeners = new ArrayList<>();
-		clock = new Clock(TimeControl.NO_CONTROL, this);
+		clock = new Clock(this);
+		clock.setTimeEventListener(this);
+
+		clock.setControlType(TimeControl.FIX_TIME_PER_MOVE);
+		clock.setMoveTime(new Second(5));
+		clock.setActiveSide(Sides.WHITE);
 	}
 	
 	/* * * * * *
@@ -64,11 +70,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
 		clock.setClockPanels(whiteClockPanel, blackClockPanel);
 	}
-
-	public void setTimeControl(){
-		clock.setStartTime(10 * 1000);
-		clock.setTimeEventListener(this);
-	}
 	
 	/* * * * * *
 	 * Getters *
@@ -83,6 +84,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	
 	public int getMoveCount() {
 		return moveCount;
+	}
+
+	public Clock getClock(){
+		return clock;
 	}
 	
 	/* * * * * * * *
@@ -104,6 +109,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	
 	@Override
 	public void run() {
+		running = true;
 		Thread t = null;
 		boolean clockStarted = false;
 		if (clock.getTimeControl() != TimeControl.NO_CONTROL){
@@ -112,12 +118,12 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 			t.start();
 		}
 
-		while (true) {
+		while (running) {
 			synchronized (this) {
 				System.out.println((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
 				moveReady = false;
 				
-				while (!moveReady && !timeExpired) {
+				while (!moveReady && !timeExpired && running) {
 					try {
 						wait(); 
 					} catch (InterruptedException e) {
@@ -125,7 +131,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 					}
 				}
 
-				if (timeExpired) {
+				if (timeExpired || !running) {
 					break; 
 				}
 				
@@ -151,6 +157,8 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 				System.out.println(currentMove);
 			}
 		}
+
+		System.out.println("gameManager stooped");
 	}
 	
 	/* * * * * * * * *
@@ -167,6 +175,17 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public synchronized void onMoveReady(Move m) {
 		currentMove = m;
 		moveReady = true;
+		notifyAll();
+	}
+
+	@Override
+	public void onTimeIsUp() {
+		timeExpired = true;
+		handleTimeExpired();
+	}
+
+	public void stopRunning(){
+		running = false;
 		notifyAll();
 	}
 	
@@ -213,11 +232,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		}
 	}
 
-	@Override
-	public void onTimeIsUp() {
-		timeExpired = true;
-		handleTimeExpired();
-	}
+	
 	
 
 	
