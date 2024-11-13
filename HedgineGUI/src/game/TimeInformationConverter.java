@@ -55,6 +55,10 @@ public class TimeInformationConverter {
 		if (tokens.length < 1){
 			throw new TimeInputException("No time information");
 		}
+		if (!tokens[0].equals("N") && tokens.length < 2){
+			throw new TimeInputException("No starttime specified");
+		}
+		
 		for (int i = 1; i < tokens.length; i++){
 			if (!tokens[i].matches("^[0-9 ]*$")) {
 				throw new TimeInputException("Invalid String format");
@@ -68,9 +72,7 @@ public class TimeInformationConverter {
 		}
 		else if (tokens[0].equals("X")) {
 			c.setControlType(TimeControl.FIX_TIME_PER_MOVE);
-			if (tokens.length < 2){
-				throw new TimeInputException("No starttime specified");
-			}
+			
 			int seconds = Integer.parseInt(tokens[1]);
 			c.setMoveTime(new Second(seconds));
 		}
@@ -91,7 +93,7 @@ public class TimeInformationConverter {
 				c.setIncrement(new Second(0), 0);
 			}
 
-			for (int len = 4; len < tokens.length; len += 2){
+			for (int len = 4; len+1 < tokens.length; len += 2){
 				int atMove = Integer.parseInt(tokens[len]);
 				int extraTime = Integer.parseInt(tokens[len+1]);
 

@@ -4,6 +4,7 @@ import chess.Board;
 import chess.IO.FENException;
 import graphics.MainWindow;
 import graphics.dialogs.InformationDialogs;
+import utility.TimeControl;
 
 public class GameStarter {
 	private static Thread t = null;
@@ -39,6 +40,14 @@ public class GameStarter {
 			gameManager.initialzeGame(new Board(), white, black);
 		}
 
+		try {
+			TimeInformationConverter.setClock(gameManager.getClock(), timeControl);
+		}
+		catch (TimeInputException t){
+			InformationDialogs.errorDialog(mainWindow, "Invalid time fromat: " + t.getMessage());
+			gameManager.getClock().setControlType(TimeControl.NO_CONTROL);
+		}
+		
 		mainWindow.repaint();
 		
 		t = new Thread(gameManager);

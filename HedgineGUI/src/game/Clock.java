@@ -49,6 +49,17 @@ public class Clock implements Runnable, GameEventListener {
 	}
 	public void setControlType(TimeControl controlType){
 		this.controlType = controlType;
+		if (whiteClockPanel == null || blackClockPanel == null){
+			return;
+		}
+		if (controlType == TimeControl.NO_CONTROL){
+			whiteClockPanel.hideTimer();
+			blackClockPanel.hideTimer();
+		}
+		else {
+			whiteClockPanel.showTimer();
+			blackClockPanel.showTimer();
+		}
 	}
 	public void setMoveTime(Second moveTime){
 		this.moveTime = whiteTime = blackTime = 1000 * moveTime.time;
@@ -114,6 +125,7 @@ public class Clock implements Runnable, GameEventListener {
 
 	@Override
 	public void run() {
+		updateDisplay();
 		long startTime = System.currentTimeMillis();
 		while (!timerUp && !gameEnded) {
 			int tikRateMillis = 50;

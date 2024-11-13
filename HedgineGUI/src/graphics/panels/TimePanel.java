@@ -12,6 +12,7 @@ import utility.Sides;
 public class TimePanel extends JPanel implements ClockListener {
 	private Sides side; 
 	private JLabel timeLabel;
+
 	public TimePanel(Sides side){
 		this.side = side;
 		timeLabel = new JLabel();
@@ -55,4 +56,15 @@ public class TimePanel extends JPanel implements ClockListener {
         repaint();
 	}
 	
+	@Override
+	public void hideTimer(){
+		setVisible(false);
+		repaint();
+	}
+	
+	@Override
+	public void showTimer(){
+		setVisible(true);
+		repaint();
+	}
 }

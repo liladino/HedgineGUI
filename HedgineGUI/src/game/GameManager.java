@@ -49,10 +49,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		eventListeners = new ArrayList<>();
 		clock = new Clock(this);
 		clock.setTimeEventListener(this);
-
-		clock.setControlType(TimeControl.FIX_TIME_PER_MOVE);
-		clock.setMoveTime(new Second(5));
-		clock.setActiveSide(Sides.WHITE);
 	}
 	
 	/* * * * * *

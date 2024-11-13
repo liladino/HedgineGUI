@@ -17,26 +17,31 @@ import javax.swing.WindowConstants;
 
 import game.GameStarter;
 import game.Human;
-import game.TimeInformationConverter;
+import game.Player;
 import utility.Sides;
 
 public class NewGame extends JFrame {
+	private JTextField whiteName;
+	private JTextField blackName;
 	private JComboBox<String> comboWhitePlayer;
 	private JTextField whiteEnginePath;
 	private JComboBox<String> comboBlackPlayer;
 	private JTextField blackEnginePath; 
-	private ButtonGroup timeControlSelectionGroup;
 	private JTextField startPos;
 	private String timeControl;
+	private JTextField fischerControl;
+	private JTextField fixTimeControl;
+	private JComboBox<String> fischerPresets;
 
 	public NewGame(){
 		initialzeWindow();
 		initialze();
-		pack();
+		//pack();
 	}
 
 	void initialzeWindow(){
 		setTitle("New game");
+		setSize(600, 600);
 		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setVisible(true);
@@ -58,7 +63,8 @@ public class NewGame extends JFrame {
 
 		gbc.gridx = 0;
 		gbc.gridy++;
-		add(new JLabel("White:"), gbc);
+		whiteName = new JTextField("White");
+		add(whiteName, gbc);
 
 		//TODO: add name field for player
 		gbc.gridx = 1;
@@ -78,7 +84,8 @@ public class NewGame extends JFrame {
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy++;
-		add(new JLabel("Black:"), gbc);
+		blackName = new JTextField("Black");
+		add(blackName, gbc);
 
 		gbc.gridx = 1;
 		comboBlackPlayer = new JComboBox<>(playertypes);
@@ -92,27 +99,46 @@ public class NewGame extends JFrame {
 		add(blackEnginePath, gbc);
 		blackEnginePath.setVisible(false);
 
-		
+		/* * * * * * *
+		 * Start fen *
+		 * * * * * * */
+		gbc.gridwidth = 1;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.gridx = 0;
+		gbc.gridy++;
+		add(new JLabel("FEN:"), gbc);
+		startPos = new JTextField("startpos", 20);		
+		gbc.gridx = 1;
+		add(startPos, gbc);
+
 		/* * * * * * * * *
 		 * Time control  *
 		 * * * * * * * * */
-		timeControlSelectionGroup = new ButtonGroup();
-		JRadioButton radioNoControl = new JRadioButton("No time control");
-		radioNoControl.setSelected(true);
+		ButtonGroup timeControlSelectionGroup = new ButtonGroup();
+		
 		JRadioButton radioFischer = new JRadioButton("Fischer");
 		JRadioButton radioFixTime = new JRadioButton("Fix time per move");
+		JRadioButton radioNoControl = new JRadioButton("No time control");
+		radioNoControl.setSelected(true);
+		timeControl = "N";
+
 		timeControlSelectionGroup.add(radioNoControl);
 		timeControlSelectionGroup.add(radioFischer);
 		timeControlSelectionGroup.add(radioFixTime);
+
+		radioFixTime.addActionListener(new FixTimeActionListener());
+		radioNoControl.addActionListener(new NoControlActionListener());
+		radioFischer.addActionListener(new FischerActionListener());
 		
 		String[] presets = {"No preset", "Bullet 1+0", "Blitz 3+2", "Blitz 5+0", "Rapid 10+10", "Tournament", "WCC"};
-		JComboBox<String> fischerPresets = new JComboBox<>(presets);
-		fischerPresets.setSelectedIndex(1);
+		fischerPresets = new JComboBox<>(presets);
+		fischerPresets.setSelectedIndex(2);
 		fischerPresets.setVisible(false);
 
-		JTextField fischerControl = new JTextField(10);
+		fischerControl = new JTextField();
 		fischerControl.setVisible(false);
-		JTextField fixTimeControl = new JTextField(5);
+
+		fixTimeControl = new JTextField("X 60");
 		fixTimeControl.setVisible(false);
 		
 		gbc.weighty = 0.05;
@@ -154,9 +180,50 @@ public class NewGame extends JFrame {
 	private class StartGameAction implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			GameStarter.startNewGame(startPos.getText(), new Human(Sides.WHITE, "w"), new Human(Sides.BLACK, "b"), timeControl);
+			Player w = null;
+			Player b = null;
+			if (comboWhitePlayer.getSelectedItem().equals("Human")){
+				w = new Human(Sides.WHITE, whiteName.getText());
+			}
+			if (comboBlackPlayer.getSelectedItem().equals("Human")){
+				b = new Human(Sides.BLACK, blackName.getText());
+			}
+
+			GameStarter.startNewGame(
+				(startPos.getText().equals("startpos") ? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : startPos.getText()), 
+				w, b, timeControl);
+			
+			dispose();
 		}
 	} 
 
+	private class FixTimeActionListener implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			fixTimeControl.setVisible(true);
 
+			fischerPresets.setVisible(false);
+			fischerControl.setVisible(false);
+		}
+	}
+
+	private class FischerActionListener implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			fixTimeControl.setVisible(false);
+
+			fischerPresets.setVisible(true);
+			fischerControl.setVisible(true);
+		}
+	}
+
+	private class NoControlActionListener implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			timeControl = "N";
+			fixTimeControl.setVisible(false);
+			fischerPresets.setVisible(false);
+			fischerControl.setVisible(false);
+		}
+	}
 }

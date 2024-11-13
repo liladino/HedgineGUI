@@ -13,6 +13,6 @@ public class Main {
 
 		GameStarter.addGameManager(gameManager);
 		GameStarter.addMainWindow(mainWindow);
-		GameStarter.startNewGame(new Human(Sides.WHITE, "W"), new Human(Sides.BLACK, "B"));
+		GameStarter.startNewGame(new Human(Sides.WHITE, "W"), new Human(Sides.BLACK, "B"), "N");
 	}
 }

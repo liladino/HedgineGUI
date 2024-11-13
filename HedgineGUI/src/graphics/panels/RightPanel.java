@@ -15,16 +15,16 @@ import utility.Sides;
 
 public class RightPanel extends JPanel{
 	public RightPanel(GameManager gameManager){
-		setPreferredSize(new Dimension(250, getHeight()));
+		setPreferredSize(new Dimension(270, getHeight()));
 
 		setLayout(new GridBagLayout());
 
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.insets = new Insets(10, 10, 10, 10);
+		gbc.insets = new Insets(10, 10, 20, 10);
 
 		//TODO: these should be a fix sized objects
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.weighty = 0.1;
+		gbc.weighty = 0.05;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		JPanel whiteNamePanel = new JPanel();
@@ -51,7 +51,7 @@ public class RightPanel extends JPanel{
 		gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
 		
 		
-		JTextArea movesArea = new JTextArea(10, 20);
+		JTextArea movesArea = new JTextArea();
 		movesArea.setEditable(false);
 		JScrollPane movesScrollPane = new JScrollPane(movesArea);
  
