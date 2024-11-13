@@ -38,9 +38,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		moveCount = 0;
 		updateListeners = new ArrayList<>();
 		eventListeners = new ArrayList<>();
-		clock = new Clock(TimeControl.NO_BONUS, this);
-		clock.setStartTime(10 * 1000);
-		clock.setTimeEventListener(this);
+		clock = new Clock(TimeControl.NO_CONTROL, this);
 	}
 	
 	/* * * * * *
@@ -65,6 +63,11 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 
 	public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
 		clock.setClockPanels(whiteClockPanel, blackClockPanel);
+	}
+
+	public void setTimeControl(){
+		clock.setStartTime(10 * 1000);
+		clock.setTimeEventListener(this);
 	}
 	
 	/* * * * * *

@@ -42,6 +42,7 @@ public class Clock implements Runnable, GameEventListener {
 	 * * * * * */
 	public void setStartTime(int startTime){
 		whiteTime = blackTime = startTime;
+		if (controlType == TimeControl.FIX_TIME_PER_MOVE) moveTime = startTime;
 	}
 	public void setMoveTime(int moveTime){
 		this.moveTime = whiteTime = blackTime = moveTime;

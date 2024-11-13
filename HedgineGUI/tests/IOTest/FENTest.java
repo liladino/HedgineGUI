@@ -29,6 +29,8 @@ class FENTest {
 		assertDoesNotThrow(() -> d = new Board("r2qk2r/pppbbppp/2n5/1B1p4/3P4/5N2/P1P2PPP/R1BQR1K1 b kq - 2 10"));
 		assertEquals(d.convertToFEN(), "r2qk2r/pppbbppp/2n5/1B1p4/3P4/5N2/P1P2PPP/R1BQR1K1 b kq - 2 10");
 		
+		assertThrows(FENException.class, () -> badFEN = new Board(""));
+		assertThrows(FENException.class, () -> badFEN = new Board(" "));
 		assertThrows(FENException.class, () -> badFEN = new Board("2b5/2pRnr1P/"));
 		assertThrows(FENException.class, () -> badFEN = new Board("2b5/p2NBp1p/1bp1nPPr/3P4/2pRnr1P/"));
 		assertThrows(FENException.class, () -> badFEN = new Board("2x5/p2NBp1p/1bp1nPPr/3P4/2pRnr1P/1k1B1Ppp/1P1P1pQP/Rq1N3K"));

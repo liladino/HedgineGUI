@@ -28,5 +28,9 @@ public class GameEndDialogs {
 		String message = (won == Sides.WHITE ? "White won on time." : "Black won on time.") ;
 		JOptionPane.showMessageDialog(parent, message, gameOver, JOptionPane.INFORMATION_MESSAGE);
 	}
+
+	public static void errorDialog(JFrame parent, String message){
+		JOptionPane.showMessageDialog(parent, message, "Error", JOptionPane.INFORMATION_MESSAGE);
+	}
 	
 }

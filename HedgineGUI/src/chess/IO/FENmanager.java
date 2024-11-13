@@ -75,17 +75,22 @@ public class FENmanager {
 			};
 		return board;
 	}
+
+	private static String missing = "Missing element(s)";
 	
 	public char[][] parseBoard(String fen) throws FENException{
 		char[][] board = startpos();
 		
 		String[] s = fen.split(" ");
+		if (s.length < 4){
+			throw new FENException(missing, readSuccesses);
+		}
 		
-		if (s[0].length() < 14) throw new FENException("Missing element(s)", readSuccesses);
+		if (s[0].length() < 14) throw new FENException(missing, readSuccesses);
 		
 		String[] pos = s[0].split("/");
 
-		if (pos.length != 8) throw new FENException("Missing element(s)", readSuccesses);
+		if (pos.length != 8) throw new FENException(missing, readSuccesses);
 		
 		int wking = 0, bking = 0;
 		int k = 0;
@@ -144,8 +149,8 @@ public class FENmanager {
 	public Sides parseTomove(String fen) throws FENException{
 		String[] s = fen.split(" ");
 		
-		if (s.length < 2) {
-			throw new FENException("Missing element(s)", readSuccesses);
+		if (s.length < 4) {
+			throw new FENException(missing, readSuccesses);
 		}
 		
 		if (s[1].length() != 1) {
@@ -167,8 +172,8 @@ public class FENmanager {
 	public boolean[] parseCastlingRights(String fen) throws FENException{
 		String[] s = fen.split(" ");
 		
-		if (s.length < 3) {
-			throw new FENException("Missing element(s)", readSuccesses);
+		if (s.length < 4) {
+			throw new FENException(missing, readSuccesses);
 		}
 		
 		if (s[2].length() > 4) {
@@ -209,7 +214,7 @@ public class FENmanager {
 		String[] s = fen.split(" ");
 		
 		if (s.length < 4) {
-			throw new FENException("Missing element(s)", readSuccesses);
+			throw new FENException(missing, readSuccesses);
 		}
 		
 		if (s[3].length() < 1) {
@@ -241,7 +246,7 @@ public class FENmanager {
 		String[] s = fen.split(" ");
 		
 		if (s.length < 5) {
-			throw new FENException("Missing element(s)", readSuccesses);
+			throw new FENException(missing, readSuccesses);
 		}
 		
 		int num;
@@ -259,7 +264,7 @@ public class FENmanager {
 		String[] s = fen.split(" ");
 		
 		if (s.length < 6) {
-			throw new FENException("Missing element(s)", readSuccesses);
+			throw new FENException(missing, readSuccesses);
 		}
 		else if (s.length > 6) {
 			throw new FENException("Too many elements", readSuccesses);
