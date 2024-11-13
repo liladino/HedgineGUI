@@ -15,12 +15,19 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
+import game.GameStarter;
+import game.Human;
+import game.TimeInformationConverter;
+import utility.Sides;
+
 public class NewGame extends JFrame {
 	private JComboBox<String> comboWhitePlayer;
 	private JTextField whiteEnginePath;
 	private JComboBox<String> comboBlackPlayer;
 	private JTextField blackEnginePath; 
-	ButtonGroup timeControlSelectionGroup;
+	private ButtonGroup timeControlSelectionGroup;
+	private JTextField startPos;
+	private String timeControl;
 
 	public NewGame(){
 		initialzeWindow();
@@ -39,9 +46,12 @@ public class NewGame extends JFrame {
 
 	void initialze(){
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.insets = new Insets(5, 10, 5, 10);
+		gbc.insets = new Insets(10, 10, 10, 10);
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 
+		/* * * * * *
+		 * Players *
+		 * * * * * */
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		add(new JLabel("Players:"), gbc);
@@ -83,6 +93,9 @@ public class NewGame extends JFrame {
 		blackEnginePath.setVisible(false);
 
 		
+		/* * * * * * * * *
+		 * Time control  *
+		 * * * * * * * * */
 		timeControlSelectionGroup = new ButtonGroup();
 		JRadioButton radioNoControl = new JRadioButton("No time control");
 		radioNoControl.setSelected(true);
@@ -102,7 +115,6 @@ public class NewGame extends JFrame {
 		JTextField fixTimeControl = new JTextField(5);
 		fixTimeControl.setVisible(false);
 		
-
 		gbc.weighty = 0.05;
 		gbc.gridx = 0;
 		gbc.gridy++;
@@ -126,7 +138,9 @@ public class NewGame extends JFrame {
 		gbc.gridx = 1;
 		add(fixTimeControl, gbc);
 
-
+		/* * * * * * * * *
+		 * start button  *
+		 * * * * * * * * */
 		JButton startGame = new JButton("Start");
 		gbc.gridwidth = 2;
 		gbc.fill = GridBagConstraints.BOTH;
@@ -140,7 +154,7 @@ public class NewGame extends JFrame {
 	private class StartGameAction implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			
+			GameStarter.startNewGame(startPos.getText(), new Human(Sides.WHITE, "w"), new Human(Sides.BLACK, "b"), timeControl);
 		}
 	} 
 

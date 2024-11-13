@@ -61,6 +61,8 @@ public class TimeInformationConverter {
 			}
 		}
 
+		//szeszkultura zh ket het mulva 
+		
 		if (tokens[0].equals("N")){
 			c.setControlType(TimeControl.NO_CONTROL);
 		}

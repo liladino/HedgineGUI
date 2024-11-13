@@ -20,7 +20,7 @@ public class RightPanel extends JPanel{
 		setLayout(new GridBagLayout());
 
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.insets = new Insets(5, 5, 5, 5);
+		gbc.insets = new Insets(10, 10, 10, 10);
 
 		//TODO: these should be a fix sized objects
 		gbc.fill = GridBagConstraints.HORIZONTAL;

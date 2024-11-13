@@ -13,24 +13,32 @@ import game.interfaces.TimeEventListener;
 import utility.*;
 
 public class GameManager implements Runnable, MoveListener, TimeEventListener{
+	/* * * * * *
+	 * Players *
+	 * * * * * */
 	private Player black = null;
 	private Player white = null;
 	private Player currentPlayer;
-	private Board board = null;
+
+	/* * * * *
+	 * Meta  *
+	 * * * * */
 	private volatile boolean moveReady;
 	private volatile boolean timeExpired;
 	private volatile boolean running;
 	private List<GameEventListener> eventListeners;
 	private List<VisualChangeListener> updateListeners;
-	private Clock clock = null;
 
 	/* * * * *
-	 * Moves *
+	 * Game  *
 	 * * * * */
 	private int moveCount;
-	ArrayList<Move> moves;
 	private Move currentMove = null;
-	
+	//private String startPos = null; 
+	private Board board = null;
+	private Clock clock = null;
+	private ArrayList<Move> moves;
+
 	/* * * * * * * *
 	 * Constructor *
 	 * * * * * * * */
@@ -58,6 +66,8 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		int plies = b.getFullMoveCount() * 2 + (b.tomove() == Sides.WHITE ? 0 : 1);
 		clock.setPlyCount(plies);
 		clock.setActiveSide(b.tomove());
+
+		//startPos = b.convertToFEN();
 	}
 	public void addGameEventListener(GameEventListener listener) {
 		eventListeners.add(listener); 
@@ -70,6 +80,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
 		clock.setClockPanels(whiteClockPanel, blackClockPanel);
 	}
+
+	/*public String getStartPos(){
+		return startPos;
+	}*/
 	
 	/* * * * * *
 	 * Getters *
@@ -179,12 +193,13 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	}
 
 	@Override
-	public void onTimeIsUp(Sides active) {
+	public synchronized void onTimeIsUp(Sides active) {
 		timeExpired = true;
+		notifyAll();
 		handleTimeExpired(active);
 	}
 
-	public void stopRunning(){
+	public synchronized void stopRunning(){
 		running = false;
 		notifyAll();
 	}
@@ -209,6 +224,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 				listener.onInsufficientMaterial();
 			}
 		}
+		stopRunning();
 	}
 
 	private void handleTimeExpired(Sides active){

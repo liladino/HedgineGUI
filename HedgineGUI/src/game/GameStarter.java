@@ -11,15 +11,15 @@ public class GameStarter {
 	private static GameManager gameManager = null;
 	private GameStarter(){ }
 
-	public static void startNewGame(Player white, Player black){
-		startNewGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", white, black);
+	public static void startNewGame(Player white, Player black, String timeControl){
+		startNewGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", white, black, timeControl);
 	}
 
-	public static void startNewGame(String fen, Player white, Player black){
+	public static void startNewGame(String fen, Player white, Player black, String timeControl){
 		if (t != null){
 			//stop the current game
 			if (t.isAlive()){
-				//t.stop();
+				gameManager.stopRunning();
 			}
 
 			if (!white.isHuman()){
