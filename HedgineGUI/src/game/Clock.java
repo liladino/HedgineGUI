@@ -178,8 +178,6 @@ public class Clock implements Runnable, GameEventListener {
 	}
 
 	private void updateClockData(){
-		plies++;
-
 		if (controlType == TimeControl.FIX_TIME_PER_MOVE){
 			blackTime = whiteTime = moveTime;
 		}
@@ -196,6 +194,8 @@ public class Clock implements Runnable, GameEventListener {
 			}
 		}
 		isWhiteActive = !isWhiteActive;
+
+		plies++;
 	}
 
 	public synchronized void setTicking(boolean ticking) {

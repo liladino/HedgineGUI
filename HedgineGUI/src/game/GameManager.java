@@ -119,6 +119,8 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	
 	@Override
 	public void run() {
+		System.out.println("gameManager started");
+		
 		running = true;
 		Thread t = null;
 		boolean clockStarted = false;

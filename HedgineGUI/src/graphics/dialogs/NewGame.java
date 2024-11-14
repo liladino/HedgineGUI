@@ -2,18 +2,28 @@ package graphics.dialogs;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import game.GameStarter;
 import game.Human;
@@ -24,39 +34,63 @@ public class NewGame extends JFrame {
 	private JTextField whiteName;
 	private JTextField blackName;
 	private JComboBox<String> comboWhitePlayer;
-	private JTextField whiteEnginePath;
+	private File whiteEngine;
 	private JComboBox<String> comboBlackPlayer;
-	private JTextField blackEnginePath; 
+	private File blackEngine; 
 	private JTextField startPos;
 	private String timeControl;
 	private JTextField fischerControl;
 	private JTextField fixTimeControl;
 	private JComboBox<String> fischerPresets;
+	private JRadioButton radioFischer;
+	private JRadioButton radioFixTime;
+	private boolean updatingFromPreset = false;
 
 	public NewGame(){
+		this("startpos");
+	}
+
+	public NewGame(String fen){
+		startPos = new JTextField(fen, 20);		
 		initialzeWindow();
 		initialze();
-		//pack();
+		pack();
+		setVisible(true);
 	}
 
 	void initialzeWindow(){
 		setTitle("New game");
-		setSize(600, 600);
 		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setVisible(true);
 		
 		setLayout(new GridBagLayout());
 	}
 
 	void initialze(){
-		GridBagConstraints gbc = new GridBagConstraints();
+  		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(10, 10, 10, 10);
-		gbc.fill = GridBagConstraints.HORIZONTAL;
+		
+		try{
+			gbc.gridx = 3;
+			gbc.gridy = 0;
+			gbc.gridheight = 13;
+			gbc.fill = GridBagConstraints.BOTH;
+			String imagesPath = System.getProperty("user.dir") + "/resources/menu/";
+			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "gtavc.png")).getScaledInstance(224, 564, Image.SCALE_SMOOTH));
+			
+			JLabel picLabel = new JLabel(menu);
+			add(picLabel, gbc);
 
-		/* * * * * *
-		 * Players *
-		 * * * * * */
+			gbc.gridheight = 1;
+		}
+		catch (IOException i){
+			return;
+		}
+		
+		/* * * * * * * * *
+		 * Player white  *
+		 * * * * * * * * */
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		add(new JLabel("Players:"), gbc);
@@ -71,14 +105,37 @@ public class NewGame extends JFrame {
 		comboWhitePlayer = new JComboBox<>(playertypes);
 		add(comboWhitePlayer, gbc);
 
-		gbc.gridwidth = 2;
-		gbc.fill = GridBagConstraints.BOTH;
+		/* * * * * * * * * * * *
+		 * White engine picker *
+		 * * * * * * * * * * * */
 		gbc.gridx = 0;
 		gbc.gridy++;
-		whiteEnginePath = new JTextField(20);
-		add(whiteEnginePath, gbc);
-		whiteEnginePath.setVisible(false);
+		JButton whiteEngineFromFile = new JButton("Choose File...");
+		JLabel whiteEnginePath = new JLabel();
+		whiteEngineFromFile.addActionListener(new EngineChooserButton(whiteName, whiteEnginePath, Sides.WHITE));
 
+		add(whiteEngineFromFile, gbc);
+		gbc.gridx = 1;
+		add(whiteEnginePath, gbc);
+
+		whiteEnginePath.setVisible(false);
+		whiteEngineFromFile.setVisible(false);
+		comboWhitePlayer.addActionListener(e -> {
+			if (comboWhitePlayer.getSelectedItem().equals("Engine")){
+				whiteEnginePath.setVisible(true);
+				whiteEngineFromFile.setVisible(true);
+			}
+			else{
+				whiteEnginePath.setVisible(false);
+				whiteEngineFromFile.setVisible(false);
+			}
+			NewGame.this.revalidate();
+			NewGame.this.repaint();
+		});
+
+		/* * * * * * * * *
+		 * Player black  *
+		 * * * * * * * * */
 		gbc.gridwidth = 1;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
@@ -90,13 +147,43 @@ public class NewGame extends JFrame {
 		comboBlackPlayer = new JComboBox<>(playertypes);
 		add(comboBlackPlayer, gbc);
 
+		/* * * * * * * * * * * *
+		 * Black engine picker *
+		 * * * * * * * * * * * */
+		gbc.gridx = 0;
+		gbc.gridy++;
+		JButton blackEngineFromFile = new JButton("Choose File...");
+		JLabel blackEnginePath = new JLabel();
+		blackEngineFromFile.addActionListener(new EngineChooserButton(blackName, blackEnginePath, Sides.BLACK));
+
+		add(blackEngineFromFile, gbc);
+		gbc.gridx = 1;
+		add(blackEnginePath, gbc);
+
+		blackEnginePath.setVisible(false);
+		blackEngineFromFile.setVisible(false);
+		comboBlackPlayer.addActionListener(e -> {
+			if (comboBlackPlayer.getSelectedItem().equals("Engine")){
+				blackEnginePath.setVisible(true);
+				blackEngineFromFile.setVisible(true);
+			}
+			else{
+				blackEnginePath.setVisible(false);
+				blackEngineFromFile.setVisible(false);
+			}
+			NewGame.this.revalidate();
+			NewGame.this.repaint();
+		});
+
+		/* * * * * * *
+		 * Separator *
+		 * * * * * * */
 		gbc.gridwidth = 2;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.gridx = 0;
 		gbc.gridy++;
-		blackEnginePath = new JTextField(20);
-		add(blackEnginePath, gbc);
-		blackEnginePath.setVisible(false);
+		add(new JSeparator(SwingConstants.HORIZONTAL), gbc);	
+		
 
 		/* * * * * * *
 		 * Start fen *
@@ -106,39 +193,89 @@ public class NewGame extends JFrame {
 		gbc.gridx = 0;
 		gbc.gridy++;
 		add(new JLabel("FEN:"), gbc);
-		startPos = new JTextField("startpos", 20);		
 		gbc.gridx = 1;
 		add(startPos, gbc);
+		
+		
+		/* * * * * * *
+		 * Separator *
+		 * * * * * * */
+		gbc.gridwidth = 2;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.gridx = 0;
+		gbc.gridy++;
+		add(new JSeparator(SwingConstants.HORIZONTAL), gbc);	
+
 
 		/* * * * * * * * *
 		 * Time control  *
 		 * * * * * * * * */
 		ButtonGroup timeControlSelectionGroup = new ButtonGroup();
 		
-		JRadioButton radioFischer = new JRadioButton("Fischer");
-		JRadioButton radioFixTime = new JRadioButton("Fix time per move");
 		JRadioButton radioNoControl = new JRadioButton("No time control");
 		radioNoControl.setSelected(true);
+		radioFischer = new JRadioButton("Fischer");
+		radioFixTime = new JRadioButton("Fix time per move");
 		timeControl = "N";
 
 		timeControlSelectionGroup.add(radioNoControl);
 		timeControlSelectionGroup.add(radioFischer);
 		timeControlSelectionGroup.add(radioFixTime);
-
-		radioFixTime.addActionListener(new FixTimeActionListener());
-		radioNoControl.addActionListener(new NoControlActionListener());
-		radioFischer.addActionListener(new FischerActionListener());
 		
-		String[] presets = {"No preset", "Bullet 1+0", "Blitz 3+2", "Blitz 5+0", "Rapid 10+10", "Tournament", "WCC"};
+		String[] presets = {"No preset", "Bullet 1+0", "Blitz 3+2", "Blitz 5+0", "Rapid 5+3", "Rapid 10+10", "Tournament", "WCC"};
 		fischerPresets = new JComboBox<>(presets);
 		fischerPresets.setSelectedIndex(2);
 		fischerPresets.setVisible(false);
+		fischerPresets.addActionListener(e -> {
+			updatingFromPreset = true;
+			if (fischerPresets.getSelectedItem().equals(presets[1])){
+				fischerControl.setText("S 60");
+			}
+			else if (fischerPresets.getSelectedItem().equals(presets[2])){
+				fischerControl.setText("S 180 0 2");
+			} 
+			else if (fischerPresets.getSelectedItem().equals(presets[3])){
+				fischerControl.setText("S 300");
+			} 
+			else if (fischerPresets.getSelectedItem().equals(presets[4])){
+				fischerControl.setText("S 300");
+			} 
+			else if (fischerPresets.getSelectedItem().equals(presets[5])){
+				fischerControl.setText("S 600 0 10");
+			} 
+			else if (fischerPresets.getSelectedItem().equals(presets[6])){
+				fischerControl.setText("S 5400 0 30 40 1800");
+			} 
+			else if (fischerPresets.getSelectedItem().equals(presets[7])){
+				fischerControl.setText("S 7200 40 30 40 1800 60 900");
+			}
+			updatingFromPreset = false; 
+		});
 
-		fischerControl = new JTextField();
+		fischerControl = new JTextField("S 180 0 2");
 		fischerControl.setVisible(false);
+		fischerControl.getDocument().addDocumentListener(
+			new DocumentListener() {
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					if (!updatingFromPreset) fischerPresets.setSelectedIndex(0);
+				}
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					if (!updatingFromPreset) fischerPresets.setSelectedIndex(0);
+				}
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					if (!updatingFromPreset) fischerPresets.setSelectedIndex(0);
+				}
+			});
 
 		fixTimeControl = new JTextField("X 60");
 		fixTimeControl.setVisible(false);
+		
+		radioFixTime.addActionListener(new FixTimeActionListener());
+		radioNoControl.addActionListener(new NoControlActionListener());
+		radioFischer.addActionListener(new FischerActionListener());
 		
 		gbc.weighty = 0.05;
 		gbc.gridx = 0;
@@ -188,6 +325,16 @@ public class NewGame extends JFrame {
 				b = new Human(Sides.BLACK, blackName.getText());
 			}
 
+			if (radioFischer.isSelected()){
+				timeControl = fischerControl.getText();
+			}
+			else if (radioFixTime.isSelected()){
+				timeControl = fixTimeControl.getText();
+			}
+			else {
+				timeControl = "N";
+			}
+
 			GameStarter.startNewGame(
 				(startPos.getText().equals("startpos") || startPos.getText().equals("") 
 					? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : startPos.getText()), 
@@ -204,6 +351,10 @@ public class NewGame extends JFrame {
 
 			fischerPresets.setVisible(false);
 			fischerControl.setVisible(false);
+			
+			
+			NewGame.this.revalidate();
+			NewGame.this.repaint();
 		}
 	}
 
@@ -214,7 +365,12 @@ public class NewGame extends JFrame {
 
 			fischerPresets.setVisible(true);
 			fischerControl.setVisible(true);
+
+			
+			NewGame.this.revalidate();
+			NewGame.this.repaint();
 		}
+
 	}
 
 	private class NoControlActionListener implements ActionListener{
@@ -224,6 +380,44 @@ public class NewGame extends JFrame {
 			fixTimeControl.setVisible(false);
 			fischerPresets.setVisible(false);
 			fischerControl.setVisible(false);
+
+			
+			NewGame.this.revalidate();
+			NewGame.this.repaint();
+		}
+	}
+
+	private class EngineChooserButton implements ActionListener{
+		JLabel path;
+		JFileChooser chooser;
+		JTextField name;
+		Sides side;
+		public EngineChooserButton(JTextField name, JLabel whitePathShower, Sides side){
+			path = whitePathShower;
+			chooser = new JFileChooser();
+			this.side = side;
+			this.name = name;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int returnVal = chooser.showOpenDialog(NewGame.this);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				if (side == Sides.WHITE){
+					whiteEngine = chooser.getSelectedFile();
+				}
+				else {
+					blackEngine = chooser.getSelectedFile();
+				}
+				String s = chooser.getSelectedFile().getPath();
+				int m = 35;
+				if (s.length() < m)
+					path.setText(s);
+				else
+					path.setText("... " + s.substring(s.length() - m + 4, s.length()));
+
+				name.setText(chooser.getSelectedFile().getName());
+			}
 		}
 	}
 }

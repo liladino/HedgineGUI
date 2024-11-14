@@ -22,7 +22,7 @@ public class MainWindow extends JFrame implements GameEventListener {
 	public MainWindow(GameManager gameManager) {
 		setTitle("Chess");
 		setMinimumSize(new Dimension(600 + getInsets().left + getInsets().right, 400 + getInsets().top + getInsets().bottom));
-		setSize(830 + getInsets().left + getInsets().right, 600 + getInsets().top + getInsets().bottom);
+		setSize(900 + getInsets().left + getInsets().right, 640 + getInsets().top + getInsets().bottom);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		gameManager.addGameEventListener(this);
