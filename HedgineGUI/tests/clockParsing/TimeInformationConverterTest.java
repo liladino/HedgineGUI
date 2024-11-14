@@ -1,4 +1,4 @@
-package clockparsing;
+package clockParsing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
