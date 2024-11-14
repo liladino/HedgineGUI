@@ -34,7 +34,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	 * * * * */
 	private int moveCount;
 	private Move currentMove = null;
-	//private String startPos = null; 
 	private Board board = null;
 	private Clock clock = null;
 	private ArrayList<Move> moves;
@@ -62,8 +61,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		int plies = b.getFullMoveCount() * 2 + (b.tomove() == Sides.WHITE ? 0 : 1);
 		clock.setPlyCount(plies);
 		clock.setActiveSide(b.tomove());
-
-		//startPos = b.convertToFEN();
 	}
 	public void addGameEventListener(GameEventListener listener) {
 		eventListeners.add(listener); 
@@ -77,10 +74,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		clock.setClockPanels(whiteClockPanel, blackClockPanel);
 	}
 
-	/*public String getStartPos(){
-		return startPos;
-	}*/
-	
 	/* * * * * *
 	 * Getters *
 	 * * * * * */
