@@ -1,4 +1,4 @@
-package chessLogicTests;
+package chesslogictests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
