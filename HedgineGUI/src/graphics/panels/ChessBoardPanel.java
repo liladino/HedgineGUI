@@ -49,7 +49,7 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 		gameManager.addGameUpdateListener(this);
 		menuManager.addGameUpdateListener(this);
 		
-		setPreferredSize(new Dimension(xDim, yDim));
+		setPreferredSize(new Dimension(720, 720));
 
 		// Add a mouse listener to handle piece selection and movement
 		addMouseListener(new MouseAdapter() {

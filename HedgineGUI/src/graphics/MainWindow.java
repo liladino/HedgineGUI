@@ -36,7 +36,7 @@ public class MainWindow extends JFrame implements GameEventListener {
 		
 		add(chessBoardPanel, BorderLayout.CENTER);
 		add(rightPanel, BorderLayout.EAST);
-		//pack();
+		pack();
 		
 		chessBoardPanel.repaint();
 		

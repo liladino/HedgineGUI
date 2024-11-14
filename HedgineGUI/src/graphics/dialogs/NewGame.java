@@ -1,5 +1,6 @@
 package graphics.dialogs;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -17,6 +19,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -51,7 +54,7 @@ public class NewGame extends JFrame {
 	}
 
 	public NewGame(String fen){
-		startPos = new JTextField(fen, 20);		
+		startPos = new JTextField(fen, 20);	
 		initialzeWindow();
 		initialze();
 		pack();
@@ -60,6 +63,7 @@ public class NewGame extends JFrame {
 
 	void initialzeWindow(){
 		setTitle("New game");
+		
 		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
@@ -70,26 +74,36 @@ public class NewGame extends JFrame {
   		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(10, 10, 10, 10);
 		
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+
 		try{
 			gbc.gridx = 3;
 			gbc.gridy = 0;
 			gbc.gridheight = 13;
 			gbc.fill = GridBagConstraints.BOTH;
 			String imagesPath = System.getProperty("user.dir") + "/resources/menu/";
-			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "gtavc.png")).getScaledInstance(224, 564, Image.SCALE_SMOOTH));
+			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "newgame.png")).getScaledInstance(224, 564, Image.SCALE_SMOOTH));
 			
 			JLabel picLabel = new JLabel(menu);
 			add(picLabel, gbc);
-
-			gbc.gridheight = 1;
 		}
 		catch (IOException i){
-			return;
+			//Image missing
+			gbc.gridx = 3;
+			gbc.gridy = 0;
+			gbc.gridheight = 13;
+			gbc.fill = GridBagConstraints.BOTH;
+			JPanel imageSpace = new JPanel();
+			imageSpace.add(new JLabel("Failed to load image"));
+			imageSpace.setPreferredSize(new Dimension(224, 564));
+			add(imageSpace, gbc);
 		}
 		
 		/* * * * * * * * *
 		 * Player white  *
 		 * * * * * * * * */
+		gbc.gridheight = 1;	
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
