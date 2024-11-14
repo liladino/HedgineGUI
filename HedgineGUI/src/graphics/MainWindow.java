@@ -9,7 +9,9 @@ import utility.Sides;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+
 import javax.swing.*;
+
 
 public class MainWindow extends JFrame implements GameEventListener {
 	private static final long serialVersionUID = 38435486L;

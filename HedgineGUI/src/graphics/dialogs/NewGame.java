@@ -66,7 +66,6 @@ public class NewGame extends JFrame {
 		whiteName = new JTextField("White");
 		add(whiteName, gbc);
 
-		//TODO: add name field for player
 		gbc.gridx = 1;
 		String[] playertypes = {"Human", "Engine"};
 		comboWhitePlayer = new JComboBox<>(playertypes);
@@ -190,7 +189,8 @@ public class NewGame extends JFrame {
 			}
 
 			GameStarter.startNewGame(
-				(startPos.getText().equals("startpos") ? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : startPos.getText()), 
+				(startPos.getText().equals("startpos") || startPos.getText().equals("") 
+					? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : startPos.getText()), 
 				w, b, timeControl);
 			
 			dispose();

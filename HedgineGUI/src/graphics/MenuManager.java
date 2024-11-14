@@ -48,8 +48,12 @@ public class MenuManager implements ActionListener {
 		menuBar = new JMenuBar();
 				
 		menuBar.add(file);
-		//fileMenuElements.add(new JMenuItem("Load FEN")); //these should be in new game
-		//fileMenuElements.add(new JMenuItem("Load board"));
+
+		//these should be implemnted as following:
+		//the user loads a file, the program parses a fen from them, and opens the new game dialog with the fen 
+		fileMenuElements.add(new JMenuItem("Load FEN")); 
+		fileMenuElements.add(new JMenuItem("Load board"));
+
 		fileMenuElements.add(new JMenuItem("Save FEN"));
 		fileMenuElements.add(new JMenuItem("Save PGN"));
 		fileMenuElements.add(new JMenuItem("Quit"));
