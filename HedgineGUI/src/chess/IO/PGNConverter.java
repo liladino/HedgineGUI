@@ -28,13 +28,7 @@ public class PGNConverter {
 
 		if (Character.toUpperCase(b.boardAt(m.getFrom())) != 'P'){
 			sb.append(Character.toUpperCase(b.boardAt(m.getFrom())));
-			switch (Character.toUpperCase(b.boardAt(m.getFrom()))){
-				case 'R':
-					sb.append(getRookMovePGN(b, m));
-					break;
-				default:
-					return null;
-			}
+			sb.append(getNotPawnMovePGN(b, m));
 		}
 		else {
 			sb.append(getPawnMovePGN(b, m));
@@ -75,7 +69,7 @@ public class PGNConverter {
 		return new String(sb);
 	}
 
-	private static String getRookMovePGN(Board b, Move m){
+	private static String getNotPawnMovePGN(Board b, Move m){
 		//this function assumes the move is legal
 		StringBuilder sb = new StringBuilder();
 
@@ -84,13 +78,12 @@ public class PGNConverter {
 			takes = true;
 		}
 
-		ArrayList<Square> rooks = getListOfPieces(b, b.boardAt(m.getFrom()));
+		ArrayList<Square> pieces = getListOfPieces(b, b.boardAt(m.getFrom()));
 
 		Square from = m.getFrom();
 		boolean pieceOnSameRank = false;
 		boolean pieceOnSameFile = false;
-		//Board copBoard = new Board(b);
-		for (Square s : rooks){
+		for (Square s : pieces){
 			if (s.equals(from)){
 				continue;
 			}
@@ -103,7 +96,18 @@ public class PGNConverter {
 				}
 			}
 		}
+
+		if (pieceOnSameRank){
+			sb.append(from.getFile());
+		}
+		if (pieceOnSameFile){
+			sb.append(from.getRank());
+		}
 		
+		if (takes){
+			sb.append('x');
+		}
+
 		return new String(sb);
 	}
 
