@@ -39,6 +39,8 @@ public class TimeInformationConverterTest {
 		assertEquals(TimeControl.FIX_TIME_PER_MOVE, clock.getTimeControl());
 		assertEquals(5000, clock.getWhiteTime());
 		assertEquals(5000, clock.getBlackTime());
+		
+		assertDoesNotThrow(() -> TimeInformationConverter.setClock(clock, "X 10 1 1"));
 	}
 
 	@Test
