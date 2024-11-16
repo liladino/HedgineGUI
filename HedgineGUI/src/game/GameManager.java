@@ -116,11 +116,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		
 		running = true;
 		Thread t = null;
-		boolean clockStarted = false;
 		if (clock.getTimeControl() != TimeControl.NO_CONTROL){
-			clock.setTicking(false);
 			t = new Thread(clock);
 			t.start();
+			clock.setTicking(true);
 		}
 
 		while (running) {
@@ -146,10 +145,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 					moves.add(currentMove);
 					
 					if (t != null){
-						if (!clockStarted){
-							clockStarted = true;
-							clock.setTicking(true);
-						}
 						clock.pressClock();
 					}
 

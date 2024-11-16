@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -73,7 +72,20 @@ public class NewGame extends JFrame {
 	void initialze(){
   		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(10, 10, 10, 10);
-		
+		initRightPanel(gbc);
+
+		initPlayerInfo(gbc);
+
+		addSeparator(gbc);
+
+		initFEN(gbc);
+
+		addSeparator(gbc);
+
+		initTimeSettings(gbc);
+	}
+
+	void initRightPanel(GridBagConstraints gbc){
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
 
@@ -99,7 +111,9 @@ public class NewGame extends JFrame {
 			imageSpace.setPreferredSize(new Dimension(224, 564));
 			add(imageSpace, gbc);
 		}
-		
+	}
+
+	void initPlayerInfo(GridBagConstraints gbc){
 		/* * * * * * * * *
 		 * Player white  *
 		 * * * * * * * * */
@@ -189,6 +203,10 @@ public class NewGame extends JFrame {
 			NewGame.this.repaint();
 		});
 
+		
+	}
+
+	void addSeparator(GridBagConstraints gbc){
 		/* * * * * * *
 		 * Separator *
 		 * * * * * * */
@@ -196,9 +214,10 @@ public class NewGame extends JFrame {
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.gridx = 0;
 		gbc.gridy++;
-		add(new JSeparator(SwingConstants.HORIZONTAL), gbc);	
-		
+		add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
+	}
 
+	void initFEN(GridBagConstraints gbc){
 		/* * * * * * *
 		 * Start fen *
 		 * * * * * * */
@@ -210,17 +229,9 @@ public class NewGame extends JFrame {
 		gbc.gridx = 1;
 		add(startPos, gbc);
 		
-		
-		/* * * * * * *
-		 * Separator *
-		 * * * * * * */
-		gbc.gridwidth = 2;
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.gridx = 0;
-		gbc.gridy++;
-		add(new JSeparator(SwingConstants.HORIZONTAL), gbc);	
+	}
 
-
+	void initTimeSettings(GridBagConstraints gbc){
 		/* * * * * * * * *
 		 * Time control  *
 		 * * * * * * * * */
@@ -287,9 +298,36 @@ public class NewGame extends JFrame {
 		fixTimeControl = new JTextField("X 60");
 		fixTimeControl.setVisible(false);
 		
-		radioFixTime.addActionListener(new FixTimeActionListener());
-		radioNoControl.addActionListener(new NoControlActionListener());
-		radioFischer.addActionListener(new FischerActionListener());
+		radioFixTime.addActionListener(e -> {
+			fixTimeControl.setVisible(true);
+
+			fischerPresets.setVisible(false);
+			fischerControl.setVisible(false);
+			
+			
+			NewGame.this.revalidate();
+			NewGame.this.repaint();
+		});
+		radioNoControl.addActionListener(e -> {
+			timeControl = "N";
+			fixTimeControl.setVisible(false);
+			fischerPresets.setVisible(false);
+			fischerControl.setVisible(false);
+
+			
+			NewGame.this.revalidate();
+			NewGame.this.repaint();
+		});
+		radioFischer.addActionListener(e -> {
+			fixTimeControl.setVisible(false);
+
+			fischerPresets.setVisible(true);
+			fischerControl.setVisible(true);
+
+			
+			NewGame.this.revalidate();
+			NewGame.this.repaint();
+		});
 		
 		gbc.weighty = 0.05;
 		gbc.gridx = 0;
@@ -357,49 +395,6 @@ public class NewGame extends JFrame {
 			dispose();
 		}
 	} 
-
-	private class FixTimeActionListener implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			fixTimeControl.setVisible(true);
-
-			fischerPresets.setVisible(false);
-			fischerControl.setVisible(false);
-			
-			
-			NewGame.this.revalidate();
-			NewGame.this.repaint();
-		}
-	}
-
-	private class FischerActionListener implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			fixTimeControl.setVisible(false);
-
-			fischerPresets.setVisible(true);
-			fischerControl.setVisible(true);
-
-			
-			NewGame.this.revalidate();
-			NewGame.this.repaint();
-		}
-
-	}
-
-	private class NoControlActionListener implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			timeControl = "N";
-			fixTimeControl.setVisible(false);
-			fischerPresets.setVisible(false);
-			fischerControl.setVisible(false);
-
-			
-			NewGame.this.revalidate();
-			NewGame.this.repaint();
-		}
-	}
 
 	private class EngineChooserButton implements ActionListener{
 		JLabel path;
