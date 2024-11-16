@@ -1,6 +1,10 @@
 package chess;
 
-public class Square {
+import java.io.Serializable;
+
+public class Square implements Serializable{
+	private static final long serialVersionUID = 81867168718303L;
+
 	private char file;
 	private int rank;
 	

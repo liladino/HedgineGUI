@@ -1,11 +1,11 @@
 package graphics.panels;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -14,30 +14,42 @@ import game.GameManager;
 import utility.Sides;
 
 public class RightPanel extends JPanel{
+	private JTextArea whiteName;
+	private JTextArea blackName;
+	private JTextArea movesArea;
+	
 	public RightPanel(GameManager gameManager){
-		setPreferredSize(new Dimension(270, getHeight()));
+		setPreferredSize(new Dimension(300, getHeight()));
 
 		setLayout(new GridBagLayout());
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(10, 10, 20, 10);
 
-		//TODO: these should be a fix sized objects
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.weighty = 0.05;
+		gbc.weightx = 0.5;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		JPanel whiteNamePanel = new JPanel();
-		whiteNamePanel.add(new JLabel("White Player name")); // Replace with actual name display
-		add(whiteNamePanel, gbc);
+		whiteName = new JTextArea("White Player");
+		whiteName.setEditable(false);
+		whiteName.setLineWrap(true);
+		Font font = new Font("Courier new", Font.BOLD, 17);
+        whiteName.setFont(font);
+		
+		add(whiteName, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 0;
-		JPanel blackNamePanel = new JPanel();
-		blackNamePanel.add(new JLabel("Black Player Name")); // Replace with actual name display
-		add(blackNamePanel, gbc);
-
+		blackName = new JTextArea("Black Player");
+		blackName.setEditable(false);
+		blackName.setColumns(5);
+		blackName.setLineWrap(true);
+		blackName.setFont(font);
+		add(blackName, gbc);
+	
 		gbc.weighty = 0.05;
+		gbc.weightx = 1;
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		TimePanel whiteClockPanel = new TimePanel(Sides.WHITE);
@@ -51,7 +63,7 @@ public class RightPanel extends JPanel{
 		gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
 		
 		
-		JTextArea movesArea = new JTextArea();
+		movesArea = new JTextArea();
 		movesArea.setEditable(false);
 		JScrollPane movesScrollPane = new JScrollPane(movesArea);
  
@@ -62,6 +74,15 @@ public class RightPanel extends JPanel{
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		add(movesScrollPane, gbc);
+	}
+
+	public void setWhiteName(String name){
+		whiteName.setText(name);
+	}
+
+	
+	public void setBlackName(String name){
+		blackName.setText(name);
 	}
 
 

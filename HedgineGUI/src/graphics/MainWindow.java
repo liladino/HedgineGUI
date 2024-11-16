@@ -42,6 +42,10 @@ public class MainWindow extends JFrame implements GameEventListener {
 		
 		setVisible(true);
 	}
+
+	public RightPanel getRightPanel(){
+		return rightPanel;
+	}
 	
 	@Override
 	public void onCheckmate(Sides won) {

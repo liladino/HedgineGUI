@@ -95,7 +95,7 @@ public class NewGame extends JFrame {
 			gbc.gridheight = 13;
 			gbc.fill = GridBagConstraints.BOTH;
 			String imagesPath = System.getProperty("user.dir") + "/resources/menu/";
-			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "newgame.png")).getScaledInstance(224, 564, Image.SCALE_SMOOTH));
+			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "newgame1.png")).getScaledInstance(224, 564, Image.SCALE_FAST));
 			
 			JLabel picLabel = new JLabel(menu);
 			add(picLabel, gbc);
@@ -391,7 +391,7 @@ public class NewGame extends JFrame {
 				(startPos.getText().equals("startpos") || startPos.getText().equals("") 
 					? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : startPos.getText()), 
 				w, b, timeControl);
-			
+
 			dispose();
 		}
 	} 

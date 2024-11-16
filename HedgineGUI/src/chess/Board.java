@@ -2,6 +2,7 @@ package chess;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.Arrays;
 
 import chess.IO.FENException;
@@ -9,7 +10,9 @@ import chess.IO.FENmanager;
 import utility.Result;
 import utility.Sides;
 
-public class Board {
+public class Board implements Serializable {
+	private static final long serialVersionUID = 1871341340688870L;
+	
 	private char[][] board;
 	private Sides tomove;
 	private boolean[] castlingRights; //white kingside, queenside, black kingside, queenside
@@ -17,7 +20,7 @@ public class Board {
 	private int fiftyMoveRule;
 	private int fullMoveCount;
 	
-	private LegalMoves legalMoves = null;
+	private transient LegalMoves legalMoves = null;
 	
 	
 	/* * * * * * * * *

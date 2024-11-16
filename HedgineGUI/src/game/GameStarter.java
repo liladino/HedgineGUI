@@ -48,6 +48,9 @@ public class GameStarter {
 			gameManager.getClock().setControlType(TimeControl.NO_CONTROL);
 		}
 		
+		mainWindow.getRightPanel().setWhiteName(white.getName());
+		mainWindow.getRightPanel().setBlackName(black.getName());
+
 		mainWindow.repaint();
 		
 		t = new Thread(gameManager);
@@ -56,6 +59,10 @@ public class GameStarter {
 
 	public static void addGameManager(GameManager gameManager){
 		GameStarter.gameManager = gameManager;
+	}
+
+	public static GameManager getGameManager(){
+		return gameManager;
 	}
 
 	public static void addMainWindow(MainWindow mainWindow){

@@ -2,28 +2,35 @@ package graphics;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Scanner;
 
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import game.GameStarter;
 import game.interfaces.VisualChangeListener;
+import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.NewGame;
 
 public class MenuManager implements ActionListener {
 	private MainWindow mainWindow;
 	
-	private JMenuBar menuBar;
 	private JMenu file;
-	private ArrayList<JMenuItem> fileMenuElements;
-	
+	private ArrayList<String> fileMenuStrings;
+
 	private JMenu game;
-	private ArrayList<JMenuItem> gameMenuElements;
-	
+	private ArrayList<String> gameMenuStrings;
+
 	private JMenu view;
 	private ArrayList<JMenuItem> viewMenuElements;
-	
+	private ArrayList<String> viewMenuStrings;
+
 	private JMenu colorScheme;
 	private ArrayList<JMenuItem> colors;
 	
@@ -32,46 +39,51 @@ public class MenuManager implements ActionListener {
 	public MenuManager(MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 
-		fileMenuElements = new ArrayList<>();
-		gameMenuElements = new ArrayList<>();
+		fileMenuStrings = new ArrayList<>();
+		gameMenuStrings = new ArrayList<>();
+		viewMenuStrings = new ArrayList<>();
 		viewMenuElements = new ArrayList<>();
+		
 		colors = new ArrayList<>();
 
 		file = new JMenu("File");
 		game = new JMenu("Game");
 		view = new JMenu("View");
-		colorScheme = new JMenu("Color scheme");
 		setUpMenuBar();
 	}	
 
 	private void setUpMenuBar() {
-		menuBar = new JMenuBar();
+		JMenuBar menuBar = new JMenuBar();
 				
 		menuBar.add(file);
 
-		//these should be implemnted as following:
-		//the user loads a file, the program parses a fen from them, and opens the new game dialog with the fen 
-		fileMenuElements.add(new JMenuItem("Load FEN")); 
-		fileMenuElements.add(new JMenuItem("Load board"));
-
-		fileMenuElements.add(new JMenuItem("Save FEN"));
-		fileMenuElements.add(new JMenuItem("Save PGN"));
-		fileMenuElements.add(new JMenuItem("Quit"));
-		for (JMenuItem m : fileMenuElements) {
+		fileMenuStrings.add("Load FEN");
+		fileMenuStrings.add("Load board");
+		fileMenuStrings.add("Save FEN");
+		fileMenuStrings.add("Save PGN");
+		fileMenuStrings.add("Quit");
+		
+		for (String s : fileMenuStrings){
+			JMenuItem m = new JMenuItem(s);
 			file.add(m);
 			m.addActionListener(this);
 		}
 				
 		menuBar.add(game);
-		gameMenuElements.add(new JMenuItem("New game"));
-		gameMenuElements.add(new JMenuItem("Resign"));
-		for (JMenuItem m : gameMenuElements) {
+		gameMenuStrings.add("New game");
+		gameMenuStrings.add("Resing");
+		gameMenuStrings.add("Take back");
+		for (String s : gameMenuStrings){
+			JMenuItem m = new JMenuItem(s);
 			game.add(m);
 			m.addActionListener(this);
 		}
 		
 		menuBar.add(view);
-		viewMenuElements.add(new JMenuItem("Rotate board"));
+		viewMenuStrings.add("Rotate board");
+		viewMenuStrings.add("Color scheme");
+		colorScheme = new JMenu(viewMenuStrings.get(1));
+		viewMenuElements.add(new JMenuItem(viewMenuStrings.get(0)));
 		viewMenuElements.add(colorScheme);
 		
 		for (JMenuItem m : viewMenuElements) {
@@ -99,18 +111,64 @@ public class MenuManager implements ActionListener {
         if (s.equals("Quit")) {
         	System.exit(0);
         }
-        else if (s.equals("Rotate board")) {
+        else if (s.equals(viewMenuStrings.get(0))) {
+			//rotate
         	GraphicSettings.rotateBoard = !GraphicSettings.rotateBoard;
         	listener.onGameLooksChanged();
         }
-        else if (s.equals("New game")){
-			NewGame newGameWindow = new NewGame(); 
+        else if (s.equals(gameMenuStrings.get(0))){
+			//new game
+			new NewGame();
 		}
 		else if (GraphicSettings.colors.containsKey(s)) {
+			//color scheme
         	GraphicSettings.selectedScheme = s;
         	listener.onGameLooksChanged();
         }
+		else if (s.equals(fileMenuStrings.get(0))){
+			//load fen
+			JFileChooser chooser = new JFileChooser();
+			chooser.setFileFilter(new FileNameExtensionFilter("FEN files", "fen", "FEN", "txt"));
+			chooser.setDialogTitle(fileMenuStrings.get(0));
 
+			int returnVal = chooser.showOpenDialog(mainWindow);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				try{ 
+					Scanner scanner = new Scanner(chooser.getSelectedFile());
+					if (scanner.hasNextLine()){
+						new NewGame(scanner.nextLine());
+						scanner.close();
+						return;
+					}
+					scanner.close();
+					InformationDialogs.errorDialog(mainWindow, "Can't load FEN");
+				}
+				catch(FileNotFoundException f){
+					InformationDialogs.errorDialog(mainWindow, "Can't open file");
+				}
+			}
+
+		}
+		else if (s.equals(fileMenuStrings.get(2))){
+			//save fen
+			String fen = GameStarter.getGameManager().getBoard().convertToFEN();
+			
+			JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle(fileMenuStrings.get(2));
+
+			int returnVal = chooser.showSaveDialog(mainWindow);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".fen")) {
+					fw.write(fen);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+		else if (s.equals(fileMenuStrings.get(1))){
+			//save board
+			String fen = GameStarter.getGameManager().getBoard().convertToFEN();
+		}
 	}
 	
 	public void addGameUpdateListener(VisualChangeListener listener) {
