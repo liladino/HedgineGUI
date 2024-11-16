@@ -11,8 +11,6 @@ class LegalMovesTest {
 	
 	//Source: https://www.chessprogramming.org/Perft_Results
 	
-	//Last runtime: 21 seconds
-	
 	@Test
 	void startPos() {
 		b = new Board();

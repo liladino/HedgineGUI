@@ -79,7 +79,6 @@ public class PGNConverter {
 		}
 
 		ArrayList<Square> pieces = getListOfPieces(b, b.boardAt(m.getFrom()));
-
 		Square from = m.getFrom();
 		boolean pieceOnSameRank = false;
 		boolean pieceOnSameFile = false;
@@ -108,6 +107,8 @@ public class PGNConverter {
 			sb.append('x');
 		}
 
+		sb.append(m.getTo().toString());
+
 		return new String(sb);
 	}
 
@@ -115,8 +116,8 @@ public class PGNConverter {
 		ArrayList<Square> list = new ArrayList<>();
 		for (int i = 1; i <= 8; i++){
 			for (char j = 'a'; j <= 'h'; j++){
-				if (b.boardAt(new Square(i, j)) == piece){
-					list.add(new Square(i, j));
+				if (b.boardAt(new Square(j, i)) == piece){
+					list.add(new Square(j, i));
 				}
 			}
 		}
