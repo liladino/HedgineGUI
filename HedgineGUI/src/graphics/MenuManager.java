@@ -193,11 +193,6 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(fileMenuStrings.get(4))){
 			//save board
-			File theDir = new File(System.getProperty("user.dir") + "/saves");
-			if (!theDir.exists()){
-				theDir.mkdirs();
-			}
-
 			try (
 				FileOutputStream fout = new FileOutputStream(System.getProperty("user.dir") + "/saves/board.ser");
 				ObjectOutputStream oos = new ObjectOutputStream(fout);
