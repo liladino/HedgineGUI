@@ -10,13 +10,19 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import chess.Board;
+import chess.Move;
+import chess.IO.FENException;
+import chess.IO.PGNConverter;
 import game.GameManager;
+import game.interfaces.VisualChangeListener;
 import utility.Sides;
 
-public class RightPanel extends JPanel{
+public class RightPanel extends JPanel implements VisualChangeListener{
 	private JTextArea whiteName;
 	private JTextArea blackName;
 	private JTextArea movesArea;
+	private GameManager gameManager;
 	
 	public RightPanel(GameManager gameManager){
 		setPreferredSize(new Dimension(300, getHeight()));
@@ -60,10 +66,14 @@ public class RightPanel extends JPanel{
 		TimePanel blackClockPanel = new TimePanel(Sides.BLACK);
 		add(blackClockPanel, gbc);
 		
+		this.gameManager = gameManager;
 		gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
-		
+		gameManager.addGameUpdateListener(this);
 		
 		movesArea = new JTextArea();
+		movesArea.setFont(new Font("Courier new", Font.PLAIN, 16));
+		movesArea.setLineWrap(true);
+		movesArea.setWrapStyleWord(true);
 		movesArea.setEditable(false);
 		JScrollPane movesScrollPane = new JScrollPane(movesArea);
  
@@ -85,5 +95,44 @@ public class RightPanel extends JPanel{
 		blackName.setText(name);
 	}
 
+	@Override
+	public void onGameStateChanged() {
+		updateMoves();
+	}
+
+	@Override
+	public void onGameLooksChanged() {
+		updateMoves();
+	}
+
+	private void updateMoves(){
+		Board temp;
+		try {
+			temp = new Board(gameManager.startFEN());
+		}
+		catch (FENException f){
+			return;
+		}
+		StringBuilder sb = new StringBuilder();
+		int c = 0;
+		sb.append(temp.getFullMoveCount());
+		sb.append(".");
+		if (temp.tomove() == Sides.BLACK){
+			sb.append("..");
+		}
+		sb.append(" ");
+
+		for (Move m : gameManager.getMoves()){
+			if (temp.tomove() == Sides.WHITE && c > 0){
+				sb.append(temp.getFullMoveCount());
+				sb.append(". ");
+			}
+			sb.append(PGNConverter.convertMoveToPGNString(temp, m) + " ");
+			temp.makeMove(m);
+			c++;
+		}
+
+		movesArea.setText(new String(sb));
+	} 
 
 }
