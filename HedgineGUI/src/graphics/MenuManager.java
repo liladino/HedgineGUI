@@ -20,10 +20,13 @@ import javax.swing.JMenuItem;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import chess.Board;
+import chess.IO.PGNConverter;
+import game.GameManager;
 import game.GameStarter;
 import game.interfaces.VisualChangeListener;
 import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.NewGame;
+import utility.Sides;
 
 public class MenuManager implements ActionListener {
 	private MainWindow mainWindow;
@@ -38,7 +41,6 @@ public class MenuManager implements ActionListener {
 	private ArrayList<JMenuItem> viewMenuElements;
 	private ArrayList<String> viewMenuStrings;
 
-	private JMenu colorScheme;
 	private ArrayList<JMenuItem> colors;
 	
 	private VisualChangeListener listener;
@@ -90,7 +92,7 @@ public class MenuManager implements ActionListener {
 		menuBar.add(view);
 		viewMenuStrings.add("Rotate board");
 		viewMenuStrings.add("Color scheme");
-		colorScheme = new JMenu(viewMenuStrings.get(1));
+		JMenu colorScheme = new JMenu(viewMenuStrings.get(1));
 		viewMenuElements.add(new JMenuItem(viewMenuStrings.get(0)));
 		viewMenuElements.add(colorScheme);
 		
@@ -138,6 +140,7 @@ public class MenuManager implements ActionListener {
 			JFileChooser chooser = new JFileChooser();
 			chooser.setFileFilter(new FileNameExtensionFilter("FEN files", "fen", "FEN", "txt"));
 			chooser.setDialogTitle(fileMenuStrings.get(0));
+			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
 
 			int returnVal = chooser.showOpenDialog(mainWindow);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -163,13 +166,14 @@ public class MenuManager implements ActionListener {
 			
 			JFileChooser chooser = new JFileChooser();
 			chooser.setDialogTitle(fileMenuStrings.get(2));
+			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
 
 			int returnVal = chooser.showSaveDialog(mainWindow);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".fen")) {
 					fw.write(fen);
-				} catch (Exception ex) {
-					ex.printStackTrace();
+				} catch (Exception e) {
+					InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
 				}
 			}
 		}
@@ -182,7 +186,7 @@ public class MenuManager implements ActionListener {
 			){
 				temp = (Board) oin.readObject();
 			} catch (FileNotFoundException f) {
-				InformationDialogs.errorDialog(mainWindow, "Saved not found: " + f.getMessage());
+				InformationDialogs.errorDialog(mainWindow, "Save not found: " + f.getMessage());
 			} catch (IOException i) {
 				InformationDialogs.errorDialog(mainWindow, "Problem while opening: " + i.getMessage());
 			}
@@ -198,9 +202,32 @@ public class MenuManager implements ActionListener {
 				ObjectOutputStream oos = new ObjectOutputStream(fout);
 			){
 				oos.writeObject(GameStarter.getGameManager().getBoard());
+				InformationDialogs.infoDialog(mainWindow, "Board saved, load it with File > Load board");
 			}
 			catch (IOException i){
 				InformationDialogs.errorDialog(mainWindow, "Problem while saving the file: " + i.getMessage());
+			}
+		}
+		else if (s.equals(fileMenuStrings.get(3))){
+			//save pgn
+			String pgn = PGNConverter.convertToPGN(
+				GameStarter.getGameManager().getPlayer(Sides.WHITE),
+				GameStarter.getGameManager().getPlayer(Sides.BLACK),
+				GameStarter.getGameManager().startFEN(), 
+				GameStarter.getGameManager().getMoves(), 
+				GameStarter.getGameManager().getResult());
+
+			JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle(fileMenuStrings.get(3));
+			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
+
+			int returnVal = chooser.showSaveDialog(mainWindow);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".pgn")) {
+					fw.write(pgn);
+				} catch (Exception e) {
+					InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
+				}
 			}
 		}
 	}

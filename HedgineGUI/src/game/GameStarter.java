@@ -2,6 +2,7 @@ package game;
 
 import chess.Board;
 import chess.IO.FENException;
+import graphics.GraphicSettings;
 import graphics.MainWindow;
 import graphics.dialogs.InformationDialogs;
 import utility.TimeControl;
@@ -21,13 +22,6 @@ public class GameStarter {
 			//stop the current game
 			if (t.isAlive()){
 				gameManager.stopRunning();
-			}
-
-			if (!white.isHuman()){
-				//(Engine)white.stop();
-			}
-			if (!black.isHuman()){
-				//(Engine)black.stop();
 			}
 			t = null;
 		}
@@ -50,6 +44,11 @@ public class GameStarter {
 		
 		mainWindow.getRightPanel().setWhiteName(white.getName());
 		mainWindow.getRightPanel().setBlackName(black.getName());
+
+		GraphicSettings.rotateBoard = false;
+		if (!white.isHuman() && black.isHuman()){
+			GraphicSettings.rotateBoard = true;
+		}
 
 		mainWindow.repaint();
 		

@@ -1,11 +1,14 @@
 package chess.IO;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import chess.Board;
 import chess.Move;
 import chess.Square;
+import game.Player;
 import utility.Result;
+import utility.Sides;
 
 public class PGNConverter {
 	private PGNConverter(){}
@@ -122,5 +125,83 @@ public class PGNConverter {
 			}
 		}
 		return list;
+	}
+
+
+	public static String convertToPGN(Player white, Player black, String fen, List<Move> moves, Result r){
+		StringBuilder sb = new StringBuilder();
+		sb.append("[Site \"HedgineGUI\"]\n");
+		sb.append("[White \"");
+		sb.append(white.getName());
+		sb.append("\"]\n[Black \"");
+		sb.append(black.getName());
+
+		String lineEnd = "\"]\n";
+		sb.append(lineEnd);
+
+		if (fen.equals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")){
+			sb.append("[Variation \"Standard\"]\n");
+		}
+		else{
+			sb.append("[Variation \"From Position\"]\n");
+			sb.append("[FEN \"");
+			sb.append(fen);
+			sb.append(lineEnd);
+		}
+
+		String res;
+		sb.append("[Result \"");
+		if (r == Result.DRAW || r == Result.STALEMATE){
+			res = "1/2-1/2";
+		}
+		else if (r == Result.BLACK_WON){
+			res = "0-1";
+		}
+		else if (r == Result.WHITE_WON){
+			res = "1-0";
+		}
+		else{
+			res = "*";
+		}
+		sb.append(res);
+		sb.append(lineEnd);
+
+		String movesString = convertToMoves(fen, moves);
+		if (movesString != null){
+			sb.append(movesString);
+		}
+
+		sb.append(res);
+
+		return new String(sb);
+	}
+
+	public static String convertToMoves(String fen, List<Move> moves){
+		Board temp;
+		try {
+			temp = new Board(fen);
+		}
+		catch (FENException f){
+			return null;
+		}
+		StringBuilder sb = new StringBuilder();
+		int c = 0;
+		sb.append(temp.getFullMoveCount());
+		sb.append(".");
+		if (temp.tomove() == Sides.BLACK){
+			sb.append("..");
+		}
+		sb.append(" ");
+
+		for (Move m : moves){
+			if (temp.tomove() == Sides.WHITE && c > 0){
+				sb.append(temp.getFullMoveCount());
+				sb.append(". ");
+			}
+			sb.append(PGNConverter.convertMoveToPGNString(temp, m) + " ");
+			temp.makeMove(m);
+			c++;
+		}
+		return new String(sb);
 	}
 }

@@ -38,6 +38,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	private Clock clock = null;
 	private ArrayList<Move> moves;
 	private String startFEN = null;
+	private Result result;
 
 	/* * * * * * * *
 	 * Constructor *
@@ -102,6 +103,17 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public String startFEN(){
 		return startFEN;
 	}
+
+	public Result getResult(){
+		return result;
+	}
+
+	public Player getPlayer(Sides s){
+		if (s == Sides.BLACK){
+			return black;
+		}
+		return white;
+	}
 	
 	/* * * * * * * *
 	 * Game Logic  *
@@ -118,6 +130,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		setBoard(b);
 		
 		currentPlayer = white;
+		result = Result.ONGOING;
 	}
 	
 	@Override
@@ -206,6 +219,11 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		}
 		for (GameEventListener listener : eventListeners) {
 			//the game ended
+			if (board.getResult() == Result.ONGOING){
+				continue;
+			}
+			result = board.getResult();
+
 			if (Result.WHITE_WON == board.getResult()) {
 				listener.onCheckmate(Sides.WHITE);
 			}

@@ -106,33 +106,8 @@ public class RightPanel extends JPanel implements VisualChangeListener{
 	}
 
 	private void updateMoves(){
-		Board temp;
-		try {
-			temp = new Board(gameManager.startFEN());
-		}
-		catch (FENException f){
-			return;
-		}
-		StringBuilder sb = new StringBuilder();
-		int c = 0;
-		sb.append(temp.getFullMoveCount());
-		sb.append(".");
-		if (temp.tomove() == Sides.BLACK){
-			sb.append("..");
-		}
-		sb.append(" ");
-
-		for (Move m : gameManager.getMoves()){
-			if (temp.tomove() == Sides.WHITE && c > 0){
-				sb.append(temp.getFullMoveCount());
-				sb.append(". ");
-			}
-			sb.append(PGNConverter.convertMoveToPGNString(temp, m) + " ");
-			temp.makeMove(m);
-			c++;
-		}
-
-		movesArea.setText(new String(sb));
+		String temp = PGNConverter.convertToMoves(gameManager.startFEN(), gameManager.getMoves());
+		if (temp != null) movesArea.setText(temp);
 	} 
 
 }
