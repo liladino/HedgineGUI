@@ -95,7 +95,7 @@ public class NewGame extends JFrame {
 			gbc.gridheight = 13;
 			gbc.fill = GridBagConstraints.BOTH;
 			String imagesPath = System.getProperty("user.dir") + "/resources/menu/";
-			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "newgame1.png")).getScaledInstance(224, 564, Image.SCALE_FAST));
+			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "newgame1.png"))/*.getScaledInstance(224, 564, Image.SCALE_FAST)*/);
 			
 			JLabel picLabel = new JLabel(menu);
 			add(picLabel, gbc);

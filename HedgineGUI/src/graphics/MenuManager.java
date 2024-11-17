@@ -2,8 +2,13 @@ package graphics;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -13,6 +18,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import chess.Board;
 import game.GameStarter;
 import game.interfaces.VisualChangeListener;
 import graphics.dialogs.InformationDialogs;
@@ -57,11 +63,12 @@ public class MenuManager implements ActionListener {
 				
 		menuBar.add(file);
 
-		fileMenuStrings.add("Load FEN");
-		fileMenuStrings.add("Load board");
-		fileMenuStrings.add("Save FEN");
-		fileMenuStrings.add("Save PGN");
-		fileMenuStrings.add("Quit");
+		fileMenuStrings.add("Load FEN");		//0
+		fileMenuStrings.add("Load board");	//1
+		fileMenuStrings.add("Save FEN");		//2
+		fileMenuStrings.add("Save PGN");		//3
+		fileMenuStrings.add("Save board");	//4
+		fileMenuStrings.add("Quit");			//5
 		
 		for (String s : fileMenuStrings){
 			JMenuItem m = new JMenuItem(s);
@@ -108,7 +115,7 @@ public class MenuManager implements ActionListener {
 		 
         System.out.println("\"" + s + "\"" + " selected");
         
-        if (s.equals("Quit")) {
+        if (s.equals(fileMenuStrings.get(5))) {
         	System.exit(0);
         }
         else if (s.equals(viewMenuStrings.get(0))) {
@@ -166,8 +173,34 @@ public class MenuManager implements ActionListener {
 			}
 		}
 		else if (s.equals(fileMenuStrings.get(1))){
+			//load board
+			Board temp = null;
+			try (
+				FileInputStream fin = new FileInputStream(System.getProperty("user.dir") + "/saves/board.ser");
+				ObjectInputStream oin = new ObjectInputStream(fin);
+			){
+				temp = (Board) oin.readObject();
+			} catch (FileNotFoundException f) {
+				InformationDialogs.errorDialog(mainWindow, "Saved not found: " + f.getMessage());
+			} catch (IOException i) {
+				InformationDialogs.errorDialog(mainWindow, "Problem while opening: " + i.getMessage());
+			}
+			catch (ClassNotFoundException c){
+				return;
+			}
+			if (temp != null) new NewGame(temp.convertToFEN());
+		}
+		else if (s.equals(fileMenuStrings.get(4))){
 			//save board
-			String fen = GameStarter.getGameManager().getBoard().convertToFEN();
+			try (
+				FileOutputStream fout = new FileOutputStream(System.getProperty("user.dir") + "/saves/board.ser");
+				ObjectOutputStream oos = new ObjectOutputStream(fout);
+			){
+				oos.writeObject(GameStarter.getGameManager().getBoard());
+			}
+			catch (IOException i){
+				InformationDialogs.errorDialog(mainWindow, "Problem while saving the file: " + i.getMessage());
+			}
 		}
 	}
 	
