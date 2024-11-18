@@ -34,7 +34,6 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 	private transient GameManager gameManager;
 	private transient Square selected;
 	private int xDim;
-	private int yDim;
 	private int squareSize;
 	private transient HashMap<Character, BufferedImage> images;
 
@@ -43,7 +42,7 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 		loadPieces();
 		selected = new Square();
 
-		yDim = xDim = Math.min(getWidth(), getHeight());
+		xDim = Math.min(getWidth(), getHeight());
 		squareSize = xDim / 8;
 		this.gameManager = gameManager;
 		gameManager.addVisualChangeListener(this);
@@ -74,7 +73,7 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 	void loadPieces() {
 		String imagesPath = System.getProperty("user.dir") + "/resources/pieces/";
 		String selectionPath = System.getProperty("user.dir") + "/resources/select/";
-
+		System.out.println(System.getProperty("user.dir") + "/resources/select/");
 		try { images.put('P', ImageIO.read(new File(imagesPath + "wp.png"))); } catch (IOException e) { e.printStackTrace(); }
 		try { images.put('R', ImageIO.read(new File(imagesPath + "wr.png"))); } catch (IOException e) { e.printStackTrace(); }
 		try { images.put('B', ImageIO.read(new File(imagesPath + "wb.png"))); } catch (IOException e) { e.printStackTrace(); }
@@ -166,7 +165,7 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		xDim = yDim = Math.min(getWidth(), getHeight());
+		xDim = Math.min(getWidth(), getHeight());
 		
 		squareSize = xDim / 8;
 		

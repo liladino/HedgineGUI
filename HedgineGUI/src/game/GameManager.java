@@ -44,7 +44,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	 * Constructor *
 	 * * * * * * * */
 	public GameManager() {
-		moves = new ArrayList<>();
 		updateListeners = new ArrayList<>();
 		eventListeners = new ArrayList<>();
 		clock = new Clock(this);
@@ -58,6 +57,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		setBoard(new Board());
 	}
 	public void setBoard(Board b) {
+		moves = new ArrayList<>();
 		board = b;
 		int plies = b.getFullMoveCount() * 2 + (b.tomove() == Sides.WHITE ? 0 : 1);
 		clock.setPlyCount(plies);
@@ -101,6 +101,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 
 	public Result getResult(){
 		return result;
+	}
+	
+	public boolean isGameRunning() {
+		return running;
 	}
 
 	public Player getPlayer(Sides s){
@@ -269,17 +273,15 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 			//can't reach this
 			return;
 		}
-		if (moves.size() < 2) return;
-
-		for (int i = 0; i < moves.size()-2; i++){
+		if (moves.isEmpty()) return;
+		
+		for (int i = 0; i < moves.size()-1; i++){
 			temp.makeMove(moves.get(i));
 		}
+		moves.remove(moves.size()-1);
 		board = temp;
-		Move last = moves.get(moves.size()-2);
-		moves.remove(moves.size()-1);
-		moves.remove(moves.size()-1);
-
-		onMoveReady(last);
+		clock.pressClock();
+		notifyGameStateChanged();
 	} 
 	
 	

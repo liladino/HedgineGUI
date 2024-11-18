@@ -232,6 +232,8 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(gameMenuStrings.get(1))){
 			//resign
+			if (!GameStarter.getGameManager().isGameRunning()) return;
+			
 			Sides won = (GameStarter.getGameManager().getBoard().tomove() == Sides.WHITE ? Sides.BLACK : Sides.WHITE);
 			GameStarter.getGameManager().stopRunning();
 			for (GameEventListener g : gameEventListeners){
@@ -240,6 +242,7 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(gameMenuStrings.get(2))){
 			//tanke back
+			if (!GameStarter.getGameManager().isGameRunning()) return;
 			GameStarter.getGameManager().takeBack();
 		}
 	}
