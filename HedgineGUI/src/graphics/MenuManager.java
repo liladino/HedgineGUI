@@ -240,7 +240,7 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(gameMenuStrings.get(2))){
 			//tanke back
-			
+			GameStarter.getGameManager().takeBack();
 		}
 	}
 	

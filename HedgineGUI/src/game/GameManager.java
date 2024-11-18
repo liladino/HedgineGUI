@@ -5,6 +5,7 @@ import java.util.List;
 
 import chess.Board;
 import chess.Move;
+import chess.IO.FENException;
 import game.interfaces.ClockListener;
 import game.interfaces.GameEventListener;
 import game.interfaces.VisualChangeListener;
@@ -32,7 +33,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	/* * * * *
 	 * Game  *
 	 * * * * */
-	private int moveCount;
 	private Move currentMove = null;
 	private Board board = null;
 	private Clock clock = null;
@@ -45,7 +45,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	 * * * * * * * */
 	public GameManager() {
 		moves = new ArrayList<>();
-		moveCount = 0;
 		updateListeners = new ArrayList<>();
 		eventListeners = new ArrayList<>();
 		clock = new Clock(this);
@@ -88,10 +87,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		return currentPlayer;
 	}
 	
-	public int getMoveCount() {
-		return moveCount;
-	}
-
 	public Clock getClock(){
 		return clock;
 	}
@@ -184,35 +179,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		System.out.println("gameManager stooped");
 	}
 	
-	/* * * * * * * * *
-	 * COMMUNICATION *
-	 * * * * * * * * */
-	
-	private void notifyGameStateChanged() {
-		for (VisualChangeListener listener : updateListeners) {
-			listener.onGameStateChanged();
-		}
-	}
-
-	@Override
-	public synchronized void onMoveReady(Move m) {
-		currentMove = m;
-		moveReady = true;
-		notifyAll();
-	}
-
-	@Override
-	public synchronized void onTimeIsUp(Sides active) {
-		timeExpired = true;
-		notifyAll();
-		handleTimeExpired(active);
-	}
-
-	public synchronized void stopRunning(){
-		running = false;
-		notifyAll();
-	}
-	
+	/* * * * * * * * * *
+	 * Game end logic  *
+	 * * * * * * * * * */
 	private void checkGameEnd() {
 		if (board.getResult() == Result.ONGOING) {
 			return;
@@ -262,6 +231,56 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		}
 	}
 
+	/* * * * * * * * *
+	 * COMMUNICATION *
+	 * * * * * * * * */
+	
+	private void notifyGameStateChanged() {
+		for (VisualChangeListener listener : updateListeners) {
+			listener.onGameStateChanged();
+		}
+	}
+
+	@Override
+	public synchronized void onMoveReady(Move m) {
+		currentMove = m;
+		moveReady = true;
+		notifyAll();
+	}
+
+	@Override
+	public synchronized void onTimeIsUp(Sides active) {
+		timeExpired = true;
+		notifyAll();
+		handleTimeExpired(active);
+	}
+
+	public synchronized void stopRunning(){
+		running = false;
+		notifyAll();
+	}
+	
+	public synchronized void takeBack(){
+		Board temp;
+		try{
+			temp = new Board(startFEN);
+		}
+		catch (FENException f){
+			//can't reach this
+			return;
+		}
+		if (moves.size() < 2) return;
+
+		for (int i = 0; i < moves.size()-2; i++){
+			temp.makeMove(moves.get(i));
+		}
+		board = temp;
+		Move last = moves.get(moves.size()-2);
+		moves.remove(moves.size()-1);
+		moves.remove(moves.size()-1);
+
+		onMoveReady(last);
+	} 
 	
 	
 
