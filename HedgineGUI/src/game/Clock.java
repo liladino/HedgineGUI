@@ -200,6 +200,9 @@ public class Clock implements Runnable, GameEventListener {
 
 	public synchronized void setTicking(boolean ticking) {
 		this.ticking = ticking;
+		if (ticking){
+			gameEnded = false;
+		}
 	}
 
 	public void updateDisplay(){
