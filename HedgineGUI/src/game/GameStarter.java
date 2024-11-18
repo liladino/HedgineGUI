@@ -56,7 +56,7 @@ public class GameStarter {
 		t.start();
 	}
 
-	public static void addGameManager(GameManager gameManager){
+	public static void setGameManager(GameManager gameManager){
 		GameStarter.gameManager = gameManager;
 	}
 

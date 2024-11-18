@@ -10,9 +10,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import chess.Board;
-import chess.Move;
-import chess.IO.FENException;
 import chess.IO.PGNConverter;
 import game.GameManager;
 import game.interfaces.VisualChangeListener;
@@ -22,7 +19,7 @@ public class RightPanel extends JPanel implements VisualChangeListener{
 	private JTextArea whiteName;
 	private JTextArea blackName;
 	private JTextArea movesArea;
-	private GameManager gameManager;
+	private transient GameManager gameManager;
 	
 	public RightPanel(GameManager gameManager){
 		setPreferredSize(new Dimension(300, getHeight()));

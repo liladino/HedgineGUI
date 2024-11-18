@@ -19,7 +19,7 @@ public class Main {
 			theDir.mkdirs();
 		}
 
-		GameStarter.addGameManager(gameManager);
+		GameStarter.setGameManager(gameManager);
 		GameStarter.addMainWindow(mainWindow);
 		GameStarter.startNewGame(new Human(Sides.WHITE, "White"), new Human(Sides.BLACK, "Black"), "N");
 	}

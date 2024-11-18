@@ -19,7 +19,7 @@ import utility.Sides;
 public class PromotionDialog extends JDialog{
 	private static final long serialVersionUID = 1687874164L;
 	private char selectedPiece;
-	private Map<Character, BufferedImage>  images;
+	private transient Map<Character, BufferedImage> images;
 	public PromotionDialog(JFrame parent, Map<Character, BufferedImage> images, Sides tomove) {
 		super(parent, "Pawn promotion", true);
 		this.images = images;
