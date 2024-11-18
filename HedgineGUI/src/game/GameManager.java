@@ -69,7 +69,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		eventListeners.add(listener); 
 	}
 	
-	public void addGameUpdateListener(VisualChangeListener listener) {
+	public void addVisualChangeListener(VisualChangeListener listener) {
 		updateListeners.add(listener);
 	}
 

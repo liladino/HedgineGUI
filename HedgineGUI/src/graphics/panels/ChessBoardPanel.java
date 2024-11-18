@@ -46,8 +46,8 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 		yDim = xDim = Math.min(getWidth(), getHeight());
 		squareSize = xDim / 8;
 		this.gameManager = gameManager;
-		gameManager.addGameUpdateListener(this);
-		menuManager.addGameUpdateListener(this);
+		gameManager.addVisualChangeListener(this);
+		menuManager.addVisualChangeListener(this);
 		
 		setPreferredSize(new Dimension(720, 720));
 

@@ -9,4 +9,5 @@ public interface GameEventListener {
 	void onInsufficientMaterial();
 	void onTimeIsUp(Sides won);
 	void onTimeIsUp();
+	void onResign(Sides won);
 }

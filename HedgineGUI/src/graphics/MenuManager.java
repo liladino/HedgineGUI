@@ -22,6 +22,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import chess.Board;
 import chess.IO.PGNConverter;
 import game.GameStarter;
+import game.interfaces.GameEventListener;
 import game.interfaces.VisualChangeListener;
 import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.NewGame;
@@ -32,18 +33,17 @@ public class MenuManager implements ActionListener {
 	
 	private JMenu file;
 	private ArrayList<String> fileMenuStrings;
-
 	private JMenu game;
 	private ArrayList<String> gameMenuStrings;
-
 	private JMenu view;
 	private ArrayList<JMenuItem> viewMenuElements;
 	private ArrayList<String> viewMenuStrings;
-
 	private ArrayList<JMenuItem> colors;
-	
-	private VisualChangeListener listener;
-	
+
+	private VisualChangeListener visualListener;
+	private ArrayList<GameEventListener> gameEventListeners;
+
+
 	public MenuManager(MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 
@@ -51,6 +51,7 @@ public class MenuManager implements ActionListener {
 		gameMenuStrings = new ArrayList<>();
 		viewMenuStrings = new ArrayList<>();
 		viewMenuElements = new ArrayList<>();
+		gameEventListeners = new ArrayList<>();
 		
 		colors = new ArrayList<>();
 
@@ -123,7 +124,7 @@ public class MenuManager implements ActionListener {
         else if (s.equals(viewMenuStrings.get(0))) {
 			//rotate
         	GraphicSettings.rotateBoard = !GraphicSettings.rotateBoard;
-        	listener.onGameLooksChanged();
+        	visualListener.onGameLooksChanged();
         }
         else if (s.equals(gameMenuStrings.get(0))){
 			//new game
@@ -132,7 +133,7 @@ public class MenuManager implements ActionListener {
 		else if (GraphicSettings.colors.containsKey(s)) {
 			//color scheme
         	GraphicSettings.selectedScheme = s;
-        	listener.onGameLooksChanged();
+        	visualListener.onGameLooksChanged();
         }
 		else if (s.equals(fileMenuStrings.get(0))){
 			//load fen
@@ -229,9 +230,25 @@ public class MenuManager implements ActionListener {
 				}
 			}
 		}
+		else if (s.equals(gameMenuStrings.get(1))){
+			//resign
+			Sides won = (GameStarter.getGameManager().getBoard().tomove() == Sides.WHITE ? Sides.BLACK : Sides.WHITE);
+			GameStarter.getGameManager().stopRunning();
+			for (GameEventListener g : gameEventListeners){
+				g.onResign(won);
+			}
+		}
+		else if (s.equals(gameMenuStrings.get(2))){
+			//tanke back
+			
+		}
 	}
 	
-	public void addGameUpdateListener(VisualChangeListener listener) {
-		this.listener = listener;
+	public void addVisualChangeListener(VisualChangeListener listener) {
+		visualListener = listener;
+	}
+
+	public void addGameEventListener(GameEventListener listener) {
+		gameEventListeners.add(listener);
 	}
 }

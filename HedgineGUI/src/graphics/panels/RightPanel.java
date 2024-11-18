@@ -65,7 +65,7 @@ public class RightPanel extends JPanel implements VisualChangeListener{
 		
 		this.gameManager = gameManager;
 		gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
-		gameManager.addGameUpdateListener(this);
+		gameManager.addVisualChangeListener(this);
 		
 		movesArea = new JTextArea();
 		movesArea.setFont(new Font("Courier new", Font.PLAIN, 16));

@@ -243,5 +243,10 @@ public class Clock implements Runnable, GameEventListener {
 	@Override
 	public void onTimeIsUp() {
 		onGameEnd();
+	}
+
+	@Override
+	public void onResign(Sides won) {
+		onGameEnd();
 	}	
 }

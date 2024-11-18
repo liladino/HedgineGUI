@@ -33,6 +33,8 @@ public class MainWindow extends JFrame implements GameEventListener {
 		rightPanel = new RightPanel(gameManager);
 		
 		setLayout(new BorderLayout());
+		menuManager.addGameEventListener(this);
+		menuManager.addGameEventListener(gameManager.getClock());
 		
 		add(chessBoardPanel, BorderLayout.CENTER);
 		add(rightPanel, BorderLayout.EAST);
@@ -72,5 +74,10 @@ public class MainWindow extends JFrame implements GameEventListener {
 	@Override
 	public void onTimeIsUp() {
 		GameEndDialogs.showDraw(this);
+	}
+
+	@Override
+	public void onResign(Sides won) {
+		GameEndDialogs.showResigned(this, won);
 	}
 }

@@ -28,4 +28,9 @@ public class GameEndDialogs {
 		String message = (won == Sides.WHITE ? "White won on time." : "Black won on time.") ;
 		JOptionPane.showMessageDialog(parent, message, gameOver, JOptionPane.INFORMATION_MESSAGE);
 	}
+	public static void showResigned(JFrame parent, Sides won){
+		String message = (won == Sides.WHITE ? "Black resigned, White won." : "White resigned, Black won.") ;
+		JOptionPane.showMessageDialog(parent, message, gameOver, JOptionPane.INFORMATION_MESSAGE);
+	}
+
 }
