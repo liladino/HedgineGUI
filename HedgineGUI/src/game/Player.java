@@ -9,7 +9,7 @@ public abstract class Player {
 	protected Sides side;
 	protected boolean human;
 	
-	public Player(Sides side, String name) {
+	protected Player(Sides side, String name) {
 		this.name = name;
 		this.side = side;
 	}

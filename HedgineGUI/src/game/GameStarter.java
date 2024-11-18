@@ -51,6 +51,7 @@ public class GameStarter {
 		}
 
 		mainWindow.repaint();
+		gameManager.notifyGameStateChanged();
 		
 		t = new Thread(gameManager);
 		t.start();

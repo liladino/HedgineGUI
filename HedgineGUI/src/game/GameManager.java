@@ -75,6 +75,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
 		clock.setClockPanels(whiteClockPanel, blackClockPanel);
 	}
+	public void setResult(Result r) {
+		result = r;
+	}
 
 	/* * * * * *
 	 * Getters *
@@ -239,7 +242,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	 * COMMUNICATION *
 	 * * * * * * * * */
 	
-	private void notifyGameStateChanged() {
+	public void notifyGameStateChanged() {
 		for (VisualChangeListener listener : updateListeners) {
 			listener.onGameStateChanged();
 		}
@@ -283,8 +286,4 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		clock.pressClock();
 		notifyGameStateChanged();
 	} 
-	
-	
-
-	
 }

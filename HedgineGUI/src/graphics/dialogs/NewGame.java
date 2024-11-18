@@ -27,12 +27,14 @@ import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import game.Engine;
 import game.GameStarter;
 import game.Human;
 import game.Player;
 import utility.Sides;
 
 public class NewGame extends JFrame {
+	private static final long serialVersionUID = -421311633940977178L;
 	private JTextField whiteName;
 	private JTextField blackName;
 	private JComboBox<String> comboWhitePlayer;
@@ -373,10 +375,16 @@ public class NewGame extends JFrame {
 			if (comboWhitePlayer.getSelectedItem().equals("Human")){
 				w = new Human(Sides.WHITE, whiteName.getText());
 			}
+			else {
+				w = new Engine(Sides.WHITE, whiteName.getText(), whiteEngine);
+			}
 			if (comboBlackPlayer.getSelectedItem().equals("Human")){
 				b = new Human(Sides.BLACK, blackName.getText());
 			}
-
+			else {
+				b = new Engine(Sides.BLACK, blackName.getText(), blackEngine);
+			}
+			
 			if (radioFischer.isSelected()){
 				timeControl = fischerControl.getText();
 			}

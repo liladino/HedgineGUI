@@ -26,6 +26,7 @@ import game.interfaces.GameEventListener;
 import game.interfaces.VisualChangeListener;
 import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.NewGame;
+import utility.Result;
 import utility.Sides;
 
 public class MenuManager implements ActionListener {
@@ -202,7 +203,7 @@ public class MenuManager implements ActionListener {
 				ObjectOutputStream oos = new ObjectOutputStream(fout);
 			){
 				oos.writeObject(GameStarter.getGameManager().getBoard());
-				InformationDialogs.infoDialog(mainWindow, "Board saved, load it with File > Load board");
+				InformationDialogs.infoDialog(mainWindow, "Board saved, load it with \"File\" > \"Load board\"");
 			}
 			catch (IOException i){
 				InformationDialogs.errorDialog(mainWindow, "Problem while saving the file: " + i.getMessage());
@@ -236,6 +237,8 @@ public class MenuManager implements ActionListener {
 			
 			Sides won = (GameStarter.getGameManager().getBoard().tomove() == Sides.WHITE ? Sides.BLACK : Sides.WHITE);
 			GameStarter.getGameManager().stopRunning();
+			GameStarter.getGameManager().setResult(won == Sides.WHITE ? Result.WHITE_WON : Result.BLACK_WON);
+			
 			for (GameEventListener g : gameEventListeners){
 				g.onResign(won);
 			}
