@@ -8,13 +8,18 @@ public abstract class Player {
 	protected String name;
 	protected Sides side;
 	protected boolean human;
+	protected MoveListener listener;
 	
 	protected Player(Sides side, String name) {
 		this.name = name;
 		this.side = side;
 	}
 	
-	public abstract void makeMove(MoveListener listener, Move m);
+	public void setMoveListener(MoveListener listener) {
+		this.listener = listener;
+	}
+	
+	public abstract void makeMove(Move m);
 	
 	public String getName() {
 		return name;

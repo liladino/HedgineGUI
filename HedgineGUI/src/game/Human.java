@@ -11,7 +11,7 @@ public class Human extends Player{
 	}
 
 	@Override
-	public void makeMove(MoveListener listener, Move m) {
+	public void makeMove(Move m) {
 		listener.onMoveReady(m);
 	}
 	

@@ -1,5 +1,10 @@
 package game;
 
+import java.util.logging.Logger;
+
+import javax.swing.text.Position;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,11 +14,14 @@ import chess.IO.FENException;
 import game.interfaces.ClockListener;
 import game.interfaces.GameEventListener;
 import game.interfaces.VisualChangeListener;
+import graphics.dialogs.InformationDialogs;
 import game.interfaces.MoveListener;
 import game.interfaces.TimeEventListener;
 import utility.*;
 
 public class GameManager implements Runnable, MoveListener, TimeEventListener{
+	private static final Logger logger = Logger.getLogger(GameManager.class.getName());
+
 	/* * * * * *
 	 * Players *
 	 * * * * * */
@@ -135,9 +143,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		result = Result.ONGOING;
 	}
 	
-	@Override
+	@Override 
 	public void run() {
-		System.out.println("gameManager started");
+		logger.info("gameManager started");
 		
 		running = true;
 		Thread t = null;
@@ -146,10 +154,18 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 			t.start();
 			clock.setTicking(true);
 		}
+		
+		try {
+			startEngines();
+		} 
+		catch (IOException e) {
+			InformationDialogs.errorDialog(null, "Failed to communicate with engine: " + e.getMessage());
+			stopRunning();
+		}
 
 		while (running) {
 			synchronized (this) {
-				System.out.println((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
+				logger.info((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
 				moveReady = false;
 				
 				while (!moveReady && !timeExpired && running) {
@@ -168,22 +184,25 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 					board.makeMove(currentMove);
 					currentPlayer = (currentPlayer == white) ? black : white;
 					moves.add(currentMove);
-					
+										
 					if (t != null){
 						clock.pressClock();
 					}
 
 					notifyGameStateChanged();
 					checkGameEnd();
+					
+					if (running && !currentPlayer.isHuman()) notifyEngine();
 				}
 				else {
 					System.out.print("Illegal input: ");
 				}
-				System.out.println(currentMove);
+				logger.info(currentMove.toString());
 			}
 		}
-
-		System.out.println("gameManager stooped");
+		
+		stopRunning();
+		logger.info("gameManager stooped");
 	}
 	
 	/* * * * * * * * * *
@@ -242,6 +261,47 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	 * COMMUNICATION *
 	 * * * * * * * * */
 	
+	private void notifyEngine() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("position fen " + startFEN);
+		
+		if (!moves.isEmpty()) {
+			sb.append(" moves ");
+			for (Move m : moves) {
+				sb.append(m.toString() + " ");
+			}
+		}
+		sb.append("\n");
+		
+		if (clock.getTimeControl() == TimeControl.NO_CONTROL) {
+			sb.append("go movetime 2000");
+		}
+		else if (clock.getTimeControl() == TimeControl.FIX_TIME_PER_MOVE) {
+			sb.append("go movetime " + (int)(clock.getWhiteTime() * 0.9));
+		}
+		//TODO fischer
+		
+		System.out.println(new String(sb));
+		
+		try {
+			((Engine)currentPlayer).sendCommand(new String(sb));
+		} catch (IOException e) {
+			return;
+		}
+	}
+	
+	private void startEngines() throws IOException {
+		if (!white.isHuman()) {
+			((Engine)white).startEngine();
+			((Engine)white).sendCommand("ucinewgame");
+		}
+		if (!black.isHuman()) {
+			((Engine)black).startEngine();
+			((Engine)black).sendCommand("ucinewgame");
+		}
+	}
+	
 	public void notifyGameStateChanged() {
 		for (VisualChangeListener listener : updateListeners) {
 			listener.onGameStateChanged();
@@ -264,6 +324,12 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 
 	public synchronized void stopRunning(){
 		running = false;
+		if (!white.isHuman()) {
+			((Engine)white).stopEngine();
+		}
+		if (!black.isHuman()) {
+			((Engine)black).stopEngine();
+		}
 		notifyAll();
 	}
 	

@@ -8,6 +8,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -74,6 +75,9 @@ public class NewGame extends JFrame {
 	void initialze(){
   		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(10, 10, 10, 10);
+		
+		whiteEngine = blackEngine = null;
+		
 		initRightPanel(gbc);
 
 		initPlayerInfo(gbc);
@@ -97,7 +101,7 @@ public class NewGame extends JFrame {
 			gbc.gridheight = 13;
 			gbc.fill = GridBagConstraints.BOTH;
 			String imagesPath = System.getProperty("user.dir") + "/resources/menu/";
-			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "newgame1.png"))/*.getScaledInstance(224, 564, Image.SCALE_FAST)*/);
+			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "newgame.png"))/*.getScaledInstance(224, 564, Image.SCALE_FAST)*/);
 			
 			JLabel picLabel = new JLabel(menu);
 			add(picLabel, gbc);
@@ -369,20 +373,22 @@ public class NewGame extends JFrame {
 
 	private class StartGameAction implements ActionListener{
 		@Override
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(ActionEvent e) {			
 			Player w = null;
 			Player b = null;
 			if (comboWhitePlayer.getSelectedItem().equals("Human")){
 				w = new Human(Sides.WHITE, whiteName.getText());
 			}
 			else {
+				if (whiteEngine == null) return;
 				w = new Engine(Sides.WHITE, whiteName.getText(), whiteEngine);
 			}
 			if (comboBlackPlayer.getSelectedItem().equals("Human")){
 				b = new Human(Sides.BLACK, blackName.getText());
 			}
 			else {
-				b = new Engine(Sides.BLACK, blackName.getText(), blackEngine);
+				if (blackEngine == null) return;
+				b = new Engine(Sides.BLACK, blackName.getText(), blackEngine);	
 			}
 			
 			if (radioFischer.isSelected()){
@@ -427,7 +433,7 @@ public class NewGame extends JFrame {
 					blackEngine = chooser.getSelectedFile();
 				}
 				String s = chooser.getSelectedFile().getPath();
-				int m = 35;
+				int m = 33;
 				if (s.length() < m)
 					path.setText(s);
 				else

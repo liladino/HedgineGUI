@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
@@ -21,6 +22,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import chess.Board;
 import chess.IO.PGNConverter;
+import game.GameManager;
 import game.GameStarter;
 import game.interfaces.GameEventListener;
 import game.interfaces.VisualChangeListener;
@@ -30,6 +32,7 @@ import utility.Result;
 import utility.Sides;
 
 public class MenuManager implements ActionListener {
+	private static final Logger logger = Logger.getLogger(MenuManager.class.getName());
 	private MainWindow mainWindow;
 	
 	private JMenu file;
@@ -117,7 +120,7 @@ public class MenuManager implements ActionListener {
 	public void actionPerformed(ActionEvent a) {
 		String s = a.getActionCommand();
 		 
-        System.out.println("\"" + s + "\"" + " selected");
+        logger.info("\"" + s + "\"" + " selected");
         
         if (s.equals(fileMenuStrings.get(5))) {
         	System.exit(0);
@@ -233,7 +236,7 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(gameMenuStrings.get(1))){
 			//resign
-			if (!GameStarter.getGameManager().isGameRunning()) return;
+			if (!GameStarter.getGameManager().isGameRunning() || !GameStarter.getGameManager().getCurrentPlayer().isHuman()) return;
 			
 			Sides won = (GameStarter.getGameManager().getBoard().tomove() == Sides.WHITE ? Sides.BLACK : Sides.WHITE);
 			GameStarter.getGameManager().stopRunning();

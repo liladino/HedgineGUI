@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import chess.IO.FENException;
-import chess.IO.FENmanager;
+import chess.IO.FENManager;
 import utility.Result;
 import utility.Sides;
 
@@ -48,7 +48,7 @@ public class Board implements Serializable {
 	}
 	
 	private void setupBoard(String FEN) throws FENException {
-		FENmanager f = new FENmanager();
+		FENManager f = new FENManager();
 		try {
 			board = f.parseBoard(FEN);
 			tomove = f.parseTomove(FEN);
@@ -195,7 +195,7 @@ public class Board implements Serializable {
 	}
 	
 	public String convertToFEN() {
-		FENmanager f = new FENmanager();
+		FENManager f = new FENManager();
 		return f.convertToFEN(this);
 	}
 	
@@ -525,7 +525,7 @@ public class Board implements Serializable {
 		return r;
 	}
 	
-	private int recursiveLegalMoves(int depth, final Board b) {
+	private static int recursiveLegalMoves(int depth, final Board b) {
 		if (depth <= 0) {
 			return 1;
 		}

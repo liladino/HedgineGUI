@@ -4,9 +4,9 @@ import chess.Board;
 import utility.Sides;
 import chess.Square;
 
-public class FENmanager {
+public class FENManager {
 	private boolean[] readSuccesses;
-	public FENmanager(){ 
+	public FENManager(){ 
 		readSuccesses = new boolean[6];
 	}
 	

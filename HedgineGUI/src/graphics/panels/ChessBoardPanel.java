@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import graphics.MenuManager;
 import graphics.dialogs.PromotionDialog;
 
 public class ChessBoardPanel extends JPanel implements VisualChangeListener {
+	private static final Logger logger = Logger.getLogger(ChessBoardPanel.class.getName());
 	private static final long serialVersionUID = 987168713547L;
 	private transient GameManager gameManager;
 	private transient Square selected;
@@ -64,7 +66,7 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 					rank = 7 - e.getY() / squareSize + 1; 
 				}
 				
-				System.out.printf("file: %c, rank: %d%n", file, rank);
+				logger.info("file: " + file + ", rank: " + rank);
 				handleSquareClick(file, rank);
 			}
 		});
@@ -73,7 +75,7 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 	void loadPieces() {
 		String imagesPath = System.getProperty("user.dir") + "/resources/pieces/";
 		String selectionPath = System.getProperty("user.dir") + "/resources/select/";
-		System.out.println(System.getProperty("user.dir") + "/resources/select/");
+		logger.info(System.getProperty("user.dir") + "/resources/select/");
 		try { images.put('P', ImageIO.read(new File(imagesPath + "wp.png"))); } catch (IOException e) { e.printStackTrace(); }
 		try { images.put('R', ImageIO.read(new File(imagesPath + "wr.png"))); } catch (IOException e) { e.printStackTrace(); }
 		try { images.put('B', ImageIO.read(new File(imagesPath + "wb.png"))); } catch (IOException e) { e.printStackTrace(); }
@@ -155,8 +157,9 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 				selected = new Square();
 				repaint();
 				
+				//if the program reaches this, the active player is surely human
 				Human h = (Human) (gameManager.getCurrentPlayer());
-				h.makeMove(gameManager, new Move(from, to, promotion));
+				h.makeMove(new Move(from, to, promotion));
 			}
 		}
 	}
