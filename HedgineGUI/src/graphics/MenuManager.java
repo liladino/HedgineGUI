@@ -22,7 +22,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import chess.Board;
 import chess.IO.PGNConverter;
-import game.GameManager;
 import game.GameStarter;
 import game.interfaces.GameEventListener;
 import game.interfaces.VisualChangeListener;

@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -21,7 +20,6 @@ public class Engine extends Player {
 	private BufferedWriter engineInput;
 	private BufferedReader engineOutput;
 	private ExecutorService executorService;
-	private volatile ArrayList<String> outputs;
 	boolean uciok = false;
 	
 	public Engine(Sides side, String name, File enginePath){
@@ -102,7 +100,7 @@ public class Engine extends Player {
 			sendCommand("quit");
 			process.waitFor();
 		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		} finally {
 			executorService.shutdown();
 		}

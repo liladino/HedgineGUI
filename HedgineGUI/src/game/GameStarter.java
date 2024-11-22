@@ -1,7 +1,6 @@
 package game;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import chess.Board;
 import chess.IO.FENException;
@@ -12,7 +11,6 @@ import utility.Sides;
 import utility.TimeControl;
 
 public class GameStarter {
-	private static final Logger logger = Logger.getLogger(GameStarter.class.getName());
 	private static Thread t = null;
 	private static MainWindow mainWindow = null;
 	private static GameManager gameManager = null;

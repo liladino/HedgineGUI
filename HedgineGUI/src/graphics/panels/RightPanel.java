@@ -16,6 +16,7 @@ import game.interfaces.VisualChangeListener;
 import utility.Sides;
 
 public class RightPanel extends JPanel implements VisualChangeListener{
+	private static final long serialVersionUID = 3474454907485110512L;
 	private JTextArea whiteName;
 	private JTextArea blackName;
 	private JTextArea movesArea;

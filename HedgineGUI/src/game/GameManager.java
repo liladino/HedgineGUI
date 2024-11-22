@@ -2,8 +2,6 @@ package game;
 
 import java.util.logging.Logger;
 
-import javax.swing.text.Position;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -162,6 +160,8 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 			InformationDialogs.errorDialog(null, "Failed to communicate with engine: " + e.getMessage());
 			stopRunning();
 		}
+	
+		if (!currentPlayer.isHuman()) notifyEngine();
 
 		while (running) {
 			synchronized (this) {
@@ -195,7 +195,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 					if (running && !currentPlayer.isHuman()) notifyEngine();
 				}
 				else {
-					System.out.print("Illegal input: ");
+					logger.info("Illegal input: ");
 				}
 				logger.info(currentMove.toString());
 			}
@@ -280,7 +280,19 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		else if (clock.getTimeControl() == TimeControl.FIX_TIME_PER_MOVE) {
 			sb.append("go movetime " + (int)(clock.getWhiteTime() * 0.9));
 		}
-		//TODO fischer
+		else if (clock.getTimeControl() == TimeControl.FISCHER) {
+			sb.append("go wtime ");
+			sb.append(clock.getWhiteTime());
+			sb.append(" btime ");
+			sb.append(clock.getBlackTime());
+			if (clock.getIncrementStartMove() < moves.size() / 2) {
+				sb.append(" winc ");
+				sb.append(clock.getIncrement());
+				sb.append(" binc ");
+				sb.append(clock.getIncrement());
+			}
+		}
+		
 		
 		System.out.println(new String(sb));
 		
@@ -344,12 +356,23 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		}
 		if (moves.isEmpty()) return;
 		
+		if (!currentPlayer.isHuman()) {
+			try {
+				((Engine)(currentPlayer)).sendCommand("stop");
+			} catch (IOException e) {
+				return;
+			}
+		}
+		
 		for (int i = 0; i < moves.size()-1; i++){
 			temp.makeMove(moves.get(i));
 		}
 		moves.remove(moves.size()-1);
 		board = temp;
 		clock.pressClock();
+		currentPlayer = (currentPlayer == white) ? black : white;
+		if (!currentPlayer.isHuman()) notifyEngine();
+		
 		notifyGameStateChanged();
 	} 
 }

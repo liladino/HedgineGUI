@@ -10,6 +10,7 @@ import game.interfaces.ClockListener;
 import utility.Sides;
 
 public class TimePanel extends JPanel implements ClockListener {
+	private static final long serialVersionUID = 8502136930868216129L;
 	private Sides side; 
 	private JLabel timeLabel;
 
