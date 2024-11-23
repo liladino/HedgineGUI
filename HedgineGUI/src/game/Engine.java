@@ -6,11 +6,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import chess.Move;
+import graphics.dialogs.InformationDialogs;
 import utility.Sides;
 
 public class Engine extends Player {
@@ -19,13 +21,17 @@ public class Engine extends Player {
 	private Process process;
 	private BufferedWriter engineInput;
 	private BufferedReader engineOutput;
+	private boolean gotInfos = false;
+	private ArrayList<String> infos = null;
 	private ExecutorService executorService;
-	boolean uciok = false;
+	private boolean uciok = false;
+	private boolean running = false;
 	
 	public Engine(Sides side, String name, File enginePath){
 		super(side, name);
 		human = false;
 		this.enginePath = enginePath;
+		infos = new ArrayList<>();
 	}
 
 	@Override
@@ -52,8 +58,10 @@ public class Engine extends Player {
 				break;
 			}
 		}
-		stopEngine();
+		//quitEngine();
 		if (!uciok) throw new IOException("Not UCI compatible engine");
+		gotInfos = true;
+		running = true;
 	}
 
 	public void startEngine() throws IOException {
@@ -69,6 +77,8 @@ public class Engine extends Player {
 		// Start listening to the engine's output in a separate thread
 		executorService.submit(this::listenToEngineOutput);
 		sendCommand("uci");
+
+		running = true;
 	}
 	
 	private void listenToEngineOutput() {
@@ -76,6 +86,11 @@ public class Engine extends Player {
 			String output;
 			while ((output = engineOutput.readLine()) != null) {
 				System.out.println(output);
+				
+				if (!gotInfos) {
+					infos.add(output);
+				}
+				
 				String[] outputParsed = output.split(" ");
 				if (outputParsed[0].equals("bestmove")) {
 					Move m = new Move(outputParsed[1]);
@@ -91,11 +106,17 @@ public class Engine extends Player {
 	}
 
 	public void sendCommand(String command) throws IOException {
+		logger.info("command sent: " + command);
 		engineInput.write(command + "\n");
 		engineInput.flush();
 	}
+	
+	public boolean isRunning() {
+		return running;
+	}
 
-	public void stopEngine() {
+	public void quitEngine() {
+		running = false;
 		try {
 			sendCommand("quit");
 			process.waitFor();
@@ -104,5 +125,14 @@ public class Engine extends Player {
 		} finally {
 			executorService.shutdown();
 		}
+	}
+	
+	public void getInfo() {
+		StringBuilder sb = new StringBuilder();
+		for (String s : infos) {
+			sb.append(s);
+			sb.append('\n');
+		}
+		InformationDialogs.infoDialog(GameStarter.getMainWindow(), new String(sb));
 	}
 }

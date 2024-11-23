@@ -35,6 +35,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	private volatile boolean running;
 	private List<GameEventListener> eventListeners;
 	private List<VisualChangeListener> updateListeners;
+	private String lastEngineCommand = null;
 
 	/* * * * *
 	 * Game  *
@@ -116,6 +117,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		return running;
 	}
 
+	public String lastEngineCommand() {
+		return lastEngineCommand;
+	}
+	
 	public Player getPlayer(Sides s){
 		if (s == Sides.BLACK){
 			return black;
@@ -145,7 +150,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public void run() {
 		logger.info("gameManager started");
 		
-		running = true;
+		running = true;		
 		Thread t = null;
 		if (clock.getTimeControl() != TimeControl.NO_CONTROL){
 			t = new Thread(clock);
@@ -229,8 +234,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 				listener.onStalemate();
 			}
 			else if (Result.DRAW == board.getResult()) {
-				//if the board signals a draw, the material is insufficient.
-				listener.onInsufficientMaterial();
+				listener.onDraw();
 			}
 		}
 		stopRunning();
@@ -293,11 +297,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 			}
 		}
 		
-		
-		System.out.println(new String(sb));
-		
+		lastEngineCommand = new String(sb);
 		try {
-			((Engine)currentPlayer).sendCommand(new String(sb));
+			((Engine)currentPlayer).sendCommand(lastEngineCommand);
 		} catch (IOException e) {
 			return;
 		}
@@ -305,11 +307,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	
 	private void startEngines() throws IOException {
 		if (!white.isHuman()) {
-			((Engine)white).startEngine();
 			((Engine)white).sendCommand("ucinewgame");
 		}
 		if (!black.isHuman()) {
-			((Engine)black).startEngine();
 			((Engine)black).sendCommand("ucinewgame");
 		}
 	}
@@ -337,10 +337,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public synchronized void stopRunning(){
 		running = false;
 		if (!white.isHuman()) {
-			((Engine)white).stopEngine();
+			((Engine)white).quitEngine();
 		}
 		if (!black.isHuman()) {
-			((Engine)black).stopEngine();
+			((Engine)black).quitEngine();
 		}
 		notifyAll();
 	}
@@ -351,7 +351,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 			temp = new Board(startFEN);
 		}
 		catch (FENException f){
-			//can't reach this
 			return;
 		}
 		if (moves.isEmpty()) return;

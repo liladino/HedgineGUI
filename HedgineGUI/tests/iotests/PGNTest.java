@@ -2,12 +2,19 @@ package iotests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.File;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import chess.Board;
 import chess.Move;
 import chess.Square;
 import chess.IO.PGNConverter;
+import game.GameManager;
+import game.GameStarter;
+import game.Human;
+import graphics.MainWindow;
+import utility.Sides;
 
 public class PGNTest {
 	Board startBoard;
@@ -96,5 +103,80 @@ public class PGNTest {
 		Move ng7 = new Move(new Square('e', 8), new Square('g', 7), ' ');	
 		assertEquals("Ng7", PGNConverter.convertMoveToPGNString(pins, ng7));
 
-	}	
+	}
+	
+	@Test
+	void fullGameTest1() {
+		GameManager gameManager = new GameManager();
+
+		Human w = new Human(Sides.WHITE, "White");
+		Human b = new Human(Sides.BLACK, "Black");
+		GameStarter.setGameManager(gameManager);
+		GameStarter.startNewGame(w, b, "N");
+		
+		try {
+			Thread.sleep(100);
+			w.makeMove(new Move(new Square('f', 2), new Square('f', 4), ' '));
+			Thread.sleep(100);
+			b.makeMove(new Move(new Square('e', 7), new Square('e', 6), ' '));
+			Thread.sleep(100);
+			w.makeMove(new Move(new Square('g', 2), new Square('g', 4), ' '));
+			Thread.sleep(100);
+			b.makeMove(new Move(new Square('d', 8), new Square('h', 4), ' '));
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			fail();
+		}
+		
+		String s = PGNConverter.convertToPGN(
+				gameManager.getPlayer(Sides.WHITE),
+				gameManager.getPlayer(Sides.BLACK),
+				gameManager.startFEN(), 
+				gameManager.getMoves(), 
+				gameManager.getResult());
+
+		assertEquals("[Site \"HedgineGUI\"]\n"
+				+ "[White \"White\"]\n"
+				+ "[Black \"Black\"]\n"
+				+ "[Variation \"Standard\"]\n"
+				+ "[Result \"0-1\"]\n"
+				+ "1. f4 e6 2. g4 Qh4# 0-1", s);
+	}
+	
+	@Test
+	void fullGameTest2() {
+		GameManager gameManager = new GameManager();
+
+		Human w = new Human(Sides.WHITE, "White");
+		Human b = new Human(Sides.BLACK, "Black");
+		GameStarter.setGameManager(gameManager);
+		GameStarter.startNewGame("rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1", w, b, "N");
+		
+		try {
+			Thread.sleep(100);
+			b.makeMove(new Move(new Square('e', 7), new Square('e', 6), ' '));
+			Thread.sleep(100);
+			w.makeMove(new Move(new Square('g', 2), new Square('g', 4), ' '));
+			Thread.sleep(100);
+			b.makeMove(new Move(new Square('d', 8), new Square('h', 4), ' '));
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			fail();
+		}
+		
+		String s = PGNConverter.convertToPGN(
+				gameManager.getPlayer(Sides.WHITE),
+				gameManager.getPlayer(Sides.BLACK),
+				gameManager.startFEN(), 
+				gameManager.getMoves(), 
+				gameManager.getResult());
+
+		assertEquals("[Site \"HedgineGUI\"]\n"
+				+ "[White \"White\"]\n"
+				+ "[Black \"Black\"]\n"
+				+ "[Variation \"From Position\"]\n"
+				+ "[FEN \"rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1\"]\n"
+				+ "[Result \"0-1\"]\n"
+				+ "1... e6 2. g4 Qh4# 0-1", s);
+	}
 }

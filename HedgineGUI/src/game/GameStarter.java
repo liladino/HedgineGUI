@@ -34,7 +34,7 @@ public class GameStarter {
 		}
 		catch (IOException e) {
 			white = new Human(Sides.WHITE, white.getName());
-			InformationDialogs.errorDialog(mainWindow, "White error: " + e.getMessage() + "\nThe player is set to be human.");
+			if (mainWindow != null) InformationDialogs.errorDialog(mainWindow, "White error: " + e.getMessage() + "\nThe player is set to be human.");
 		}
 		
 		try {
@@ -42,7 +42,7 @@ public class GameStarter {
 		}
 		catch (IOException e) {
 			black = new Human(Sides.BLACK, black.getName());
-			InformationDialogs.errorDialog(mainWindow, "Black error: " + e.getMessage() + "\nThe player is set to be human.");
+			if (mainWindow != null) InformationDialogs.errorDialog(mainWindow, "Black error: " + e.getMessage() + "\nThe player is set to be human.");
 		}
 		
 		white.setMoveListener(gameManager);
@@ -50,15 +50,15 @@ public class GameStarter {
 		
 		initializeGame(fen, white, black, timeControl);
 		
-		mainWindow.getRightPanel().setWhiteName(white.getName());
-		mainWindow.getRightPanel().setBlackName(black.getName());
+		if (mainWindow != null) mainWindow.getRightPanel().setWhiteName(white.getName());
+		if (mainWindow != null) mainWindow.getRightPanel().setBlackName(black.getName());
 
 		GraphicSettings.rotateBoard = false;
 		if (!white.isHuman() && black.isHuman()){
 			GraphicSettings.rotateBoard = true;
 		}
 
-		mainWindow.repaint();
+		if (mainWindow != null) mainWindow.repaint();
 		gameManager.notifyGameStateChanged();
 		
 		t = new Thread(gameManager);
@@ -94,4 +94,9 @@ public class GameStarter {
 	public static void addMainWindow(MainWindow mainWindow){
 		GameStarter.mainWindow = mainWindow;
 	}
+
+	public static MainWindow getMainWindow(){
+		return mainWindow;
+	}
+
 }

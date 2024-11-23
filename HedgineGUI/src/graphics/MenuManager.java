@@ -22,6 +22,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import chess.Board;
 import chess.IO.PGNConverter;
+import game.Engine;
 import game.GameStarter;
 import game.interfaces.GameEventListener;
 import game.interfaces.VisualChangeListener;
@@ -41,6 +42,8 @@ public class MenuManager implements ActionListener {
 	private JMenu view;
 	private ArrayList<JMenuItem> viewMenuElements;
 	private ArrayList<String> viewMenuStrings;
+	private JMenu engines;
+	private ArrayList<String> enginesMenuStrings;
 	private ArrayList<JMenuItem> colors;
 
 	private VisualChangeListener visualListener;
@@ -54,6 +57,7 @@ public class MenuManager implements ActionListener {
 		gameMenuStrings = new ArrayList<>();
 		viewMenuStrings = new ArrayList<>();
 		viewMenuElements = new ArrayList<>();
+		enginesMenuStrings = new ArrayList<>();
 		gameEventListeners = new ArrayList<>();
 		
 		colors = new ArrayList<>();
@@ -61,6 +65,7 @@ public class MenuManager implements ActionListener {
 		file = new JMenu("File");
 		game = new JMenu("Game");
 		view = new JMenu("View");
+		engines = new JMenu("Engine");
 		setUpMenuBar();
 	}	
 
@@ -69,12 +74,12 @@ public class MenuManager implements ActionListener {
 				
 		menuBar.add(file);
 
-		fileMenuStrings.add("Load FEN");		//0
-		fileMenuStrings.add("Load board");	//1
-		fileMenuStrings.add("Save FEN");		//2
-		fileMenuStrings.add("Save PGN");		//3
-		fileMenuStrings.add("Save board");	//4
-		fileMenuStrings.add("Quit");			//5
+		fileMenuStrings.add("Load FEN");        //0
+		fileMenuStrings.add("Load board");      //1
+		fileMenuStrings.add("Save FEN");        //2
+		fileMenuStrings.add("Save PGN");        //3
+		fileMenuStrings.add("Save board");      //4
+		fileMenuStrings.add("Quit");            //5
 		
 		for (String s : fileMenuStrings){
 			JMenuItem m = new JMenuItem(s);
@@ -109,6 +114,19 @@ public class MenuManager implements ActionListener {
 		}
 		for (JMenuItem m : colors) {
 			colorScheme.add(m);
+			m.addActionListener(this);
+		}
+		
+		menuBar.add(engines);
+
+		enginesMenuStrings.add("Quit engine");
+		enginesMenuStrings.add("Restart engine");
+		enginesMenuStrings.add("Stop engine");
+		enginesMenuStrings.add("Engine info");
+		
+		for (String s : enginesMenuStrings){
+			JMenuItem m = new JMenuItem(s);
+			engines.add(m);
 			m.addActionListener(this);
 		}
 
@@ -246,10 +264,66 @@ public class MenuManager implements ActionListener {
 			}
 		}
 		else if (s.equals(gameMenuStrings.get(2))){
-			//tanke back
+			//take back
 			if (!GameStarter.getGameManager().isGameRunning()) return;
 			GameStarter.getGameManager().takeBack();
 		}
+		else if (s.equals(enginesMenuStrings.get(0))){
+			//quit engine
+			Engine e = getEngine();
+			if (e == null) return;
+			try {
+				e.sendCommand("quit");
+			} catch (IOException e1) {
+				return;
+			}
+		}
+		else if (s.equals(enginesMenuStrings.get(1))){
+			//restart engine
+			Engine e = getEngine();
+			if (e == null) return;
+			try {
+				if (e.isRunning())
+					e.quitEngine();
+				
+				e.startEngine();
+				
+				e.sendCommand("ucinewgame");
+				if (GameStarter.getGameManager().getCurrentPlayer() == e) 
+					e.sendCommand(GameStarter.getGameManager().lastEngineCommand());
+			} catch (IOException e1) {
+				return;
+			}
+		}
+		else if (s.equals(enginesMenuStrings.get(3))){
+			//engine stop -> get move
+			Engine e = getEngine();
+			if (e == null) return;
+			try {
+				if (e.isRunning()) e.sendCommand("stop");
+			} catch (IOException e1) {
+				return;
+			}
+		}
+		else if (s.equals(enginesMenuStrings.get(3))){
+			//engine info
+			Engine e = getEngine();
+			if (e == null) return;
+			e.getInfo();
+		}
+	}
+	
+	private Engine getEngine() {
+		Engine e;
+		if (!GameStarter.getGameManager().getCurrentPlayer().isHuman()) e = (Engine) GameStarter.getGameManager().getCurrentPlayer();
+		else {
+			Sides notActiveSide = (GameStarter.getGameManager().getCurrentPlayer().getSide() == Sides.BLACK ? Sides.WHITE : Sides.BLACK); 
+			if (GameStarter.getGameManager().getPlayer(notActiveSide).isHuman()) {
+				return null;
+			}
+			e = (Engine) GameStarter.getGameManager().getPlayer(notActiveSide);
+		}
+		return e;
 	}
 	
 	public void addVisualChangeListener(VisualChangeListener listener) {
