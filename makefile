@@ -7,8 +7,6 @@ SOURCES = $(shell find $(SRC_DIR) -name "*.java")
 
 CLASSPATH = $(LIB_DIR)/*:$(BIN_DIR)
 
-PROJECT_ROOT = $(abspath $(dir $(CURDIR))/..)
-
 build:
 	make clean
 	mkdir -p $(BIN_DIR)
