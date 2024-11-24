@@ -105,7 +105,7 @@ public class NewGame extends JFrame {
 			add(picLabel, gbc);
 		}
 		catch (IOException i){
-			//Image missing
+			//Image missing panel
 			gbc.gridx = 3;
 			gbc.gridy = 0;
 			gbc.gridheight = 13;
@@ -267,7 +267,7 @@ public class NewGame extends JFrame {
 				fischerControl.setText("S 300");
 			} 
 			else if (fischerPresets.getSelectedItem().equals(presets[4])){
-				fischerControl.setText("S 300");
+				fischerControl.setText("S 300 0 3");
 			} 
 			else if (fischerPresets.getSelectedItem().equals(presets[5])){
 				fischerControl.setText("S 600 0 10");

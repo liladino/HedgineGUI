@@ -78,7 +78,7 @@ public class GameStarter {
 			TimeInformationConverter.setClock(gameManager.getClock(), timeControl);
 		}
 		catch (TimeInputException t){
-			InformationDialogs.errorDialog(mainWindow, "Invalid time fromat: " + t.getMessage());
+			InformationDialogs.errorDialog(mainWindow, "Invalid time fromat: " + t.getMessage() + "\nTime set to no control");
 			gameManager.getClock().setControlType(TimeControl.NO_CONTROL);
 		}
 	}

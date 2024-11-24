@@ -26,7 +26,6 @@ public class Board implements Serializable {
 	/* * * * * * * * *
 	 * Constructors  *
 	 * * * * * * * * */
-	
 	public Board(String FEN) throws FENException {
 		try {
 			setupBoard(FEN);
@@ -45,6 +44,23 @@ public class Board implements Serializable {
 			//this can't throw an exception if i didn't mess up
 			System.out.println(e);
 		}
+	}
+	
+	public Board(Board b) {
+		board = new char[12][12];
+		for (int i = 2; i < 10; i++) 
+			for (int j = 2; j < 10; j++) 
+				board[i][j] = b.board[i][j];
+		
+		if (b.tomove == Sides.WHITE) tomove = Sides.WHITE; else tomove = Sides.BLACK;
+		
+		castlingRights = Arrays.copyOf(b.castlingRights, 4);
+		
+		enPassantTarget = new Square(b.enPassantTarget);
+		fiftyMoveRule = b.fiftyMoveRule;
+		fullMoveCount = b.fullMoveCount;
+		
+		legalMoves = null;
 	}
 	
 	private void setupBoard(String FEN) throws FENException {
@@ -74,24 +90,6 @@ public class Board implements Serializable {
 		if (inCheck(notToMove)) {
 			throw new FENException("Illegal board: The side not to move is in check.", 6);
 		}
-	}
-	
-	//copy constructor
-	public Board(Board b) {
-		board = new char[12][12];
-		for (int i = 2; i < 10; i++) 
-			for (int j = 2; j < 10; j++) 
-				board[i][j] = b.board[i][j];
-		
-		if (b.tomove == Sides.WHITE) tomove = Sides.WHITE; else tomove = Sides.BLACK;
-		
-		castlingRights = Arrays.copyOf(b.castlingRights, 4);
-		
-		enPassantTarget = new Square(b.enPassantTarget);
-		fiftyMoveRule = b.fiftyMoveRule;
-		fullMoveCount = b.fullMoveCount;
-		
-		legalMoves = null;
 	}
 	
 	
@@ -213,6 +211,7 @@ public class Board implements Serializable {
 		if (tomove == Sides.BLACK) tomove = Sides.WHITE;
 		else tomove = Sides.BLACK;
 	}
+	
 	
 	public void makeMove(Move m) {
 		if (m.isNull()) return;
@@ -449,7 +448,7 @@ public class Board implements Serializable {
 			return false;
 		}
 		
-		//to check if square + offset is q,r,b,n, or p, no matter the color
+		//to check if square + offset is q,r,b,n, or p
 		int colorOffset = (tomove == Sides.WHITE ? 0 : 'a' - 'A');
 		
 		

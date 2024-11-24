@@ -22,5 +22,8 @@ public class Main {
 		GameStarter.setGameManager(gameManager);
 		GameStarter.addMainWindow(mainWindow);
 		GameStarter.startNewGame(new Human(Sides.WHITE, "White"), new Human(Sides.BLACK, "Black"), "N");
+		
+
+		System.out.println(System.getProperty("user.dir"));
 	}
 }
