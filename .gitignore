@@ -40,10 +40,14 @@ out/
 ## Eclipse
 .settings/
 bin/
+HedgineGUI/bin/
 tmp/
 .metadata
+HedgineGUI/.metadata
 .classpath
+HedgineGUI/.classpath
 .project
+HedgineGUI/.project
 *.tmp
 *.bak
 *.swp
@@ -79,3 +83,4 @@ saves/
 HedgineGUI/saves/
 HedgineGUI/doc/
 leiras/
+debuglog.txt
