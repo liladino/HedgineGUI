@@ -15,6 +15,10 @@ import game.GameManager;
 import game.interfaces.VisualChangeListener;
 import utility.Sides;
 
+/**
+ * The panel on the right side of the screen. 
+ * Shows the players' names, their remaining time, and the moves made in the game.
+ */
 public class RightPanel extends JPanel implements VisualChangeListener{
 	private static final long serialVersionUID = 3474454907485110512L;
 	private JTextArea whiteName;

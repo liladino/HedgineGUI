@@ -6,6 +6,9 @@ import java.util.TreeMap;
 import utility.Pair;
 import java.awt.Color;
 
+/**
+ * Works like public global settings for the board panel and menu.
+ */
 public class GraphicSettings {
 	private static Map<String, Pair<Color, Color>> colorsP = new TreeMap<>();;
 	public static final Map<String, Pair<Color, Color>> colors = colorsP;
@@ -14,6 +17,10 @@ public class GraphicSettings {
 	
 	private GraphicSettings() {}
 	
+	/**
+	 * Initializes the settings. 
+	 * Should be called at the beginning of the program
+	 */
 	public static void initializeGraphicSettings() {
 		rotateBoard = false;
 		selectedScheme = "Green";

@@ -10,6 +10,17 @@ import chess.IO.FENManager;
 import utility.Result;
 import utility.Sides;
 
+/**
+ * This class represents a chessboard, and all the information regarding it.
+ * It handles making a move on the board, getting the legal moves and setting the metadata:
+ *  - which side is to move
+ *  - castling rights
+ *  - en passant possibility
+ *  - fifty move rule count
+ *  - full move count
+ *  
+ * Note: the makeMove() method *does not* check if the move is actually legal.
+ * */
 public class Board implements Serializable {
 	private static final long serialVersionUID = 1871341340688870L;
 	
@@ -26,6 +37,11 @@ public class Board implements Serializable {
 	/* * * * * * * * *
 	 * Constructors  *
 	 * * * * * * * * */
+	/**
+	 * Tries to set up a board from a FEN.
+	 * If the last move number and fifty move rule fields are not found, they are set to 1 and 0 respectively.
+	 * If other fields are missing/are invalid, throws a FENException.
+	 * */
 	public Board(String FEN) throws FENException {
 		try {
 			setupBoard(FEN);
@@ -212,12 +228,18 @@ public class Board implements Serializable {
 		else tomove = Sides.BLACK;
 	}
 	
-	
+	/**
+	 * @param m tries to make the move
+	 * Does NOT check if the move is legal, only if it "looks valid enough" to make it.
+	 * If there is an error with the move (is null, no piece stands there), it returns without doing anything.
+	 * */
 	public void makeMove(Move m) {
 		if (m.isNull()) return;
 		if (board[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == ' ') return;
 		
 		legalMoves = null;
+		
+		int tempFiftyMove = fiftyMoveRule;
 		
 		//setting castling rights
 		//if anything moves to one of the corners, no castling that way
@@ -336,6 +358,9 @@ public class Board implements Serializable {
 		//set meta values
 		if (tomove == Sides.BLACK) {
 			fullMoveCount++;
+			if (tempFiftyMove == fiftyMoveRule) {
+				fiftyMoveRule++;
+			}
 		}
 		
 		switchColor();
@@ -369,6 +394,10 @@ public class Board implements Serializable {
 	}
 	
 	public Result getResult() {
+		if (fiftyMoveRule >= 50) {
+			return Result.DRAW;
+		}
+		
 		if (legalMoves == null) {
 			generateLegalMoves();
 		}

@@ -17,6 +17,13 @@ import game.interfaces.MoveListener;
 import game.interfaces.TimeEventListener;
 import utility.*;
 
+/**
+ * Manages the lifecycle and logic of a chess game, including player interactions,
+ * time control, move processing, and engine communication.
+ *
+ * Serves as the central controller for chess games, handles board setup, player turns, time management, and interaction with external chess engines. 
+ * Notifies listeners about game state changes, visual updates, and game results.
+ */
 public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	private static final Logger logger = Logger.getLogger(GameManager.class.getName());
 

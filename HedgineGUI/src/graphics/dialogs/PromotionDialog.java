@@ -16,6 +16,10 @@ import javax.swing.WindowConstants;
 
 import utility.Sides;
 
+/**
+ * Shows the promotion options if a pawn reaches the 1st or 8th rank.
+ * Note: if the dialog is closed without selecting any options, the move should be cancelled. 
+ */
 public class PromotionDialog extends JDialog{
 	private static final long serialVersionUID = 1687874164L;
 	private char selectedPiece;
@@ -23,7 +27,7 @@ public class PromotionDialog extends JDialog{
 	public PromotionDialog(JFrame parent, Map<Character, BufferedImage> images, Sides tomove) {
 		super(parent, "Pawn promotion", true);
 		this.images = images;
-		selectedPiece = ' '; //this space works as a cancel operation too (like on exit)
+		selectedPiece = ' '; //this space works as a cancel operation too (on exit)
 		setLayout(new GridLayout(1, 4));
 		setSize(400, 90 + parent.getInsets().top + parent.getInsets().bottom);
 		setResizable(false);

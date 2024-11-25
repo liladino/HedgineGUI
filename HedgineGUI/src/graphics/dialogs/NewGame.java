@@ -32,6 +32,12 @@ import game.Human;
 import game.Player;
 import utility.Sides;
 
+/**
+ * Settings for a new game. 
+ * Loads the engines, and sets the time control.
+ * Note: this does not check if the engine is uci compatible, the start position is valid, or the time format string is correct.
+ * Note: upon closing this window, the game should continue
+ */
 public class NewGame extends JFrame {
 	private static final long serialVersionUID = -421311633940977178L;
 	private JTextField whiteName;

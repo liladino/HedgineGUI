@@ -5,6 +5,9 @@ import javax.swing.JOptionPane;
 
 import utility.Sides;
 
+/**
+ * Shows a message upon game end.
+ */
 public class GameEndDialogs {
 	private GameEndDialogs(){}
 	private static String gameOver = "Game over";

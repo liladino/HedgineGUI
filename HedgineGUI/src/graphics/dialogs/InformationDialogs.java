@@ -8,6 +8,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
+/**
+ * Shows custom information/error messages, as well as the infos about the program.
+ */
 public class InformationDialogs {
 	private InformationDialogs(){}
 	

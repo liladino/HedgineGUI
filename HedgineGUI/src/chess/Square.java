@@ -2,6 +2,9 @@ package chess;
 
 import java.io.Serializable;
 
+/**
+ * A field on the board. Provides automatic conversion between the indices used by the Board and user notations.
+ * */
 public class Square implements Serializable{
 	private static final long serialVersionUID = 81867168718303L;
 
@@ -18,6 +21,11 @@ public class Square implements Serializable{
 		//null square
 	}
 	
+	/**
+	 * Constructor from user friendly coordinates
+	 * @param file
+	 * @param rank
+	 */
 	public Square(char file, int rank) {
 		if (file < 'a' || file > 'h' || rank < 1 || rank > 8) {
 			this.rank = -1;
@@ -28,7 +36,9 @@ public class Square implements Serializable{
 		this.file = file;
 	}
 	
-	//constructor for 12x12 board coordinates
+	/**
+	 * constructor for 12x12 board coordinates
+	 */
 	public Square(int row, int col) {
 		if (row < 2 || row > 9 || col < 2 || col > 9) {
 			rank = -1;
@@ -69,6 +79,9 @@ public class Square implements Serializable{
 	/* * * * * *
 	 * Methods *
 	 * * * * * */
+	/**
+	 * Checks if it's a nullmove
+	 */
 	public boolean isNull() {
 		if (rank == -1 || rank == 0) {
 			return true;

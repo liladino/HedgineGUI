@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 import utility.Sides;
 
+/**
+ * An extension on ArrayList, to store the legal moves in a position.
+ * It get's a Board in its constructor, and adds the moves automatically.
+ * */
 public class LegalMoves extends ArrayList<Move> {
 	private static final long serialVersionUID = 9706338641357L;
 	

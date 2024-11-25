@@ -58,7 +58,6 @@ public class Engine extends Player {
 				break;
 			}
 		}
-		//quitEngine();
 		if (!uciok) throw new IOException("Not UCI compatible engine");
 		gotInfos = true;
 		running = true;
@@ -101,6 +100,7 @@ public class Engine extends Player {
 				}
 			}
 		} catch (IOException e) {
+			running = false;
 			logger.info("Error reading engine output: " + e.getMessage());
 		}
 	}

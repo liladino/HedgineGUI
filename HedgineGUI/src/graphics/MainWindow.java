@@ -12,7 +12,10 @@ import java.awt.Dimension;
 
 import javax.swing.*;
 
-
+/**
+ * The main window of the application. 
+ * Implements GameEventListener, and shows the appropiate message upon the end of the game
+ */
 public class MainWindow extends JFrame implements GameEventListener {
 	private static final long serialVersionUID = 38435486L;
 	private ChessBoardPanel chessBoardPanel;

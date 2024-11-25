@@ -2,6 +2,10 @@ package chess;
 
 import java.io.PrintStream;
 
+/**
+ * A class that represents a chess move. 
+ * Consists of two squares (from, to) and a char that represents a promotion.
+ * */
 public class Move {
 	private final Square from;
 	private final Square to;
@@ -10,6 +14,10 @@ public class Move {
 	/* * * * * * * *
 	 * Constructor *
 	 * * * * * * * */
+	
+	/**
+	 * Creates a null move
+	 * */
 	public Move() {
 		//nullmove
 		from = new Square();
@@ -17,6 +25,10 @@ public class Move {
 		promotion = ' ';
 	}
 	
+	/**
+	 * Creates a move from a strng
+	 * @param str should be in long algebraic notation (e.g. e1g1, c7d8q)
+	 * */
 	public Move(String str) {
 		if (!(this.isMove(str))) {
 			from = new Square();
@@ -41,6 +53,10 @@ public class Move {
 		}
 	}
 	
+	/**
+	 * Creates a move from Squares and a char. 
+	 * @param promotion a lowercase character, that the pawn will turn into. If there is no promotion, can be anything but lowercase piece names. The program internally will store a space.
+	 * */
 	public Move(Square from, Square to, char promotion) {
 		this.from = from;
 		this.to = to;

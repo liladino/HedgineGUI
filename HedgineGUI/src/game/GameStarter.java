@@ -10,6 +10,9 @@ import graphics.dialogs.InformationDialogs;
 import utility.Sides;
 import utility.TimeControl;
 
+/**
+ * 
+ */
 public class GameStarter {
 	private static Thread t = null;
 	private static MainWindow mainWindow = null;

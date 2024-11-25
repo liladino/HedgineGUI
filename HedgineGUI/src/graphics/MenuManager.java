@@ -31,6 +31,9 @@ import graphics.dialogs.NewGame;
 import utility.Result;
 import utility.Sides;
 
+/**
+ * Initializes the menubar, and handles the interactions.
+ */
 public class MenuManager implements ActionListener {
 	private static final Logger logger = Logger.getLogger(MenuManager.class.getName());
 	private MainWindow mainWindow;

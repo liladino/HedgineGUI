@@ -3,6 +3,12 @@ package game;
 import utility.Second;
 import utility.TimeControl;
 
+/**
+ * Helps setting a Clock object / or its values based on the time info string.
+ * Works in both ways:
+ *    if instanced, can build a valid time information string step by step
+ *    with the static setClock method can set a Clock from a string
+ */
 public class TimeInformationConverter {
 	private StringBuilder time;
 	public TimeInformationConverter(){

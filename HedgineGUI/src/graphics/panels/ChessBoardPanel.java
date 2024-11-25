@@ -24,12 +24,18 @@ import chess.Move;
 import utility.*;
 import chess.Square;
 import game.GameManager;
+import game.GameStarter;
 import game.Human;
 import game.interfaces.VisualChangeListener;
 import graphics.GraphicSettings;
 import graphics.MenuManager;
+import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.PromotionDialog;
 
+/**
+ * Shows the chess board on the screen. 
+ * Handles clicks on it, and if the active player is a human, registers its move. 
+ */
 public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 	private static final Logger logger = Logger.getLogger(ChessBoardPanel.class.getName());
 	private static final long serialVersionUID = 987168713547L;
@@ -76,23 +82,30 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 		String imagesPath = System.getProperty("user.dir") + "/resources/pieces/";
 		String selectionPath = System.getProperty("user.dir") + "/resources/select/";
 		logger.info(System.getProperty("user.dir") + "/resources/select/");
-		try { images.put('P', ImageIO.read(new File(imagesPath + "wp.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('R', ImageIO.read(new File(imagesPath + "wr.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('B', ImageIO.read(new File(imagesPath + "wb.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('N', ImageIO.read(new File(imagesPath + "wn.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('Q', ImageIO.read(new File(imagesPath + "wq.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('K', ImageIO.read(new File(imagesPath + "wk.png"))); } catch (IOException e) { e.printStackTrace(); } 
-		try { images.put('p', ImageIO.read(new File(imagesPath + "bp.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('r', ImageIO.read(new File(imagesPath + "br.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('b', ImageIO.read(new File(imagesPath + "bb.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('n', ImageIO.read(new File(imagesPath + "bn.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('q', ImageIO.read(new File(imagesPath + "bq.png"))); } catch (IOException e) { e.printStackTrace(); }
-		try { images.put('k', ImageIO.read(new File(imagesPath + "bk.png"))); } catch (IOException e) { e.printStackTrace(); }
+		
+		boolean fail = false;
+		
+		try { images.put('P', ImageIO.read(new File(imagesPath + "wp.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('R', ImageIO.read(new File(imagesPath + "wr.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('B', ImageIO.read(new File(imagesPath + "wb.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('N', ImageIO.read(new File(imagesPath + "wn.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('Q', ImageIO.read(new File(imagesPath + "wq.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('K', ImageIO.read(new File(imagesPath + "wk.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; } 
+		try { images.put('p', ImageIO.read(new File(imagesPath + "bp.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('r', ImageIO.read(new File(imagesPath + "br.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('b', ImageIO.read(new File(imagesPath + "bb.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('n', ImageIO.read(new File(imagesPath + "bn.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('q', ImageIO.read(new File(imagesPath + "bq.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('k', ImageIO.read(new File(imagesPath + "bk.kpng"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
 		
 		//selection
 		try { images.put('S', ImageIO.read(new File(selectionPath + "blue.png"))); } catch (IOException e) { e.printStackTrace(); }
 		//check
 		try { images.put('C', ImageIO.read(new File(selectionPath + "magenta.png"))); } catch (IOException e) { e.printStackTrace(); }
+		
+		if (fail) {
+			InformationDialogs.errorDialog(GameStarter.getMainWindow(), "Can't load all images at \"" + imagesPath + "\".\nLetters will be visible instead.\nMaybe Classpath isn't set right?");
+		}
 	}
 	
 	Sides pieceColor(char c) {

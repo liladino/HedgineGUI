@@ -8,6 +8,10 @@ import game.interfaces.GameEventListener;
 import game.interfaces.TimeEventListener;
 import utility.*;
 
+/**
+ * Handles the time remaining for both sides.
+ * Notifies the TimePanels upon pressing the clock, and notifies the GameManager if the time has expired
+ * */
 public class Clock implements Runnable, GameEventListener {
 	private TimeControl controlType;
 	private int whiteTime; 

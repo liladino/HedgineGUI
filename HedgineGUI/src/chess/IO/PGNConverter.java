@@ -10,6 +10,10 @@ import game.Player;
 import utility.Result;
 import utility.Sides;
 
+/**
+ * A class that converts a game and list of moves into a PGN string,
+ * or convert a single move into algebraic notation.
+ */
 public class PGNConverter {
 	private PGNConverter(){}
 

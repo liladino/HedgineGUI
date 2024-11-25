@@ -4,6 +4,9 @@ import chess.Board;
 import utility.Sides;
 import chess.Square;
 
+/**
+ * Class that converts the Board into a FEN string, or a FEN string into a Board.
+ */
 public class FENManager {
 	private boolean[] readSuccesses;
 	public FENManager(){ 
@@ -58,7 +61,7 @@ public class FENManager {
 		return new String(sb);
 	}
 	
-	public char[][] startpos() {
+	private char[][] startpos() {
 		char[][] board = {
 				{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
 				{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },

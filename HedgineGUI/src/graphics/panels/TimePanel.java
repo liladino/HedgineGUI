@@ -9,6 +9,10 @@ import java.awt.Font;
 import game.interfaces.ClockListener;
 import utility.Sides;
 
+/**
+ * Shows the remaining time for one side. 
+ * Formats it as minutes:seconds, or seconds:centiseconds if less then 30 seconds remain
+ */
 public class TimePanel extends JPanel implements ClockListener {
 	private static final long serialVersionUID = 8502136930868216129L;
 	private Sides side; 
