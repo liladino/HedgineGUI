@@ -41,11 +41,15 @@ public class MenuManager implements ActionListener {
 	private ArrayList<String> gameMenuStrings;
 	private JMenu view;
 	private ArrayList<JMenuItem> viewMenuElements;
+	private ArrayList<JMenuItem> colors;
 	private ArrayList<String> viewMenuStrings;
 	private JMenu engines;
 	private ArrayList<String> enginesMenuStrings;
-	private ArrayList<JMenuItem> colors;
 
+	private JMenu about;
+	private ArrayList<String> aboutMenuStrings;
+	
+	
 	private VisualChangeListener visualListener;
 	private ArrayList<GameEventListener> gameEventListeners;
 
@@ -59,6 +63,7 @@ public class MenuManager implements ActionListener {
 		viewMenuElements = new ArrayList<>();
 		enginesMenuStrings = new ArrayList<>();
 		gameEventListeners = new ArrayList<>();
+		aboutMenuStrings = new ArrayList<>();
 		
 		colors = new ArrayList<>();
 
@@ -66,6 +71,7 @@ public class MenuManager implements ActionListener {
 		game = new JMenu("Game");
 		view = new JMenu("View");
 		engines = new JMenu("Engine");
+		about = new JMenu("About");
 		setUpMenuBar();
 	}	
 
@@ -130,6 +136,15 @@ public class MenuManager implements ActionListener {
 			m.addActionListener(this);
 		}
 
+		aboutMenuStrings.add("Hedine GUI");
+		for (String s : aboutMenuStrings){
+			JMenuItem m = new JMenuItem(s);
+			about.add(m);
+			m.addActionListener(this);
+		}
+		
+		menuBar.add(about);
+		
 		mainWindow.setJMenuBar(menuBar);
 	}
 
@@ -310,6 +325,9 @@ public class MenuManager implements ActionListener {
 			Engine e = getEngine();
 			if (e == null) return;
 			e.getInfo();
+		}
+		else if (s.equals(aboutMenuStrings.get(0))) {
+			InformationDialogs.aboutDialog(mainWindow);
 		}
 	}
 	

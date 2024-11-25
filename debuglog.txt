@@ -1,0 +1,35 @@
+Transposition Table:	1 MB, 43690 entry
+Repetition Table:	8.000000 kB, 1024 entry
+--> uci
+--> ucinewgame
+--> position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 moves b1c3  d7d5  
+tomove: 1	fifty move count: 0	move num: 1
+--> go movetime 2000
+time control 1	start time: 1732531470995	moveTime: 2000 	depth: 40
+|---+---+---+---+---+---+---+---|
+| r | n | b | q | k | b | n | r |
+|---+---+---+---+---+---+---+---|
+| p | p | p | p | p | p | p | p |
+|---+---+---+---+---+---+---+---|
+|   |   |   |   |   |   |   |   |
+|---+---+---+---+---+---+---+---|
+|   |   |   |   |   |   |   |   |
+|---+---+---+---+---+---+---+---|
+|   |   |   |   |   |   |   |   |
+|---+---+---+---+---+---+---+---|
+|   |   | N |   |   |   |   |   |
+|---+---+---+---+---+---+---+---|
+| P | P | P | P | P | P | P | P |
+|---+---+---+---+---+---+---+---|
+| R |   | B | Q | K | B | N | R |
+|---+---+---+---+---+---+---+---|
+
+thinking time 2000
+info depth 1 score cp 0 pv b8c6  
+info depth 2 score cp 15 pv b8c6  g1f3  
+info depth 3 score cp 0 pv b8c6  g1f3  g8f6  
+info depth 4 score cp 0 pv b8c6  a1b1  g8f6  g1f3  
+info depth 5 score cp 0 pv b8c6  a1b1  g8f6  g1f3  a8b8  
+info depth 6 score cp 15 pv b8c6  g1f3  a8b8  b2b3  g8f6  c1b2  
+info depth 7 score cp 15
+bestmove: b8c6  
