@@ -23,6 +23,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import chess.Board;
 import chess.IO.PGNConverter;
 import game.Engine;
+import game.GameManager;
 import game.GameStarter;
 import game.interfaces.GameEventListener;
 import game.interfaces.VisualChangeListener;
@@ -100,6 +101,7 @@ public class MenuManager implements ActionListener {
 		gameMenuStrings.add("New game");
 		gameMenuStrings.add("Resing");
 		gameMenuStrings.add("Take back");
+		gameMenuStrings.add("Abort");
 		for (String s : gameMenuStrings){
 			JMenuItem m = new JMenuItem(s);
 			game.add(m);
@@ -128,7 +130,7 @@ public class MenuManager implements ActionListener {
 		
 		menuBar.add(engines);
 
-		enginesMenuStrings.add("Quit engine");
+		enginesMenuStrings.add("Quit engine(s)");
 		enginesMenuStrings.add("Restart engine");
 		enginesMenuStrings.add("Stop engine");
 		enginesMenuStrings.add("Engine info");
@@ -286,14 +288,27 @@ public class MenuManager implements ActionListener {
 			if (!GameStarter.getGameManager().isGameRunning()) return;
 			GameStarter.getGameManager().takeBack();
 		}
+		else if (s.equals(gameMenuStrings.get(3))){
+			//abort
+			if (!GameStarter.getGameManager().isGameRunning()) return;
+			
+			GameStarter.getGameManager().stopRunning();
+			GameStarter.getGameManager().setResult(Result.DRAW);
+			
+			for (GameEventListener g : gameEventListeners){
+				g.onDraw();
+			}
+		}
 		else if (s.equals(enginesMenuStrings.get(0))){
 			//quit engine
-			Engine e = getEngine();
-			if (e == null) return;
-			try {
-				e.sendCommand("quit");
-			} catch (IOException e1) {
-				return;
+			Engine e;
+			if (!GameStarter.getGameManager().getWhite().isHuman()) {
+				e = (Engine) GameStarter.getGameManager().getWhite();
+				e.quitEngine();
+			}
+			if (!GameStarter.getGameManager().getBlack().isHuman()) {
+				e = (Engine) GameStarter.getGameManager().getBlack();
+				e.quitEngine();
 			}
 		}
 		else if (s.equals(enginesMenuStrings.get(1))){

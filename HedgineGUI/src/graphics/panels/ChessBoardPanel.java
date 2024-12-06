@@ -96,7 +96,7 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 		try { images.put('b', ImageIO.read(new File(imagesPath + "bb.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
 		try { images.put('n', ImageIO.read(new File(imagesPath + "bn.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
 		try { images.put('q', ImageIO.read(new File(imagesPath + "bq.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('k', ImageIO.read(new File(imagesPath + "bk.kpng"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { images.put('k', ImageIO.read(new File(imagesPath + "bk.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
 		
 		//selection
 		try { images.put('S', ImageIO.read(new File(selectionPath + "blue.png"))); } catch (IOException e) { e.printStackTrace(); }

@@ -43,9 +43,9 @@ public class NewGame extends JFrame {
 	private JTextField whiteName;
 	private JTextField blackName;
 	private JComboBox<String> comboWhitePlayer;
-	private File whiteEngine;
+	private static File whiteEngine = null;
 	private JComboBox<String> comboBlackPlayer;
-	private File blackEngine; 
+	private static File blackEngine = null; 
 	private JTextField startPos;
 	private String timeControl;
 	private JTextField fischerControl;
@@ -80,7 +80,7 @@ public class NewGame extends JFrame {
   		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(10, 10, 10, 10);
 		
-		whiteEngine = blackEngine = null;
+		//whiteEngine = blackEngine = null;
 		
 		initRightPanel(gbc);
 
@@ -419,11 +419,18 @@ public class NewGame extends JFrame {
 		JFileChooser chooser;
 		JTextField name;
 		Sides side;
-		public EngineChooserButton(JTextField name, JLabel whitePathShower, Sides side){
-			path = whitePathShower;
+		public EngineChooserButton(JTextField name, JLabel pathShower, Sides side){
+			path = pathShower;
 			chooser = new JFileChooser();
 			this.side = side;
 			this.name = name;
+			
+			if (whiteEngine != null && side == Sides.WHITE) {
+				setTextAndLabel(whiteEngine);
+			}
+			else if (blackEngine != null && side == Sides.BLACK) {
+				setTextAndLabel(blackEngine);
+			}
 		}
 
 		@Override
@@ -436,15 +443,19 @@ public class NewGame extends JFrame {
 				else {
 					blackEngine = chooser.getSelectedFile();
 				}
-				String s = chooser.getSelectedFile().getPath();
-				int m = 33;
-				if (s.length() < m)
-					path.setText(s);
-				else
-					path.setText("... " + s.substring(s.length() - m + 4, s.length()));
-
-				name.setText(chooser.getSelectedFile().getName());
+				setTextAndLabel(chooser.getSelectedFile());
 			}
+		}
+		
+		private void setTextAndLabel(File f) {
+			String s = f.getPath();
+			int m = 33;
+			if (s.length() < m)
+				path.setText(s);
+			else
+				path.setText("... " + s.substring(s.length() - m + 4, s.length()));
+	
+			name.setText(f.getName());
 		}
 	}
 }

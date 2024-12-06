@@ -99,9 +99,15 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public Board getBoard() {
 		return board;
 	}
-	
+
 	public Player getCurrentPlayer() {
 		return currentPlayer;
+	}
+	public Player getWhite() {
+		return white;
+	}
+	public Player getBlack() {
+		return black;
 	}
 	
 	public Clock getClock(){
