@@ -10,7 +10,7 @@ import java.awt.Color;
  * Works like public global settings for the board panel and menu.
  */
 public class GraphicSettings {
-	private static Map<String, Pair<Color, Color>> colorsP = new TreeMap<>();;
+	private static Map<String, Pair<Color, Color>> colorsP = new TreeMap<>();
 	public static final Map<String, Pair<Color, Color>> colors = colorsP;
 	public static boolean rotateBoard;
 	public static String selectedScheme;

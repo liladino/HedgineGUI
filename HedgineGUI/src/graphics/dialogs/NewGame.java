@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
@@ -104,9 +105,15 @@ public class NewGame extends JFrame {
 			gbc.gridy = 0;
 			gbc.gridheight = 13;
 			gbc.fill = GridBagConstraints.BOTH;
-			String imagesPath = System.getProperty("user.dir") + "/resources/menu/";
-			ImageIcon menu = new ImageIcon(ImageIO.read(new File(imagesPath + "newgame1.png"))/*.getScaledInstance(224, 564, Image.SCALE_FAST)*/);
 			
+			String imagePath = "/resources/menu/newgame1.png";
+		    InputStream imageStream = getClass().getResourceAsStream(imagePath);
+		    
+		    if (imageStream == null) {
+		        throw new IOException("Resource not found: " + imagePath);
+		    }
+		    
+		    ImageIcon menu = new ImageIcon(ImageIO.read(imageStream));
 			JLabel picLabel = new JLabel(menu);
 			add(picLabel, gbc);
 		}

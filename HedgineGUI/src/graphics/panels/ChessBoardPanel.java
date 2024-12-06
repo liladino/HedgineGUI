@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import chess.Board;
 import chess.Move;
@@ -79,32 +80,74 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 	}
 	
 	void loadPieces() {
-		String imagesPath = System.getProperty("user.dir") + "/resources/pieces/";
-		String selectionPath = System.getProperty("user.dir") + "/resources/select/";
-		logger.info(System.getProperty("user.dir") + "/resources/select/");
-		
+		String imagesPath = "/resources/pieces/";
+		String selectionPath = "/resources/select/";
+		InputStream imageStream = null;// = getClass().getResourceAsStream(resourcePath);
+	
 		boolean fail = false;
-		
-		try { images.put('P', ImageIO.read(new File(imagesPath + "wp.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('R', ImageIO.read(new File(imagesPath + "wr.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('B', ImageIO.read(new File(imagesPath + "wb.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('N', ImageIO.read(new File(imagesPath + "wn.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('Q', ImageIO.read(new File(imagesPath + "wq.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('K', ImageIO.read(new File(imagesPath + "wk.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; } 
-		try { images.put('p', ImageIO.read(new File(imagesPath + "bp.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('r', ImageIO.read(new File(imagesPath + "br.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('b', ImageIO.read(new File(imagesPath + "bb.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('n', ImageIO.read(new File(imagesPath + "bn.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('q', ImageIO.read(new File(imagesPath + "bq.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
-		try { images.put('k', ImageIO.read(new File(imagesPath + "bk.png"))); } catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "wp.png"))) throw new IOException();
+			images.put('P', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "wr.png"))) throw new IOException();
+			images.put('R', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "wb.png"))) throw new IOException();
+			images.put('B', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "wn.png"))) throw new IOException();
+			images.put('N', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try {
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "wq.png"))) throw new IOException();
+			images.put('Q', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "wk.png"))) throw new IOException();
+			images.put('K', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; } 
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "bp.png"))) throw new IOException();
+			images.put('p', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "br.png"))) throw new IOException();
+			images.put('r', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "bb.png"))) throw new IOException();
+			images.put('b', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try {
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "bn.png"))) throw new IOException();
+			images.put('n', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "bq.png"))) throw new IOException();
+			images.put('q', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(imagesPath + "bk.png"))) throw new IOException();
+			images.put('k', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); fail = true; }
 		
 		//selection
-		try { images.put('S', ImageIO.read(new File(selectionPath + "blue.png"))); } catch (IOException e) { e.printStackTrace(); }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(selectionPath + "blue.png"))) throw new IOException();
+			images.put('S', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); }
+		
 		//check
-		try { images.put('C', ImageIO.read(new File(selectionPath + "magenta.png"))); } catch (IOException e) { e.printStackTrace(); }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(selectionPath + "magenta.png"))) throw new IOException();
+			images.put('C', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); }
 		
 		if (fail) {
-			InformationDialogs.errorDialog(GameStarter.getMainWindow(), "Can't load all images at \"" + imagesPath + "\".\nLetters will be visible instead.\nMaybe Classpath isn't set right?");
+			InformationDialogs.errorDialog(GameStarter.getMainWindow(), "Can't load all images at \"" + imagesPath + "\".\nLetters will be visible instead.");
 		}
 	}
 	
