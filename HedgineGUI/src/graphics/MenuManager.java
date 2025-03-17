@@ -160,6 +160,8 @@ public class MenuManager implements ActionListener {
         logger.info("\"" + s + "\"" + " selected");
         
         if (s.equals(fileMenuStrings.get(5))) {
+        	GameStarter.getGameManager().stopRunning();
+        	try { Thread.sleep(100); } catch (InterruptedException e) {}
         	System.exit(0);
         }
         else if (s.equals(viewMenuStrings.get(0))) {

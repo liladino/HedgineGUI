@@ -7,8 +7,12 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
+import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
@@ -26,6 +30,7 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import game.Engine;
 import game.GameStarter;
@@ -40,7 +45,7 @@ import utility.Sides;
  * Note: upon closing this window, the game should continue
  */
 public class NewGame extends JFrame {
-	private static final long serialVersionUID = -421311633940977178L;
+	private static final long serialVersionUID = -421311633940977178L;	
 	private JTextField whiteName;
 	private JTextField blackName;
 	private JComboBox<String> comboWhitePlayer;
@@ -56,11 +61,41 @@ public class NewGame extends JFrame {
 	private JRadioButton radioFixTime;
 	private boolean updatingFromPreset = false;
 
+	private static final String PERS_whiteEnginePath = System.getProperty("user.dir") + "/saves/.wep";
+	private static final String PERS_blackEnginePath = System.getProperty("user.dir") + "/saves/.bep";
+	
 	public NewGame(){
 		this("startpos");
 	}
 
 	public NewGame(String fen){
+		if (whiteEngine == null) {
+			try{ 
+				File load = new File(PERS_whiteEnginePath);
+				Scanner scanner = new Scanner(load);
+				if (scanner.hasNextLine()){
+					whiteEngine = new File(scanner.nextLine());
+				}
+				scanner.close();
+			}
+			catch(Exception e){
+				System.out.println("Can't load previous white engine path");
+			}
+		}
+		if (blackEngine == null) {
+			try{ 
+				File load = new File(PERS_blackEnginePath);
+				Scanner scanner = new Scanner(load);
+				if (scanner.hasNextLine()){
+					blackEngine = new File(scanner.nextLine());
+				}
+				scanner.close();
+			}
+			catch(Exception e){
+				System.out.println("Can't load previous black engine path");
+			}
+		}
+		
 		startPos = new JTextField(fen, 20);	
 		initialzeWindow();
 		initialze();
@@ -446,9 +481,21 @@ public class NewGame extends JFrame {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				if (side == Sides.WHITE){
 					whiteEngine = chooser.getSelectedFile();
+					try {
+						FileWriter fw = new FileWriter(PERS_whiteEnginePath);
+					    fw.write(whiteEngine.toString());
+					    fw.close();
+					}
+					catch (Exception exc) {	System.out.println(exc.getMessage()); }
 				}
 				else {
 					blackEngine = chooser.getSelectedFile();
+					try {
+						FileWriter fw = new FileWriter(PERS_blackEnginePath);
+					    fw.write(blackEngine.toString());
+					    fw.close();
+					}
+					catch (Exception exc) {	System.out.println(exc.getMessage()); }
 				}
 				setTextAndLabel(chooser.getSelectedFile());
 			}

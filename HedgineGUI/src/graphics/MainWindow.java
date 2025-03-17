@@ -1,6 +1,7 @@
 package graphics;
 
 import game.GameManager;
+import game.GameStarter;
 import game.interfaces.GameEventListener;
 import graphics.dialogs.GameEndDialogs;
 import graphics.panels.ChessBoardPanel;
@@ -9,6 +10,8 @@ import utility.Sides;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.*;
 
@@ -26,7 +29,16 @@ public class MainWindow extends JFrame implements GameEventListener {
 		setTitle("Chess");
 		setMinimumSize(new Dimension(600 + getInsets().left + getInsets().right, 400 + getInsets().top + getInsets().bottom));
 		setSize(900 + getInsets().left + getInsets().right, 640 + getInsets().top + getInsets().bottom);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (GameStarter.getGameManager() != null) GameStarter.getGameManager().stopRunning();
+                try { Thread.sleep(100); } catch (InterruptedException exc) {}
+    			System.exit(0);
+            }
+        });
 
 		gameManager.addGameEventListener(this);
 		

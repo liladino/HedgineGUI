@@ -89,6 +89,7 @@ public class PGNConverter {
 		Square from = m.getFrom();
 		boolean pieceOnSameRank = false;
 		boolean pieceOnSameFile = false;
+		int count = 0;
 		for (Square s : pieces){
 			if (s.equals(from)){
 				continue;
@@ -100,6 +101,7 @@ public class PGNConverter {
 				if (s.getRank() == from.getRank()){
 					pieceOnSameRank = true;
 				}
+				count++;
 			}
 		}
 
@@ -108,6 +110,10 @@ public class PGNConverter {
 		}
 		if (pieceOnSameFile){
 			sb.append(from.getRank());
+		}
+		
+		if (!pieceOnSameFile && !pieceOnSameRank && count > 0) {
+			sb.append(from.getFile());
 		}
 		
 		if (takes){
