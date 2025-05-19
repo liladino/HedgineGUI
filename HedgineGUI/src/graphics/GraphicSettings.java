@@ -14,6 +14,7 @@ public class GraphicSettings {
 	public static final Map<String, Pair<Color, Color>> colors = colorsP;
 	public static boolean rotateBoard;
 	public static String selectedScheme;
+	public static boolean dragDrop;
 	
 	private GraphicSettings() {}
 	
@@ -23,6 +24,7 @@ public class GraphicSettings {
 	 */
 	public static void initializeGraphicSettings() {
 		rotateBoard = false;
+		dragDrop = true;
 		selectedScheme = "Green";
 		colorsP.put("Gray", new Pair<>(Color.WHITE, Color.GRAY));
 		colorsP.put("Wood", new Pair<>(new Color(255, 178, 102), new Color(153, 76, 0)));

@@ -16,7 +16,6 @@ import javax.swing.SwingUtilities;
 import java.util.HashMap;
 import java.util.logging.Logger;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -45,7 +44,12 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 	private int xDim;
 	private int squareSize;
 	private transient HashMap<Character, BufferedImage> images;
-
+	
+	private boolean dragged = false;
+	private int dragX;
+	private int dragY;
+	private char draggedPiece;
+	
 	public ChessBoardPanel(GameManager gameManager, MenuManager menuManager) {
 		images = new HashMap<>();
 		loadPieces();
@@ -59,24 +63,81 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 		
 		setPreferredSize(new Dimension(720, 720));
 
-		// Add a mouse listener to handle piece selection and movement
-		addMouseListener(new MouseAdapter() {
-			@Override
+		
+		MouseAdapter mouseAdapter = new MouseAdapter() {
+			/*@Override
 			public void mouseClicked(MouseEvent e) {
-				int rank;
-				char file = (char)((e.getX() - (getWidth() - xDim) / 2)/ squareSize + 'a');
-				if (GraphicSettings.rotateBoard) {
-					rank = e.getY() / squareSize + 1; 
-					file = (char)(7 - file + 'a' + 'a');
+				Square s = getSquare(e.getX(), e.getY());
+				
+				logger.info("file: " + s.getFile() + ", rank: " + s.getRank());
+				handleSquareClick(s.getFile(), s.getRank());
+			}*/
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				Square s = getSquare(e.getX(), e.getY());
+				
+				logger.info("file: " + s.getFile() + ", rank: " + s.getRank());
+				if (GraphicSettings.dragDrop) {
+					draggedPiece = gameManager.getBoard().boardAt(s);
+					if (draggedPiece == ' ') return;
+					
+					if ((gameManager.getBoard().tomove() == Sides.WHITE && Character.isUpperCase(draggedPiece)) 
+						|| (gameManager.getBoard().tomove() == Sides.BLACK && Character.isLowerCase(draggedPiece))) {
+
+						dragged = true;
+						selected = s;
+						draggedPiece = gameManager.getBoard().boardAt(s);
+						
+					}
 				}
 				else {
-					rank = 7 - e.getY() / squareSize + 1; 
+					handleSquareClick(s.getFile(), s.getRank());
 				}
-				
-				logger.info("file: " + file + ", rank: " + rank);
-				handleSquareClick(file, rank);
 			}
-		});
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (!GraphicSettings.dragDrop || !dragged) {
+					return;
+				}	
+				Square s = getSquare(e.getX(), e.getY());
+				
+				logger.info("file: " + s.getFile() + ", rank: " + s.getRank());
+				dragged = false;
+
+				handleSquareClick(s.getFile(), s.getRank());
+				selected = new Square();
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				if (!GraphicSettings.dragDrop || !dragged) {
+					return;
+				}	
+				dragX = e.getX();
+				dragY = e.getY();
+
+				logger.info(Integer.toString(dragX) + ' ' + Integer.toString(dragY));
+				repaint();
+			}
+		};
+
+		addMouseListener(mouseAdapter);
+		addMouseMotionListener(mouseAdapter);
+	}
+	
+	private Square getSquare(int X, int Y) {
+		int rank;
+		char file = (char)((X - (getWidth() - xDim) / 2)/ squareSize + 'a');
+		if (GraphicSettings.rotateBoard) {
+			rank = Y / squareSize + 1; 
+			file = (char)(7 - file + 'a' + 'a');
+		}
+		else {
+			rank = 7 - Y / squareSize + 1; 
+		}
+		return new Square(file, rank);
 	}
 	
 	void loadPieces() {
@@ -228,13 +289,34 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 		
 		squareSize = xDim / 8;
 		
-		drawBoard(g);
+		if (!dragged) {
+			drawBoard(g);
+		}
+		else {
+			Board board = new Board(gameManager.getBoard());
+			board.getRawBoard()[selected.getRowCoord()][selected.getColCoord()] = ' ';
+			drawBoard(g, board);
+			
+			drawPiece(g, dragX - squareSize/2, dragY - squareSize/2, draggedPiece, getSquare(dragX, dragY).getFile(), getSquare(dragX, dragY).getFile());
+			
+		}
 	}
-
-	private void drawBoard(Graphics g) {
-		
-		Board board = gameManager.getBoard();
-
+	
+	private void drawPiece(Graphics g, int xCoord, int yCoord, char piece, char file, int rank) {
+		if (images.containsKey(piece)) {
+			g.drawImage(images.get(piece).getScaledInstance(squareSize, squareSize, Image.SCALE_FAST)
+					, xCoord, yCoord, squareSize, squareSize, this);
+		}
+		else {
+			//piece image isn't available
+			g.setColor(Color.RED);
+			g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
+			g.drawString(Character.toString(piece), 
+					xCoord + squareSize/2, yCoord + squareSize/2);
+		}
+	}
+	
+	private void drawBoard(Graphics g, Board board) {
 		for (int rank = 1; rank <= 8; rank++) {
 			for (char file = 'a'; file <= 'h'; file++) {
 				int xCoord, yCoord;
@@ -271,20 +353,15 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 				}
 				
 				if (board.boardAt(file, rank) != ' ') {
-					if (images.containsKey(board.boardAt(file, rank))) {
-						g.drawImage(images.get(board.boardAt(file, rank)).getScaledInstance(squareSize, squareSize, Image.SCALE_SMOOTH)
-								, xCoord, yCoord, squareSize, squareSize, this);
-					}
-					else {
-						//piece image isn't available
-						g.setColor(Color.RED);
-						g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
-						g.drawString(Character.toString(board.boardAt(file, rank)), 
-								xCoord + squareSize/2, yCoord + squareSize/2);
-					}
+					drawPiece(g, xCoord, yCoord, board.boardAt(file, rank), file, rank);
 				}
 			}
 		}
+	}
+
+	private void drawBoard(Graphics g) {
+		Board board = gameManager.getBoard();
+		drawBoard(g, board);
 	}
 	
 	private Color getColor(Sides s) {

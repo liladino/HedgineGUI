@@ -23,7 +23,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import chess.Board;
 import chess.IO.PGNConverter;
 import game.Engine;
-import game.GameManager;
 import game.GameStarter;
 import game.interfaces.GameEventListener;
 import graphics.dialogs.InformationDialogs;
@@ -45,6 +44,8 @@ public class MenuManager implements ActionListener {
 	private JMenu view;
 	private ArrayList<JMenuItem> viewMenuElements;
 	private ArrayList<JMenuItem> colors;
+	private ArrayList<JMenuItem> inputModes;
+	private ArrayList<String> inputModesStrings;
 	private ArrayList<String> viewMenuStrings;
 	private JMenu engines;
 	private ArrayList<String> enginesMenuStrings;
@@ -65,8 +66,10 @@ public class MenuManager implements ActionListener {
 		enginesMenuStrings = new ArrayList<>();
 		gameEventListeners = new ArrayList<>();
 		aboutMenuStrings = new ArrayList<>();
-		
+
 		colors = new ArrayList<>();
+		inputModes = new ArrayList<>();
+		inputModesStrings = new ArrayList<>();
 
 		file = new JMenu("File");
 		game = new JMenu("Game");
@@ -108,9 +111,14 @@ public class MenuManager implements ActionListener {
 		menuBar.add(view);
 		viewMenuStrings.add("Rotate board");
 		viewMenuStrings.add("Color scheme");
+		viewMenuStrings.add("Input mode");
 		JMenu colorScheme = new JMenu(viewMenuStrings.get(1));
+		JMenu inputModeSel = new JMenu(viewMenuStrings.get(2));
+		
 		viewMenuElements.add(new JMenuItem(viewMenuStrings.get(0)));
+		
 		viewMenuElements.add(colorScheme);
+		viewMenuElements.add(inputModeSel);
 		
 		for (JMenuItem m : viewMenuElements) {
 			view.add(m);
@@ -122,6 +130,15 @@ public class MenuManager implements ActionListener {
 		}
 		for (JMenuItem m : colors) {
 			colorScheme.add(m);
+			m.addActionListener(this);
+		}
+		inputModesStrings.add("Drag and drop");
+		inputModesStrings.add("Click");
+		for (String s : inputModesStrings) {
+			inputModes.add(new JMenuItem(s));	
+		}
+		for (JMenuItem m : inputModes) {
+			inputModeSel.add(m);
 			m.addActionListener(this);
 		}
 		
@@ -176,6 +193,19 @@ public class MenuManager implements ActionListener {
 			//color scheme
         	GraphicSettings.selectedScheme = s;
         	for (GameEventListener listener : gameEventListeners) {
+            	listener.onGameLooksChanged();	
+        	}
+        }
+		else if (inputModesStrings.contains(s)) {
+			//input mode
+    		//System.out.println("kurvaelet");
+			if (inputModesStrings.get(0).equals(s)) {
+				GraphicSettings.dragDrop = true;				
+			}
+			else {
+				GraphicSettings.dragDrop = false;
+			}
+			for (GameEventListener listener : gameEventListeners) {
             	listener.onGameLooksChanged();	
         	}
         }

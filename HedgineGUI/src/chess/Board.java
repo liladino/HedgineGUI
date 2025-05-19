@@ -145,6 +145,10 @@ public class Board implements Serializable {
 		return fullMoveCount;
 	}
 	
+	public char[][] getRawBoard(){
+		return board;
+	}
+	
 	public char boardAt(int row, int col) {
 		if (row < 2 || col < 2 || row > 9 || col > 9) {
 			return 0;
