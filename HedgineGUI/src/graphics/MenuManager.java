@@ -26,7 +26,6 @@ import game.Engine;
 import game.GameManager;
 import game.GameStarter;
 import game.interfaces.GameEventListener;
-import game.interfaces.VisualChangeListener;
 import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.NewGame;
 import utility.Result;
@@ -53,8 +52,6 @@ public class MenuManager implements ActionListener {
 	private JMenu about;
 	private ArrayList<String> aboutMenuStrings;
 	
-	
-	private VisualChangeListener visualListener;
 	private ArrayList<GameEventListener> gameEventListeners;
 
 
@@ -167,7 +164,9 @@ public class MenuManager implements ActionListener {
         else if (s.equals(viewMenuStrings.get(0))) {
 			//rotate
         	GraphicSettings.rotateBoard = !GraphicSettings.rotateBoard;
-        	visualListener.onGameLooksChanged();
+        	for (GameEventListener listener : gameEventListeners) {
+            	listener.onGameLooksChanged();	
+        	}
         }
         else if (s.equals(gameMenuStrings.get(0))){
 			//new game
@@ -176,7 +175,9 @@ public class MenuManager implements ActionListener {
 		else if (GraphicSettings.colors.containsKey(s)) {
 			//color scheme
         	GraphicSettings.selectedScheme = s;
-        	visualListener.onGameLooksChanged();
+        	for (GameEventListener listener : gameEventListeners) {
+            	listener.onGameLooksChanged();	
+        	}
         }
 		else if (s.equals(fileMenuStrings.get(0))){
 			//load fen
@@ -364,10 +365,6 @@ public class MenuManager implements ActionListener {
 		return e;
 	}
 	
-	public void addVisualChangeListener(VisualChangeListener listener) {
-		visualListener = listener;
-	}
-
 	public void addGameEventListener(GameEventListener listener) {
 		gameEventListeners.add(listener);
 	}

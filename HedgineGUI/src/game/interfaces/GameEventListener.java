@@ -2,9 +2,6 @@ package game.interfaces;
 
 import utility.Sides;
 
-/**
- * GameManager notifies thru these functions that the game ended
- */
 public interface GameEventListener {
 	void onCheckmate(Sides won);
 	void onDraw();
@@ -13,4 +10,7 @@ public interface GameEventListener {
 	void onTimeIsUp(Sides won);
 	void onTimeIsUp();
 	void onResign(Sides won);
+	
+	void onGameStateChanged();
+	void onGameLooksChanged();
 }

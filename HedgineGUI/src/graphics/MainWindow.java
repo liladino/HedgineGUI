@@ -40,7 +40,7 @@ public class MainWindow extends JFrame implements GameEventListener {
             }
         });
 
-		gameManager.addGameEventListener(this);
+		gameManager.addGameChangeListener(this);
 		
 		GraphicSettings.initializeGraphicSettings();
 		menuManager = new MenuManager(this);
@@ -94,5 +94,15 @@ public class MainWindow extends JFrame implements GameEventListener {
 	@Override
 	public void onResign(Sides won) {
 		GameEndDialogs.showResigned(this, won);
+	}
+
+	@Override
+	public void onGameStateChanged() {
+		// no job
+	}
+
+	@Override
+	public void onGameLooksChanged() {
+		// no job
 	}
 }

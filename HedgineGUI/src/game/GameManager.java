@@ -11,7 +11,6 @@ import chess.Move;
 import chess.IO.FENException;
 import game.interfaces.ClockListener;
 import game.interfaces.GameEventListener;
-import game.interfaces.VisualChangeListener;
 import graphics.dialogs.InformationDialogs;
 import game.interfaces.MoveListener;
 import game.interfaces.TimeEventListener;
@@ -41,7 +40,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	private volatile boolean timeExpired;
 	private volatile boolean running;
 	private List<GameEventListener> eventListeners;
-	private List<VisualChangeListener> updateListeners;
 	private String lastEngineCommand = null;
 
 	/* * * * *
@@ -58,7 +56,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	 * Constructor *
 	 * * * * * * * */
 	public GameManager() {
-		updateListeners = new ArrayList<>();
 		eventListeners = new ArrayList<>();
 		clock = new Clock(this);
 		clock.setTimeEventListener(this);
@@ -78,12 +75,8 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		clock.setActiveSide(b.tomove());
 		startFEN = b.convertToFEN();
 	}
-	public void addGameEventListener(GameEventListener listener) {
+	public void addGameChangeListener(GameEventListener listener) {
 		eventListeners.add(listener); 
-	}
-	
-	public void addVisualChangeListener(VisualChangeListener listener) {
-		updateListeners.add(listener);
 	}
 
 	public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
@@ -182,10 +175,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		if (!currentPlayer.isHuman()) notifyEngine();
 
 		while (running) {
+			logger.info((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
+			moveReady = false;
+			
 			synchronized (this) {
-				logger.info((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
-				moveReady = false;
-				
 				while (!moveReady && !timeExpired && running) {
 					try {
 						wait(); 
@@ -193,30 +186,30 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 						Thread.currentThread().interrupt(); 
 					}
 				}
-
-				if (timeExpired || !running) {
-					break; 
-				}
-				
-				if (board.isMoveLegal(currentMove)) {
-					board.makeMove(currentMove);
-					currentPlayer = (currentPlayer == white) ? black : white;
-					moves.add(currentMove);
-										
-					if (t != null){
-						clock.pressClock();
-					}
-
-					notifyGameStateChanged();
-					checkGameEnd();
-					
-					if (running && !currentPlayer.isHuman()) notifyEngine();
-				}
-				else {
-					logger.info("Illegal input: ");
-				}
-				logger.info(currentMove.toString());
 			}
+
+			if (timeExpired || !running) {
+				break; 
+			}
+			
+			if (board.isMoveLegal(currentMove)) {
+				board.makeMove(currentMove);
+				currentPlayer = (currentPlayer == white) ? black : white;
+				moves.add(currentMove);
+									
+				if (t != null){
+					clock.pressClock();
+				}
+
+				notifyGameStateChanged();
+				checkGameEnd();
+				
+				if (running && !currentPlayer.isHuman()) notifyEngine();
+			}
+			else {
+				logger.info("Illegal input: ");
+			}
+			logger.info(currentMove.toString());
 		}
 		
 		stopRunning();
@@ -328,7 +321,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	}
 	
 	public void notifyGameStateChanged() {
-		for (VisualChangeListener listener : updateListeners) {
+		for (GameEventListener listener : eventListeners) {
 			listener.onGameStateChanged();
 		}
 	}

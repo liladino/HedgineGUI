@@ -27,7 +27,7 @@ import chess.Square;
 import game.GameManager;
 import game.GameStarter;
 import game.Human;
-import game.interfaces.VisualChangeListener;
+import game.interfaces.GameEventListener;
 import graphics.GraphicSettings;
 import graphics.MenuManager;
 import graphics.dialogs.InformationDialogs;
@@ -37,7 +37,7 @@ import graphics.dialogs.PromotionDialog;
  * Shows the chess board on the screen. 
  * Handles clicks on it, and if the active player is a human, registers its move. 
  */
-public class ChessBoardPanel extends JPanel implements VisualChangeListener {
+public class ChessBoardPanel extends JPanel implements GameEventListener {
 	private static final Logger logger = Logger.getLogger(ChessBoardPanel.class.getName());
 	private static final long serialVersionUID = 987168713547L;
 	private transient GameManager gameManager;
@@ -54,8 +54,8 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 		xDim = Math.min(getWidth(), getHeight());
 		squareSize = xDim / 8;
 		this.gameManager = gameManager;
-		gameManager.addVisualChangeListener(this);
-		menuManager.addVisualChangeListener(this);
+		gameManager.addGameChangeListener(this);
+		menuManager.addGameEventListener(this);
 		
 		setPreferredSize(new Dimension(720, 720));
 
@@ -309,6 +309,41 @@ public class ChessBoardPanel extends JPanel implements VisualChangeListener {
 	@Override
 	public void onGameLooksChanged() {
 		repaint();
+	}
+
+	@Override
+	public void onCheckmate(Sides won) {
+		//
+	}
+
+	@Override
+	public void onDraw() {
+		//
+	}
+
+	@Override
+	public void onStalemate() {
+		//
+	}
+
+	@Override
+	public void onInsufficientMaterial() {
+		//
+	}
+
+	@Override
+	public void onTimeIsUp(Sides won) {
+		//
+	}
+
+	@Override
+	public void onTimeIsUp() {
+		//
+	}
+
+	@Override
+	public void onResign(Sides won) {
+		// 
 	}
 	
 }

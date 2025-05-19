@@ -41,7 +41,7 @@ public class Clock implements Runnable, GameEventListener {
 		increment = 0;
 		incrementStartMove = 0;
 		gameEnded = timerUp = gameEnded = ticking = false;
-		gameManager.addGameEventListener(this);
+		gameManager.addGameChangeListener(this);
 	}
 
 	/* * * * * *
@@ -255,5 +255,15 @@ public class Clock implements Runnable, GameEventListener {
 	@Override
 	public void onResign(Sides won) {
 		onGameEnd();
+	}
+
+	@Override
+	public void onGameStateChanged() {
+		// no job
+	}
+
+	@Override
+	public void onGameLooksChanged() {
+		// no job
 	}	
 }

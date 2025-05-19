@@ -12,14 +12,14 @@ import javax.swing.JTextArea;
 
 import chess.IO.PGNConverter;
 import game.GameManager;
-import game.interfaces.VisualChangeListener;
+import game.interfaces.GameEventListener;
 import utility.Sides;
 
 /**
  * The panel on the right side of the screen. 
  * Shows the players' names, their remaining time, and the moves made in the game.
  */
-public class RightPanel extends JPanel implements VisualChangeListener{
+public class RightPanel extends JPanel implements GameEventListener{
 	private static final long serialVersionUID = 3474454907485110512L;
 	private JTextArea whiteName;
 	private JTextArea blackName;
@@ -70,7 +70,7 @@ public class RightPanel extends JPanel implements VisualChangeListener{
 		
 		this.gameManager = gameManager;
 		gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
-		gameManager.addVisualChangeListener(this);
+		gameManager.addGameChangeListener(this);
 		
 		movesArea = new JTextArea();
 		movesArea.setFont(new Font("Courier new", Font.PLAIN, 16));
@@ -110,6 +110,41 @@ public class RightPanel extends JPanel implements VisualChangeListener{
 	private void updateMoves(){
 		String temp = PGNConverter.convertToMoves(gameManager.startFEN(), gameManager.getMoves());
 		if (temp != null) movesArea.setText(temp);
+	}
+
+	@Override
+	public void onCheckmate(Sides won) {
+		updateMoves();
+	}
+
+	@Override
+	public void onDraw() {
+		updateMoves();
+	}
+
+	@Override
+	public void onStalemate() {
+		updateMoves();
+	}
+
+	@Override
+	public void onInsufficientMaterial() {
+		updateMoves();
+	}
+
+	@Override
+	public void onTimeIsUp(Sides won) {
+		updateMoves();
+	}
+
+	@Override
+	public void onTimeIsUp() {
+		updateMoves();
+	}
+
+	@Override
+	public void onResign(Sides won) {
+		updateMoves();
 	} 
 
 }
