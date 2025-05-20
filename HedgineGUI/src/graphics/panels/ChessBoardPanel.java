@@ -84,6 +84,13 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 						handleSquareClick(s.getFile(), s.getRank());
 						return;
 					}
+					if ((gameManager.getBoard().tomove() == Sides.WHITE 
+									&& Character.isLowerCase(gameManager.getBoard().boardAt(s))) 
+							|| (gameManager.getBoard().tomove() == Sides.BLACK 
+									&& Character.isUpperCase(gameManager.getBoard().boardAt(s)))) {
+						handleSquareClick(s.getFile(), s.getRank());
+						return;
+					}					
 					
 					if ((gameManager.getBoard().tomove() == Sides.WHITE && Character.isUpperCase(draggedPiece)) 
 						|| (gameManager.getBoard().tomove() == Sides.BLACK && Character.isLowerCase(draggedPiece))) {
