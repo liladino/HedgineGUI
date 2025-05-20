@@ -367,8 +367,7 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 				if (((board.boardAt(file, rank) == 'K' && board.tomove() == Sides.WHITE) 
 					|| (board.boardAt(file, rank) == 'k' && board.tomove() == Sides.BLACK))
 						&& board.inCheck()
-						&& images.containsKey('C')
-						){
+						&& images.containsKey('C')){
 					g.drawImage(images.get('C'), xCoord, yCoord, squareSize, squareSize, this);
 				}
 				

@@ -7,11 +7,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
@@ -30,7 +28,6 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import game.Engine;
 import game.GameStarter;
@@ -204,8 +201,10 @@ public class NewGame extends JFrame {
 			if (comboWhitePlayer.getSelectedItem().equals("Engine")){
 				whiteEnginePath.setVisible(true);
 				whiteEngineFromFile.setVisible(true);
+				if (whiteEngine.exists()) whiteName.setText(whiteEngine.getName());
 			}
 			else{
+				whiteName.setText("White");
 				whiteEnginePath.setVisible(false);
 				whiteEngineFromFile.setVisible(false);
 			}
@@ -246,8 +245,10 @@ public class NewGame extends JFrame {
 			if (comboBlackPlayer.getSelectedItem().equals("Engine")){
 				blackEnginePath.setVisible(true);
 				blackEngineFromFile.setVisible(true);
+				if (blackEngine.exists()) blackName.setText(blackEngine.getName());
 			}
 			else{
+				blackName.setText("Black");
 				blackEnginePath.setVisible(false);
 				blackEngineFromFile.setVisible(false);
 			}
@@ -509,7 +510,10 @@ public class NewGame extends JFrame {
 			else
 				path.setText("... " + s.substring(s.length() - m + 4, s.length()));
 	
-			name.setText(f.getName());
+			if ((side == Sides.WHITE && comboWhitePlayer.getSelectedIndex() == 1)
+				|| (side == Sides.BLACK && comboBlackPlayer.getSelectedIndex() == 1)) {
+				name.setText(f.getName());
+			}
 		}
 	}
 }
