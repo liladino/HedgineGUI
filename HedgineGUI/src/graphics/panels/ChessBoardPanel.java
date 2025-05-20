@@ -90,7 +90,7 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 									&& Character.isUpperCase(gameManager.getBoard().boardAt(s)))) {
 						handleSquareClick(s.getFile(), s.getRank());
 						return;
-					}					
+					}
 					
 					if ((gameManager.getBoard().tomove() == Sides.WHITE && Character.isUpperCase(draggedPiece)) 
 						|| (gameManager.getBoard().tomove() == Sides.BLACK && Character.isLowerCase(draggedPiece))) {
@@ -158,7 +158,7 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 	void loadPieces() {
 		String imagesPath = "/resources/pieces/";
 		String selectionPath = "/resources/select/";
-		InputStream imageStream = null;// = getClass().getResourceAsStream(resourcePath);
+		InputStream imageStream = null;
 	
 		boolean fail = false;
 		try { 
@@ -214,6 +214,10 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 		try { 
 			if (null == (imageStream = getClass().getResourceAsStream(selectionPath + "blue.png"))) throw new IOException();
 			images.put('S', ImageIO.read(imageStream));
+		} catch (IOException e) { e.printStackTrace(); }
+		try { 
+			if (null == (imageStream = getClass().getResourceAsStream(selectionPath + "lastmove.png"))) throw new IOException();
+			images.put('L', ImageIO.read(imageStream));
 		} catch (IOException e) { e.printStackTrace(); }
 		
 		//check
@@ -351,25 +355,36 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 				}
 				g.fillRect(xCoord, yCoord, squareSize, squareSize);
 				
-				// Draw pieces
+				//mark last move
+				if (gameManager.getMoves().size() > 0) {
+					Move m = gameManager.getMoves().getLast();
+					if ((rank == m.getFrom().getRank() && file == m.getFrom().getFile()) 
+						|| (rank == m.getTo().getRank() && file == m.getTo().getFile())) {
+						g.drawImage(images.get('L'), xCoord, yCoord, squareSize, squareSize, this);
+					}
+				}
+				//mark check
 				if (((board.boardAt(file, rank) == 'K' && board.tomove() == Sides.WHITE) 
 					|| (board.boardAt(file, rank) == 'k' && board.tomove() == Sides.BLACK))
 						&& board.inCheck()
 						&& images.containsKey('C')
 						){
-					//mark check
 					g.drawImage(images.get('C'), xCoord, yCoord, squareSize, squareSize, this);
 				}
-				if (file == selected.getFile() 
+				
+				//mark piece selection
+			   	if (file == selected.getFile() 
 					&& rank == selected.getRank()
 					&& images.containsKey('S')) {
-					//mark piece selection
-				   	g.drawImage(images.get('S'), xCoord, yCoord, squareSize, squareSize, this);
+					g.drawImage(images.get('S'), xCoord, yCoord, squareSize, squareSize, this);
 				}
+
 				
+				// Draw pieces
 				if (board.boardAt(file, rank) != ' ') {
 					drawPiece(g, xCoord, yCoord, board.boardAt(file, rank), file, rank);
 				}
+				
 			}
 		}
 	}

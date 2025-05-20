@@ -25,7 +25,7 @@ public class GraphicSettings {
 	public static void initializeGraphicSettings() {
 		rotateBoard = false;
 		dragDrop = true;
-		selectedScheme = "Green";
+		selectedScheme = "Green"; //todo: from save
 		colorsP.put("Gray", new Pair<>(Color.WHITE, Color.GRAY));
 		colorsP.put("Wood", new Pair<>(new Color(255, 178, 102), new Color(153, 76, 0)));
 		colorsP.put("Green", new Pair<>(new Color(229, 255, 204), new Color(76, 153, 0)));
