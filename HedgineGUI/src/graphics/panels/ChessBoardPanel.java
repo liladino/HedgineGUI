@@ -80,7 +80,10 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 				logger.info("file: " + s.getFile() + ", rank: " + s.getRank());
 				if (GraphicSettings.dragDrop) {
 					draggedPiece = gameManager.getBoard().boardAt(s);
-					if (draggedPiece == ' ') return;
+					if (draggedPiece == ' ') {
+						handleSquareClick(s.getFile(), s.getRank());
+						return;
+					}
 					
 					if ((gameManager.getBoard().tomove() == Sides.WHITE && Character.isUpperCase(draggedPiece)) 
 						|| (gameManager.getBoard().tomove() == Sides.BLACK && Character.isLowerCase(draggedPiece))) {
@@ -100,14 +103,19 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 			public void mouseReleased(MouseEvent e) {
 				if (!GraphicSettings.dragDrop || !dragged) {
 					return;
-				}	
+				}
 				Square s = getSquare(e.getX(), e.getY());
 				
 				logger.info("file: " + s.getFile() + ", rank: " + s.getRank());
 				dragged = false;
-
-				handleSquareClick(s.getFile(), s.getRank());
-				selected = new Square();
+				if (!s.equals(selected)) {
+					handleSquareClick(s.getFile(), s.getRank());
+					selected = new Square();
+				}
+				else {
+					selected = new Square();
+					handleSquareClick(s.getFile(), s.getRank());
+				}
 			}
 			
 			@Override
