@@ -161,6 +161,8 @@ public class Clock implements Runnable, GameEventListener {
 				if (timerUp){
 					updateDisplay();
 					signalTimeIsUp();
+					timerUp = false;
+					break;
 				}
 				else if (clockWasPressed){
 					updateClockData();
@@ -173,7 +175,7 @@ public class Clock implements Runnable, GameEventListener {
 
 	private void signalTimeIsUp() {
 		if (whiteTime <= 0) timeEventListener.onTimeIsUp(Sides.WHITE);
-		timeEventListener.onTimeIsUp(Sides.BLACK);
+		if (blackTime <= 0) timeEventListener.onTimeIsUp(Sides.BLACK);
 	}
 
 	public synchronized void pressClock(){

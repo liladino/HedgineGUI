@@ -60,7 +60,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		clock = new Clock(this);
 		clock.setTimeEventListener(this);
 	}
-	
+		
 	/* * * * * *
 	 * Setters *
 	 * * * * * */
@@ -189,6 +189,12 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 			}
 
 			if (timeExpired || !running) {
+				if (!running) {
+					logger.info("game not running");
+				}
+				if (timeExpired) {
+					logger.info("time expired");
+				}
 				break; 
 			}
 			
@@ -213,7 +219,8 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		}
 		
 		stopRunning();
-		logger.info("gameManager stooped");
+		timeExpired = false;
+		logger.info("gameManager stopped");
 	}
 	
 	/* * * * * * * * * *
@@ -361,6 +368,8 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		}
 		if (moves.isEmpty()) return;
 		
+		int takebacks = 1;
+		
 		if (!currentPlayer.isHuman()) {
 			try {
 				((Engine)(currentPlayer)).sendCommand("stop");
@@ -368,14 +377,24 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 				return;
 			}
 		}
+		else {
+			//if the other player is an engine, one should take back 2 moves.
+			Player otherPlayer = (currentPlayer == white ? black : white);
+			if (!otherPlayer.isHuman()) {
+				takebacks = 2;
+			}
+		}
 		
-		for (int i = 0; i < moves.size()-1; i++){
+		for (int i = 0; i < moves.size()-takebacks; i++){
 			temp.makeMove(moves.get(i));
 		}
-		moves.remove(moves.size()-1);
+		for (int i = 0; i < takebacks; i++) {
+			moves.remove(moves.size()-1);
+			currentPlayer = (currentPlayer == white) ? black : white;
+		}
+		
 		board = temp;
 		clock.pressClock();
-		currentPlayer = (currentPlayer == white) ? black : white;
 		if (!currentPlayer.isHuman()) notifyEngine();
 		
 		notifyGameStateChanged();

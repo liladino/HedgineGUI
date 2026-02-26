@@ -167,7 +167,7 @@ public class NewGame extends JFrame {
 		 * Player white  *
 		 * * * * * * * * */
 		gbc.gridheight = 1;	
-		gbc.fill = GridBagConstraints.HORIZONTAL;
+ 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		add(new JLabel("Players:"), gbc);
