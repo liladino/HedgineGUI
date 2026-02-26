@@ -3,39 +3,43 @@ Version 1.2.1
 
 ## About
 `https://github.com/liladino/HedgineGUI/`
-A UCI compatible chess GUI, made in pair with `https://github.com/liladino/Hedgine` (unfinished).
+A UCI compatible chess GUI, made in pair with `https://github.com/liladino/Hedgine`.
 
 ## Features
 
 ### Playing modes
 
-* Two player moe
+* Two player mode
 * Engine vs player
-* Engie vs Engine
+* Engine vs Engine
 
-Supports both drag and drop and clickong modes for move input.
+Supports both drag and drop and clicking modes for move input.
 
-### Standard communication
+### Standards
 
- * UCI: Supports Stockfish, Hedgine, and most major engines
+ * UCI communication supports most major engines (e.g. Stockfish) (as well as my hobby project, Hedgine) 
  * PGN output for games
  * FEN board state save
 
 ## Build & run
 
-### Linux command line
+### Bash
 
-To create a runnable jar file, cd to the projectfolder and use:
+To create a runnable jar file, cd to the projectfolder and use
 ```
 make jar
 ```
+You can then run the jar file with
+```
+java -jar HedgineGUI.jar 
+```
 
-To run the project from the command line: 
+To run the project from the source: 
 ```
 make build
 make run
 ```
-the two in one:
+The two in one:
 ```
 make all
 ```
