@@ -9,8 +9,7 @@ SOURCES = $(shell find $(SRC_DIR) -name "*.java")
 
 CLASSPATH = $(LIB_DIR)/*:$(BIN_DIR)
 
-build:
-	make clean
+build: clean
 	mkdir -p $(BIN_DIR)
 	javac -cp $(CLASSPATH) -d $(BIN_DIR) $(SOURCES)
 	cp -r $(RESOURCES_DIR) $(BIN_DIR)
