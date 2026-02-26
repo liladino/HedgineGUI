@@ -1,5 +1,4 @@
 # HedgineGUI
-Version 1.2.1
 
 ## About
 `https://github.com/liladino/HedgineGUI/`
