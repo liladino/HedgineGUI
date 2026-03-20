@@ -6,13 +6,14 @@ import java.io.File;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import chess.Board;
-import chess.Move;
-import chess.Square;
-import chess.IO.PGNConverter;
+
+import core.chess.Board;
+import core.chess.Move;
+import core.chess.Square;
+import core.chess.IO.PGNConverter;
 import game.GameManager;
 import game.GameStarter;
-import game.Human;
+import game.HumanPlayer;
 import graphics.MainWindow;
 import utility.Sides;
 
@@ -109,8 +110,8 @@ public class PGNTest {
 	void fullGameTest1() {
 		GameManager gameManager = new GameManager();
 
-		Human w = new Human(Sides.WHITE, "White");
-		Human b = new Human(Sides.BLACK, "Black");
+		HumanPlayer w = new HumanPlayer(Sides.WHITE, "White");
+		HumanPlayer b = new HumanPlayer(Sides.BLACK, "Black");
 		GameStarter.setGameManager(gameManager);
 		GameStarter.startNewGame(w, b, "N");
 		
@@ -147,8 +148,8 @@ public class PGNTest {
 	void fullGameTest2() {
 		GameManager gameManager = new GameManager();
 
-		Human w = new Human(Sides.WHITE, "White");
-		Human b = new Human(Sides.BLACK, "Black");
+		HumanPlayer w = new HumanPlayer(Sides.WHITE, "White");
+		HumanPlayer b = new HumanPlayer(Sides.BLACK, "Black");
 		GameStarter.setGameManager(gameManager);
 		GameStarter.startNewGame("rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1", w, b, "N");
 		

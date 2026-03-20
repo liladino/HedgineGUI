@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import chess.Square;
+import core.chess.Square;
 
 class SquareTest {
 	private Square nullSquare, e4, h8;

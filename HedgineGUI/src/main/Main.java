@@ -4,7 +4,7 @@ import java.io.File;
 
 import game.GameManager;
 import game.GameStarter;
-import game.Human;
+import game.HumanPlayer;
 import graphics.MainWindow;
 import utility.Sides;
 
@@ -21,6 +21,6 @@ public class Main {
 
 		GameStarter.setGameManager(gameManager);
 		GameStarter.addMainWindow(mainWindow);
-		GameStarter.startNewGame(new Human(Sides.WHITE, "White"), new Human(Sides.BLACK, "Black"), "N");
+		GameStarter.startNewGame(new HumanPlayer(Sides.WHITE, "White"), new HumanPlayer(Sides.BLACK, "Black"), "N");
 	}
 }

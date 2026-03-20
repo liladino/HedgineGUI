@@ -4,8 +4,9 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import chess.Board;
-import chess.IO.FENException;
+
+import core.chess.Board;
+import core.chess.IO.FENException;
 
 class FENTest {
 	Board start;

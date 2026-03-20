@@ -1,8 +1,8 @@
-package chess.IO;
+package core.chess.IO;
 
-import chess.Board;
+import core.chess.Board;
+import core.chess.Square;
 import utility.Sides;
-import chess.Square;
 
 /**
  * Class that converts the Board into a FEN string, or a FEN string into a Board.

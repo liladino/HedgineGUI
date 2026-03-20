@@ -1,8 +1,9 @@
-package game;
+package core;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import game.GameManager;
 import game.interfaces.ClockListener;
 import game.interfaces.GameEventListener;
 import game.interfaces.TimeEventListener;

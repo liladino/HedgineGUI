@@ -1,10 +1,10 @@
 package game;
 
-import chess.Move;
+import core.chess.Move;
 import utility.Sides;
 
-public class Human extends Player{
-	public Human(Sides side, String name) {
+public class HumanPlayer extends Player{
+	public HumanPlayer(Sides side, String name) {
 		super(side, name);
 		human = true;
 	}

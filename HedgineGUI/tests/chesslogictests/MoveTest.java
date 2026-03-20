@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import chess.Move;
-import chess.Square;
+import core.chess.Move;
+import core.chess.Square;
 
 class MoveTest {
 	Move nm, g1f3, e7e8q, a1a2, badString; 

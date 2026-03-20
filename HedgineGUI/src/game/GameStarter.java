@@ -2,8 +2,10 @@ package game;
 
 import java.io.IOException;
 
-import chess.Board;
-import chess.IO.FENException;
+import core.TimeInformationConverter;
+import core.TimeInputException;
+import core.chess.Board;
+import core.chess.IO.FENException;
 import graphics.GraphicSettings;
 import graphics.MainWindow;
 import graphics.dialogs.InformationDialogs;
@@ -33,18 +35,18 @@ public class GameStarter {
 		}
 		
 		try {
-			if (!white.isHuman()) ((Engine)white).validateEngine();
+			if (!white.isHuman()) ((EnginePlayer)white).validateEngine();
 		}
 		catch (IOException e) {
-			white = new Human(Sides.WHITE, white.getName());
+			white = new HumanPlayer(Sides.WHITE, white.getName());
 			if (mainWindow != null) InformationDialogs.errorDialog(mainWindow, "White error: " + e.getMessage() + "\nThe player is set to be human.");
 		}
 		
 		try {
-			if (!black.isHuman()) ((Engine)black).validateEngine();
+			if (!black.isHuman()) ((EnginePlayer)black).validateEngine();
 		}
 		catch (IOException e) {
-			black = new Human(Sides.BLACK, black.getName());
+			black = new HumanPlayer(Sides.BLACK, black.getName());
 			if (mainWindow != null) InformationDialogs.errorDialog(mainWindow, "Black error: " + e.getMessage() + "\nThe player is set to be human.");
 		}
 		

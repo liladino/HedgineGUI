@@ -2,13 +2,15 @@ package game;
 
 import java.util.logging.Logger;
 
+import core.Clock;
+import core.chess.Board;
+import core.chess.Move;
+import core.chess.IO.FENException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import chess.Board;
-import chess.Move;
-import chess.IO.FENException;
 import game.interfaces.ClockListener;
 import game.interfaces.GameEventListener;
 import graphics.dialogs.InformationDialogs;
@@ -312,7 +314,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		
 		lastEngineCommand = new String(sb);
 		try {
-			((Engine)currentPlayer).sendCommand(lastEngineCommand);
+			((EnginePlayer)currentPlayer).sendCommand(lastEngineCommand);
 		} catch (IOException e) {
 			return;
 		}
@@ -320,10 +322,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	
 	private void startEngines() throws IOException {
 		if (!white.isHuman()) {
-			((Engine)white).sendCommand("ucinewgame");
+			((EnginePlayer)white).sendCommand("ucinewgame");
 		}
 		if (!black.isHuman()) {
-			((Engine)black).sendCommand("ucinewgame");
+			((EnginePlayer)black).sendCommand("ucinewgame");
 		}
 	}
 	
@@ -350,10 +352,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public synchronized void stopRunning(){
 		running = false;
 		if (!white.isHuman()) {
-			((Engine)white).quitEngine();
+			((EnginePlayer)white).quitEngine();
 		}
 		if (!black.isHuman()) {
-			((Engine)black).quitEngine();
+			((EnginePlayer)black).quitEngine();
 		}
 		notifyAll();
 	}
@@ -372,7 +374,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		
 		if (!currentPlayer.isHuman()) {
 			try {
-				((Engine)(currentPlayer)).sendCommand("stop");
+				((EnginePlayer)(currentPlayer)).sendCommand("stop");
 			} catch (IOException e) {
 				return;
 			}

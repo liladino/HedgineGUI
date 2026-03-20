@@ -1,6 +1,6 @@
 package game;
 
-import chess.Move;
+import core.chess.Move;
 import game.interfaces.MoveListener;
 import utility.Sides;
 

@@ -29,9 +29,9 @@ import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import game.Engine;
+import game.EnginePlayer;
 import game.GameStarter;
-import game.Human;
+import game.HumanPlayer;
 import game.Player;
 import utility.Sides;
 
@@ -424,18 +424,18 @@ public class NewGame extends JFrame {
 			Player w = null;
 			Player b = null;
 			if (comboWhitePlayer.getSelectedItem().equals("Human")){
-				w = new Human(Sides.WHITE, whiteName.getText());
+				w = new HumanPlayer(Sides.WHITE, whiteName.getText());
 			}
 			else {
 				if (whiteEngine == null) return;
-				w = new Engine(Sides.WHITE, whiteName.getText(), whiteEngine);
+				w = new EnginePlayer(Sides.WHITE, whiteName.getText(), whiteEngine);
 			}
 			if (comboBlackPlayer.getSelectedItem().equals("Human")){
-				b = new Human(Sides.BLACK, blackName.getText());
+				b = new HumanPlayer(Sides.BLACK, blackName.getText());
 			}
 			else {
 				if (blackEngine == null) return;
-				b = new Engine(Sides.BLACK, blackName.getText(), blackEngine);	
+				b = new EnginePlayer(Sides.BLACK, blackName.getText(), blackEngine);	
 			}
 			
 			if (radioFischer.isSelected()){

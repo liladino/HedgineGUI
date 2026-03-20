@@ -1,6 +1,6 @@
 package game.interfaces;
 
-import chess.Move;
+import core.chess.Move;
 
 /**
  * Players noitfy the GameManager 

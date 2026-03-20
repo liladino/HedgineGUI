@@ -1,4 +1,4 @@
-package chess;
+package core.chess;
 
 import java.util.ArrayList;
 

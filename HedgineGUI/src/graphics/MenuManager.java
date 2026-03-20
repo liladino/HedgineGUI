@@ -20,9 +20,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import chess.Board;
-import chess.IO.PGNConverter;
-import game.Engine;
+import core.chess.Board;
+import core.chess.IO.PGNConverter;
+import game.EnginePlayer;
 import game.GameStarter;
 import game.interfaces.GameEventListener;
 import graphics.dialogs.InformationDialogs;
@@ -334,19 +334,19 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(enginesMenuStrings.get(0))){
 			//quit engine
-			Engine e;
+			EnginePlayer e;
 			if (!GameStarter.getGameManager().getWhite().isHuman()) {
-				e = (Engine) GameStarter.getGameManager().getWhite();
+				e = (EnginePlayer) GameStarter.getGameManager().getWhite();
 				e.quitEngine();
 			}
 			if (!GameStarter.getGameManager().getBlack().isHuman()) {
-				e = (Engine) GameStarter.getGameManager().getBlack();
+				e = (EnginePlayer) GameStarter.getGameManager().getBlack();
 				e.quitEngine();
 			}
 		}
 		else if (s.equals(enginesMenuStrings.get(1))){
 			//restart engine
-			Engine e = getEngine();
+			EnginePlayer e = getEngine();
 			if (e == null) return;
 			try {
 				if (e.isRunning())
@@ -363,7 +363,7 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(enginesMenuStrings.get(2))){
 			//engine stop -> get move
-			Engine e = getEngine();
+			EnginePlayer e = getEngine();
 			if (e == null) return;
 			try {
 				if (e.isRunning()) e.sendCommand("stop");
@@ -373,7 +373,7 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(enginesMenuStrings.get(3))){
 			//engine info
-			Engine e = getEngine();
+			EnginePlayer e = getEngine();
 			if (e == null) return;
 			e.getInfo();
 		}
@@ -382,15 +382,15 @@ public class MenuManager implements ActionListener {
 		}
 	}
 	
-	private Engine getEngine() {
-		Engine e;
-		if (!GameStarter.getGameManager().getCurrentPlayer().isHuman()) e = (Engine) GameStarter.getGameManager().getCurrentPlayer();
+	private EnginePlayer getEngine() {
+		EnginePlayer e;
+		if (!GameStarter.getGameManager().getCurrentPlayer().isHuman()) e = (EnginePlayer) GameStarter.getGameManager().getCurrentPlayer();
 		else {
 			Sides notActiveSide = (GameStarter.getGameManager().getCurrentPlayer().getSide() == Sides.BLACK ? Sides.WHITE : Sides.BLACK); 
 			if (GameStarter.getGameManager().getPlayer(notActiveSide).isHuman()) {
 				return null;
 			}
-			e = (Engine) GameStarter.getGameManager().getPlayer(notActiveSide);
+			e = (EnginePlayer) GameStarter.getGameManager().getPlayer(notActiveSide);
 		}
 		return e;
 	}

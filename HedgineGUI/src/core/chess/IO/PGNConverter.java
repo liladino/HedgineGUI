@@ -1,11 +1,11 @@
-package chess.IO;
+package core.chess.IO;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import chess.Board;
-import chess.Move;
-import chess.Square;
+import core.chess.Board;
+import core.chess.Move;
+import core.chess.Square;
 import game.Player;
 import utility.Result;
 import utility.Sides;

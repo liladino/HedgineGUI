@@ -1,12 +1,12 @@
-package chess;
+package core.chess;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import chess.IO.FENException;
-import chess.IO.FENManager;
+import core.chess.IO.FENException;
+import core.chess.IO.FENManager;
 import utility.Result;
 import utility.Sides;
 

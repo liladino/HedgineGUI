@@ -1,4 +1,4 @@
-package game;
+package core;
 
 import utility.Second;
 import utility.TimeControl;

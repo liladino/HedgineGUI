@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import chess.IO.PGNConverter;
+import core.chess.IO.PGNConverter;
 import game.GameManager;
 import game.interfaces.GameEventListener;
 import utility.Sides;

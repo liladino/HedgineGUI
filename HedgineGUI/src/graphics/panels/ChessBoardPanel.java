@@ -13,19 +13,20 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import core.chess.Board;
+import core.chess.Move;
+import core.chess.Square;
+
 import java.util.HashMap;
 import java.util.logging.Logger;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
-import chess.Board;
-import chess.Move;
 import utility.*;
-import chess.Square;
 import game.GameManager;
 import game.GameStarter;
-import game.Human;
+import game.HumanPlayer;
 import game.interfaces.GameEventListener;
 import graphics.GraphicSettings;
 import graphics.MenuManager;
@@ -294,7 +295,7 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 				repaint();
 				
 				//if the program reaches this, the active player is surely human
-				Human h = (Human) (gameManager.getCurrentPlayer());
+				HumanPlayer h = (HumanPlayer) (gameManager.getCurrentPlayer());
 				h.makeMove(new Move(from, to, promotion));
 			}
 		}

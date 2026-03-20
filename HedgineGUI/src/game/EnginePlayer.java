@@ -11,13 +11,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import chess.Move;
+import core.chess.Move;
 import graphics.dialogs.InformationDialogs;
 import utility.Sides;
 
-public class Engine extends Player {
+public class EnginePlayer extends Player {
 	private File enginePath;
-	private static final Logger logger = Logger.getLogger(Engine.class.getName());
+	private static final Logger logger = Logger.getLogger(EnginePlayer.class.getName());
 	private Process process;
 	private BufferedWriter engineInput;
 	private BufferedReader engineOutput;
@@ -27,7 +27,7 @@ public class Engine extends Player {
 	private boolean uciok = false;
 	private boolean running = false;
 	
-	public Engine(Sides side, String name, File enginePath){
+	public EnginePlayer(Sides side, String name, File enginePath){
 		super(side, name);
 		human = false;
 		this.enginePath = enginePath;

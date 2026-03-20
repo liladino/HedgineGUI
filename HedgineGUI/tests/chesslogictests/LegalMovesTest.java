@@ -1,10 +1,11 @@
 package chesslogictests;
 
 import static org.junit.jupiter.api.Assertions.*;
-import chess.Board;
-import chess.IO.FENException;
 
 import org.junit.jupiter.api.Test;
+
+import core.chess.Board;
+import core.chess.IO.FENException;
 
 class LegalMovesTest {
 	Board b = null;
