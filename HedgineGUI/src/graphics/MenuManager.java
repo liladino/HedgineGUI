@@ -361,7 +361,7 @@ public class MenuManager implements ActionListener {
 				return;
 			}
 		}
-		else if (s.equals(enginesMenuStrings.get(3))){
+		else if (s.equals(enginesMenuStrings.get(2))){
 			//engine stop -> get move
 			Engine e = getEngine();
 			if (e == null) return;

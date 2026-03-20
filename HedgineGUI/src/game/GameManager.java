@@ -393,8 +393,11 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 			currentPlayer = (currentPlayer == white) ? black : white;
 		}
 		
+		if (takebacks == 1) {
+			clock.pressClock();
+		}
+		
 		board = temp;
-		clock.pressClock();
 		if (!currentPlayer.isHuman()) notifyEngine();
 		
 		notifyGameStateChanged();

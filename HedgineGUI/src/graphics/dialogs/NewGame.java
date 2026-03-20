@@ -447,6 +447,8 @@ public class NewGame extends JFrame {
 			else {
 				timeControl = "N";
 			}
+			
+			GameStarter.getGameManager().stopRunning();
 
 			GameStarter.startNewGame(
 				(startPos.getText().equals("startpos") || startPos.getText().equals("") 
