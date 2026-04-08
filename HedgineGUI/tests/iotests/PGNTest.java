@@ -2,8 +2,6 @@ package iotests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +12,6 @@ import core.chess.IO.PGNConverter;
 import game.GameManager;
 import game.GameStarter;
 import game.HumanPlayer;
-import graphics.MainWindow;
 import utility.Sides;
 
 public class PGNTest {
@@ -132,7 +129,7 @@ public class PGNTest {
 		String s = PGNConverter.convertToPGN(
 				gameManager.getPlayer(Sides.WHITE),
 				gameManager.getPlayer(Sides.BLACK),
-				gameManager.startFEN(), 
+				gameManager.getStartFEN(), 
 				gameManager.getMoves(), 
 				gameManager.getResult());
 
@@ -168,7 +165,7 @@ public class PGNTest {
 		String s = PGNConverter.convertToPGN(
 				gameManager.getPlayer(Sides.WHITE),
 				gameManager.getPlayer(Sides.BLACK),
-				gameManager.startFEN(), 
+				gameManager.getStartFEN(), 
 				gameManager.getMoves(), 
 				gameManager.getResult());
 

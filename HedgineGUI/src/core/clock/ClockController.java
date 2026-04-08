@@ -3,8 +3,6 @@ package core.clock;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 import utility.Sides;
 
 public class ClockController {
@@ -32,7 +30,7 @@ public class ClockController {
 	}
 
 	public void subscribe(ClockListener listener){
-		listeners.add(listener);	
+		listeners.add(listener);
 	}
 
 	private void onTick() {

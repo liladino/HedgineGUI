@@ -108,7 +108,7 @@ public class RightPanel extends JPanel implements GameEventListener{
 	}
 
 	private void updateMoves(){
-		String temp = PGNConverter.convertToMoves(gameManager.startFEN(), gameManager.getMoves());
+		String temp = PGNConverter.convertToMoves(gameManager.getStartFEN(), gameManager.getMoves());
 		if (temp != null) movesArea.setText(temp);
 	}
 

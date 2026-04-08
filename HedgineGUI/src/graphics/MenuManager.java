@@ -287,7 +287,7 @@ public class MenuManager implements ActionListener {
 			String pgn = PGNConverter.convertToPGN(
 				GameStarter.getGameManager().getPlayer(Sides.WHITE),
 				GameStarter.getGameManager().getPlayer(Sides.BLACK),
-				GameStarter.getGameManager().startFEN(), 
+				GameStarter.getGameManager().getStartFEN(), 
 				GameStarter.getGameManager().getMoves(), 
 				GameStarter.getGameManager().getResult());
 

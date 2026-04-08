@@ -2,11 +2,6 @@ package clocktest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.awt.HeadlessException;
-import java.lang.ModuleLayer.Controller;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -7,6 +7,7 @@ import core.chess.Move;
 import core.chess.IO.FENException;
 import core.clock.Clock;
 import core.clock.ClockListener;
+import core.clock.ClockSnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,13 +17,9 @@ import graphics.dialogs.InformationDialogs;
 import utility.*;
 
 /**
- * Manages the lifecycle and logic of a chess game, including player interactions,
- * time control, move processing, and engine communication.
- *
- * Serves as the central controller for chess games, handles board setup, player turns, time management, and interaction with external chess engines. 
- * Notifies listeners about game state changes, visual updates, and game results.
+ * Manages the lifecycle and logic of a chess game
  */
-public class GameManager implements Runnable, MoveListener, TimeEventListener{
+public class GameManager implements Runnable, MoveListener, TimeEventListener, ClockListener{
 	private static final Logger logger = Logger.getLogger(GameManager.class.getName());
 
 	/* * * * * *
@@ -92,7 +89,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public Board getBoard() {
 		return board;
 	}
-
 	public Player getCurrentPlayer() {
 		return currentPlayer;
 	}
@@ -102,31 +98,24 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	public Player getBlack() {
 		return black;
 	}
-	
 	public Clock getClock(){
 		return clock;
 	}
-
 	public List<Move> getMoves(){
 		return moves;
 	}
-
-	public String startFEN(){
+	public String getStartFEN(){
 		return startFEN;
 	}
-
 	public Result getResult(){
 		return result;
 	}
-	
 	public boolean isGameRunning() {
 		return running;
 	}
-
 	public String lastEngineCommand() {
 		return lastEngineCommand;
 	}
-	
 	public Player getPlayer(Sides s){
 		if (s == Sides.BLACK){
 			return black;
@@ -401,5 +390,15 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 		if (!currentPlayer.isHuman()) notifyEngine();
 		
 		notifyGameStateChanged();
+	}
+
+	@Override
+	public void onTick(ClockSnapshot snapshot) {
+		// probably no job here
+	}
+
+	@Override
+	public void onTimeUp(ClockSnapshot snapshot) {
+		onTimeIsUp(snapshot.getFlaggedSide());
 	} 
 }
