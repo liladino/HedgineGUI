@@ -49,7 +49,7 @@ public class MainWindow extends JFrame implements GameEventListener {
 		
 		setLayout(new BorderLayout());
 		menuManager.addGameEventListener(this);
-		menuManager.addGameEventListener(gameManager.getClock());
+		// menuManager.addGameEventListener(gameManager.getClock());
 		
 		add(chessBoardPanel, BorderLayout.CENTER);
 		add(rightPanel, BorderLayout.EAST);

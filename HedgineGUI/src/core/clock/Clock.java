@@ -245,6 +245,10 @@ public final class Clock {
 		return extraTimes;
 	}
 
+    public boolean isRunning(){
+        return running;
+    }
+
 	/**
 	 * Advances the clock to the current time, keeps the internal state up to sync if needed.
 	 */

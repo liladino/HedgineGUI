@@ -56,8 +56,9 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	 * * * * * * * */
 	public GameManager() {
 		eventListeners = new ArrayList<>();
-		clock = new Clock(this);
-		clock.setTimeEventListener(this);
+		clock = new Clock();
+		// clock = new Clock(this);
+		// clock.setTimeEventListener(this);
 	}
 		
 	/* * * * * *
@@ -79,7 +80,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	}
 
 	public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
-		clock.setClockPanels(whiteClockPanel, blackClockPanel);
+		// clock.setClockPanels(whiteClockPanel, blackClockPanel);
 	}
 	public void setResult(Result r) {
 		result = r;
@@ -153,73 +154,73 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener{
 	
 	@Override 
 	public void run() {
-		logger.info("gameManager started");
+		// logger.info("gameManager started");
 		
-		running = true;		
-		Thread t = null;
-		if (clock.getTimeControl() != TimeControl.NO_CONTROL){
-			t = new Thread(clock);
-			t.start();
-			clock.setTicking(true);
-		}
+		// running = true;		
+		// Thread t = null;
+		// if (clock.getTimeControl() != TimeControl.NO_CONTROL){
+		// 	t = new Thread(clock);
+		// 	t.start();
+		// 	clock.setTicking(true);
+		// }
 		
-		try {
-			startEngines();
-		} 
-		catch (IOException e) {
-			InformationDialogs.errorDialog(null, "Failed to communicate with engine: " + e.getMessage());
-			stopRunning();
-		}
+		// try {
+		// 	startEngines();
+		// } 
+		// catch (IOException e) {
+		// 	InformationDialogs.errorDialog(null, "Failed to communicate with engine: " + e.getMessage());
+		// 	stopRunning();
+		// }
 	
-		if (!currentPlayer.isHuman()) notifyEngine();
+		// if (!currentPlayer.isHuman()) notifyEngine();
 
-		while (running) {
-			logger.info((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
-			moveReady = false;
+		// while (running) {
+		// 	logger.info((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
+		// 	moveReady = false;
 			
-			synchronized (this) {
-				while (!moveReady && !timeExpired && running) {
-					try {
-						wait(); 
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt(); 
-					}
-				}
-			}
+		// 	synchronized (this) {
+		// 		while (!moveReady && !timeExpired && running) {
+		// 			try {
+		// 				wait(); 
+		// 			} catch (InterruptedException e) {
+		// 				Thread.currentThread().interrupt(); 
+		// 			}
+		// 		}
+		// 	}
 
-			if (timeExpired || !running) {
-				if (!running) {
-					logger.info("game not running");
-				}
-				if (timeExpired) {
-					logger.info("time expired");
-				}
-				break; 
-			}
+		// 	if (timeExpired || !running) {
+		// 		if (!running) {
+		// 			logger.info("game not running");
+		// 		}
+		// 		if (timeExpired) {
+		// 			logger.info("time expired");
+		// 		}
+		// 		break; 
+		// 	}
 			
-			if (board.isMoveLegal(currentMove)) {
-				board.makeMove(currentMove);
-				currentPlayer = (currentPlayer == white) ? black : white;
-				moves.add(currentMove);
+		// 	if (board.isMoveLegal(currentMove)) {
+		// 		board.makeMove(currentMove);
+		// 		currentPlayer = (currentPlayer == white) ? black : white;
+		// 		moves.add(currentMove);
 									
-				if (t != null){
-					clock.pressClock();
-				}
+		// 		if (t != null){
+		// 			clock.pressClock();
+		// 		}
 
-				notifyGameStateChanged();
-				checkGameEnd();
+		// 		notifyGameStateChanged();
+		// 		checkGameEnd();
 				
-				if (running && !currentPlayer.isHuman()) notifyEngine();
-			}
-			else {
-				logger.info("Illegal input: ");
-			}
-			logger.info(currentMove.toString());
-		}
+		// 		if (running && !currentPlayer.isHuman()) notifyEngine();
+		// 	}
+		// 	else {
+		// 		logger.info("Illegal input: ");
+		// 	}
+		// 	logger.info(currentMove.toString());
+		// }
 		
-		stopRunning();
-		timeExpired = false;
-		logger.info("gameManager stopped");
+		// stopRunning();
+		// timeExpired = false;
+		// logger.info("gameManager stopped");
 	}
 	
 	/* * * * * * * * * *

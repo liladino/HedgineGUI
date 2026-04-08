@@ -1,4 +1,4 @@
-package clockparsing;
+package clocktest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import core.ClockBuilder;
 import core.TimeInputException;
 import core.clock.Clock;
-import game.GameManager;
 import utility.Pair;
 import utility.Second;
 import utility.TimeControl;
@@ -20,8 +19,7 @@ public class ClockBuilderTest {
 	ClockBuilder t;
 	@BeforeEach
 	void init(){
-		GameManager gameManager = new GameManager();
-		clock = gameManager.getClock();
+		clock = new Clock();
 		t = new ClockBuilder();
 	}
 

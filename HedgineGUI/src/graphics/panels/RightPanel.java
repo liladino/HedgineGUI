@@ -69,7 +69,7 @@ public class RightPanel extends JPanel implements GameEventListener{
 		add(blackClockPanel, gbc);
 		
 		this.gameManager = gameManager;
-		gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
+		// gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
 		gameManager.addGameChangeListener(this);
 		
 		movesArea = new JTextArea();

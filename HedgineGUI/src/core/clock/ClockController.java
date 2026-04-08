@@ -3,6 +3,10 @@ package core.clock;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.RuntimeErrorException;
+
+import utility.Sides;
+
 public class ClockController {
 	private Clock clock;
 	private List<ClockListener> listeners;
@@ -21,6 +25,10 @@ public class ClockController {
 	// Clock can be built from time information via the ClockBuilder
 	public void setClock(Clock c){
 		clock = c;
+	}
+	
+    public void setActiveSide(Sides s){
+		clock.setActiveSide(s);
 	}
 
 	public void subscribe(ClockListener listener){
