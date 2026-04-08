@@ -9,15 +9,13 @@ public class ClockController {
 	private Clock clock;
 	private List<ClockListener> listeners;
 	private Ticker ticker;
+	private boolean isRunning;
 
 	public ClockController(Ticker t, Clock c){
 		ticker = t;
 		clock = c;
 		listeners = new ArrayList<>();
-	}
-
-	public ClockController(Ticker t){
-        this(t, null);
+		isRunning = false;
 	}
 
 	// Clock can be built from time information via the ClockBuilder
@@ -37,8 +35,11 @@ public class ClockController {
 		ClockSnapshot snapshot = clock.snapshot();
 
 		if (snapshot.isTimeUp()) {
-			for (ClockListener l : listeners){
-				l.onTimeUp(snapshot);
+			if (isRunning) {
+				pauseClock();
+				for (ClockListener l : listeners){
+					l.onTimeUp(snapshot);
+				}
 			}
 		}
         else {
@@ -49,16 +50,21 @@ public class ClockController {
 	}
 
 	public void startClock() {
+		isRunning = true;
 		clock.start();
         ticker.start(() -> this.onTick());
 	}
 
 	public void pauseClock() {
+		isRunning = false;
 		clock.pause();
+		ticker.stop();
 	}
 
 	public void resumeClock() {
+		isRunning = true;
 		clock.resume();
+		ticker.start(() -> this.onTick());
 	}
 
 	public void pressClock() {
