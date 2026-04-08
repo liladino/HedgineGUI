@@ -1,17 +1,18 @@
 package core;
 
+import core.clock.Clock;
 import utility.Second;
 import utility.TimeControl;
 
 /**
  * Helps setting a Clock object / or its values based on the time info string.
  * Works in both ways:
- *    if instanced, can build a valid time information string step by step
- *    with the static setClock method can set a Clock from a string
+ *	if instanced, can build a valid time information string step by step
+ *	with the static setClock method can set a Clock from a string
  */
-public class TimeInformationConverter {
+public class ClockBuilder {
 	private StringBuilder time;
-	public TimeInformationConverter(){
+	public ClockBuilder(){
 		time = new StringBuilder();
 		time.append('N');
 	}
@@ -70,8 +71,6 @@ public class TimeInformationConverter {
 				throw new TimeInputException("Invalid String format");
 			}
 		}
-
-		//szeszkultura zh ket het mulva 
 		
 		if (tokens[0].equals("N")){
 			c.setControlType(TimeControl.NO_CONTROL);

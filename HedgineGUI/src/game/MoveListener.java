@@ -1,4 +1,4 @@
-package game.interfaces;
+package game;
 
 import core.chess.Move;
 
