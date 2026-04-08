@@ -1,7 +1,6 @@
 package game;
 
 import core.chess.Move;
-import game.interfaces.MoveListener;
 import utility.Sides;
 
 public abstract class Player {

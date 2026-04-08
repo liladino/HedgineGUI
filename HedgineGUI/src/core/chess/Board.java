@@ -202,14 +202,14 @@ public class Board implements Serializable {
 	
 	@Override
 	public String toString() {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        
-        PrintStream printStream = new PrintStream(outputStream);
-        
-        printToStream(printStream);
-        
-        String result = outputStream.toString();
-        return result;
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		
+		PrintStream printStream = new PrintStream(outputStream);
+		
+		printToStream(printStream);
+		
+		String result = outputStream.toString();
+		return result;
 	}
 	
 	public String convertToFEN() {

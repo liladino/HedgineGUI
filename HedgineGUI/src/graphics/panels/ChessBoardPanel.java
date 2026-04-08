@@ -24,10 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import utility.*;
+import game.GameEventListener;
 import game.GameManager;
 import game.GameStarter;
 import game.HumanPlayer;
-import game.interfaces.GameEventListener;
 import graphics.GraphicSettings;
 import graphics.MenuManager;
 import graphics.dialogs.InformationDialogs;

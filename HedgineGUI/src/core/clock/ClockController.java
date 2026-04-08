@@ -5,23 +5,25 @@ import java.util.List;
 
 public class ClockController {
 	private Clock clock;
-	private List<IClockListener> listeners;
-	private ITicker ticker;
+	private List<ClockListener> listeners;
+	private Ticker ticker;
 
-	public ClockController(ITicker t, Clock c){
+	public ClockController(Ticker t, Clock c){
 		ticker = t;
 		clock = c;
 		listeners = new ArrayList<>();
 	}
 
-	/** 
-	 * Clock can be built from time information via the ClockBuilder
-	 */
+	public ClockController(Ticker t){
+        this(t, null);
+	}
+
+	// Clock can be built from time information via the ClockBuilder
 	public void setClock(Clock c){
 		clock = c;
 	}
 
-	public void subscribe(IClockListener listener){
+	public void subscribe(ClockListener listener){
 		listeners.add(listener);	
 	}
 
@@ -29,12 +31,12 @@ public class ClockController {
 		ClockSnapshot snapshot = clock.snapshot();
 
 		if (snapshot.isTimeUp()) {
-			for (IClockListener l : listeners){
+			for (ClockListener l : listeners){
 				l.onTimeUp(snapshot);
 			}
 		}
         else {
-			for (IClockListener l : listeners){
+			for (ClockListener l : listeners){
 				l.onTick(snapshot);
             }
         }
@@ -42,6 +44,7 @@ public class ClockController {
 
 	public void startClock() {
 		clock.start();
+        ticker.start(() -> this.onTick());
 	}
 
 	public void pauseClock() {

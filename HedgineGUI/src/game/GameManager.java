@@ -2,20 +2,17 @@ package game;
 
 import java.util.logging.Logger;
 
-import core.Clock;
 import core.chess.Board;
 import core.chess.Move;
 import core.chess.IO.FENException;
+import core.clock.Clock;
+import core.clock.ClockListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import game.interfaces.ClockListener;
-import game.interfaces.GameEventListener;
 import graphics.dialogs.InformationDialogs;
-import game.interfaces.MoveListener;
-import game.interfaces.TimeEventListener;
 import utility.*;
 
 /**

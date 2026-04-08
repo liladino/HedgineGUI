@@ -1,8 +1,8 @@
 package graphics;
 
+import game.GameEventListener;
 import game.GameManager;
 import game.GameStarter;
-import game.interfaces.GameEventListener;
 import graphics.dialogs.GameEndDialogs;
 import graphics.panels.ChessBoardPanel;
 import graphics.panels.RightPanel;
@@ -32,13 +32,13 @@ public class MainWindow extends JFrame implements GameEventListener {
 
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                if (GameStarter.getGameManager() != null) GameStarter.getGameManager().stopRunning();
-                try { Thread.sleep(100); } catch (InterruptedException exc) {}
-    			System.exit(0);
-            }
-        });
+			@Override
+			public void windowClosing(WindowEvent e) {
+				if (GameStarter.getGameManager() != null) GameStarter.getGameManager().stopRunning();
+				try { Thread.sleep(100); } catch (InterruptedException exc) {}
+				System.exit(0);
+			}
+		});
 
 		gameManager.addGameChangeListener(this);
 		

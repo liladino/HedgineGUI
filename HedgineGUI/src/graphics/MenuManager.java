@@ -23,8 +23,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import core.chess.Board;
 import core.chess.IO.PGNConverter;
 import game.EnginePlayer;
+import game.GameEventListener;
 import game.GameStarter;
-import game.interfaces.GameEventListener;
 import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.NewGame;
 import utility.Result;
@@ -84,12 +84,12 @@ public class MenuManager implements ActionListener {
 				
 		menuBar.add(file);
 
-		fileMenuStrings.add("Load FEN");        //0
-		fileMenuStrings.add("Load board");      //1
-		fileMenuStrings.add("Save FEN");        //2
-		fileMenuStrings.add("Save PGN");        //3
-		fileMenuStrings.add("Save board");      //4
-		fileMenuStrings.add("Quit");            //5
+		fileMenuStrings.add("Load FEN");		//0
+		fileMenuStrings.add("Load board");	  //1
+		fileMenuStrings.add("Save FEN");		//2
+		fileMenuStrings.add("Save PGN");		//3
+		fileMenuStrings.add("Save board");	  //4
+		fileMenuStrings.add("Quit");			//5
 		
 		for (String s : fileMenuStrings){
 			JMenuItem m = new JMenuItem(s);
@@ -171,34 +171,34 @@ public class MenuManager implements ActionListener {
 	public void actionPerformed(ActionEvent a) {
 		String s = a.getActionCommand();
 		 
-        logger.info("\"" + s + "\"" + " selected");
-        
-        if (s.equals(fileMenuStrings.get(5))) {
-        	GameStarter.getGameManager().stopRunning();
-        	try { Thread.sleep(100); } catch (InterruptedException e) {}
-        	System.exit(0);
-        }
-        else if (s.equals(viewMenuStrings.get(0))) {
+		logger.info("\"" + s + "\"" + " selected");
+		
+		if (s.equals(fileMenuStrings.get(5))) {
+			GameStarter.getGameManager().stopRunning();
+			try { Thread.sleep(100); } catch (InterruptedException e) {}
+			System.exit(0);
+		}
+		else if (s.equals(viewMenuStrings.get(0))) {
 			//rotate
-        	GraphicSettings.rotateBoard = !GraphicSettings.rotateBoard;
-        	for (GameEventListener listener : gameEventListeners) {
-            	listener.onGameLooksChanged();	
-        	}
-        }
-        else if (s.equals(gameMenuStrings.get(0))){
+			GraphicSettings.rotateBoard = !GraphicSettings.rotateBoard;
+			for (GameEventListener listener : gameEventListeners) {
+				listener.onGameLooksChanged();	
+			}
+		}
+		else if (s.equals(gameMenuStrings.get(0))){
 			//new game
 			new NewGame();
 		}
 		else if (GraphicSettings.colors.containsKey(s)) {
 			//color scheme
-        	GraphicSettings.selectedScheme = s;
-        	for (GameEventListener listener : gameEventListeners) {
-            	listener.onGameLooksChanged();	
-        	}
-        }
+			GraphicSettings.selectedScheme = s;
+			for (GameEventListener listener : gameEventListeners) {
+				listener.onGameLooksChanged();	
+			}
+		}
 		else if (inputModesStrings.contains(s)) {
 			//input mode
-    		//System.out.println("kurvaelet");
+			//System.out.println("kurvaelet");
 			if (inputModesStrings.get(0).equals(s)) {
 				GraphicSettings.dragDrop = true;				
 			}
@@ -206,9 +206,9 @@ public class MenuManager implements ActionListener {
 				GraphicSettings.dragDrop = false;
 			}
 			for (GameEventListener listener : gameEventListeners) {
-            	listener.onGameLooksChanged();	
-        	}
-        }
+				listener.onGameLooksChanged();	
+			}
+		}
 		else if (s.equals(fileMenuStrings.get(0))){
 			//load fen
 			JFileChooser chooser = new JFileChooser();

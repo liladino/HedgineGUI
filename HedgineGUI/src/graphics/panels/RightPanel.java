@@ -11,8 +11,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import core.chess.IO.PGNConverter;
+import game.GameEventListener;
 import game.GameManager;
-import game.interfaces.GameEventListener;
 import utility.Sides;
 
 /**

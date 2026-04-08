@@ -2,7 +2,7 @@ package game;
 
 import java.io.IOException;
 
-import core.TimeInformationConverter;
+import core.ClockBuilder;
 import core.TimeInputException;
 import core.chess.Board;
 import core.chess.IO.FENException;
@@ -80,7 +80,7 @@ public class GameStarter {
 		}
 
 		try {
-			TimeInformationConverter.setClock(gameManager.getClock(), timeControl);
+			ClockBuilder.setClock(gameManager.getClock(), timeControl);
 		}
 		catch (TimeInputException t){
 			InformationDialogs.errorDialog(mainWindow, "Invalid time fromat: " + t.getMessage() + "\nTime set to no control");
