@@ -202,6 +202,7 @@ public final class Clock {
 	public synchronized ClockSnapshot snapshot() {
 		advanceToNow();
 		return new ClockSnapshot(
+			controlType,
 			whiteTimeMs,
 			blackTimeMs,
 			activeSide,

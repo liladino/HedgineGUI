@@ -6,6 +6,9 @@ import core.ClockBuilder;
 import core.TimeInputException;
 import core.chess.Board;
 import core.chess.IO.FENException;
+import core.clock.Clock;
+import core.clock.ClockController;
+import core.clock.SwingTimer;
 import graphics.GraphicSettings;
 import graphics.MainWindow;
 import graphics.dialogs.InformationDialogs;
@@ -49,7 +52,7 @@ public class GameStarter {
 			black = new HumanPlayer(Sides.BLACK, black.getName());
 			if (mainWindow != null) InformationDialogs.errorDialog(mainWindow, "Black error: " + e.getMessage() + "\nThe player is set to be human.");
 		}
-		
+				
 		white.setMoveListener(gameManager);
 		black.setMoveListener(gameManager);
 		
@@ -63,6 +66,20 @@ public class GameStarter {
 			GraphicSettings.rotateBoard = true;
 		}
 
+		Clock clock = new Clock();
+		try {
+			ClockBuilder.setClock(clock, timeControl);
+		}
+		catch (TimeInputException e){ }
+
+		ClockController clockController = new ClockController(new SwingTimer(), clock);
+		Board b = null;
+		try{
+			b = new Board(fen);
+			clockController.setActiveSide(b.tomove());
+		}
+		catch(FENException e) {	}
+		
 		if (mainWindow != null) mainWindow.repaint();
 		gameManager.notifyGameStateChanged();
 		
@@ -79,13 +96,13 @@ public class GameStarter {
 			gameManager.initialzeGame(new Board(), white, black);
 		}
 
-		try {
-			ClockBuilder.setClock(gameManager.getClock(), timeControl);
-		}
-		catch (TimeInputException t){
-			InformationDialogs.errorDialog(mainWindow, "Invalid time fromat: " + t.getMessage() + "\nTime set to no control");
-			gameManager.getClock().setControlType(TimeControl.NO_CONTROL);
-		}
+		// try {
+		// 	ClockBuilder.setClock(gameManager.getClock(), timeControl);
+		// }
+		// catch (TimeInputException t){
+		// 	InformationDialogs.errorDialog(mainWindow, "Invalid time fromat: " + t.getMessage() + "\nTime set to no control");
+		// 	gameManager.getClock().setControlType(TimeControl.NO_CONTROL);
+		// }
 	}
 
 	public static void setGameManager(GameManager gameManager){

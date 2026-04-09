@@ -43,35 +43,31 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 	 * * * * */
 	private Move currentMove = null;
 	private Board board = null;
-	private Clock clock = null;
 	private ArrayList<Move> moves;
 	private String startFEN = null;
 	private Result result;
+	private ClockSnapshot lastClockSnapshot = null;
 
 	/* * * * * * * *
 	 * Constructor *
 	 * * * * * * * */
 	public GameManager() {
 		eventListeners = new ArrayList<>();
-		clock = new Clock();
-		// clock = new Clock(this);
-		// clock.setTimeEventListener(this);
 	}
 		
 	/* * * * * *
 	 * Setters *
 	 * * * * * */
-	public void setBoard() {
-		setBoard(new Board());
-	}
-	public void setBoard(Board b) {
+	// public void setBoard() {
+	// 	setBoard(new Board());
+	// }
+	private void setBoard(Board b) {
 		moves = new ArrayList<>();
 		board = b;
 		int plies = b.getFullMoveCount() * 2 + (b.tomove() == Sides.WHITE ? 0 : 1);
-		clock.setPlyCount(plies);
-		clock.setActiveSide(b.tomove());
 		startFEN = b.convertToFEN();
 	}
+
 	public void addGameChangeListener(GameEventListener listener) {
 		eventListeners.add(listener); 
 	}
@@ -97,9 +93,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 	}
 	public Player getBlack() {
 		return black;
-	}
-	public Clock getClock(){
-		return clock;
 	}
 	public List<Move> getMoves(){
 		return moves;
@@ -266,7 +259,6 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 	/* * * * * * * * *
 	 * COMMUNICATION *
 	 * * * * * * * * */
-	
 	private void notifyEngine() {
 		StringBuilder sb = new StringBuilder();
 		
@@ -280,22 +272,27 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 		}
 		sb.append("\n");
 		
-		if (clock.getTimeControl() == TimeControl.NO_CONTROL) {
+		if (null == lastClockSnapshot) {
 			sb.append("go movetime 2000");
 		}
-		else if (clock.getTimeControl() == TimeControl.FIX_TIME_PER_MOVE) {
-			sb.append("go movetime " + (int)(clock.getWhiteTime() * 0.9));
-		}
-		else if (clock.getTimeControl() == TimeControl.FISCHER) {
-			sb.append("go wtime ");
-			sb.append(clock.getWhiteTime());
-			sb.append(" btime ");
-			sb.append(clock.getBlackTime());
-			if (clock.getIncrementStartMove() < moves.size() / 2) {
-				sb.append(" winc ");
-				sb.append(clock.getIncrement());
-				sb.append(" binc ");
-				sb.append(clock.getIncrement());
+		else {
+			if (lastClockSnapshot.getTimeControl() == TimeControl.NO_CONTROL) {
+				sb.append("go movetime 2000");
+			}
+			else if (lastClockSnapshot.getTimeControl() == TimeControl.FIX_TIME_PER_MOVE) {
+				sb.append("go movetime " + (int)(lastClockSnapshot.getWhiteTimeMs() * 0.9));
+			}
+			else if (lastClockSnapshot.getTimeControl() == TimeControl.FISCHER) {
+				sb.append("go wtime ");
+				sb.append(lastClockSnapshot.getWhiteTimeMs());
+				sb.append(" btime ");
+				sb.append(lastClockSnapshot.getBlackTimeMs());
+				if (lastClockSnapshot.getWincMs() != 0 || lastClockSnapshot.getBincMs() != 0) {
+					sb.append(" winc ");
+					sb.append(lastClockSnapshot.getWincMs());
+					sb.append(" binc ");
+					sb.append(lastClockSnapshot.getWincMs());
+				}
 			}
 		}
 		
@@ -383,7 +380,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 		}
 		
 		if (takebacks == 1) {
-			clock.pressClock();
+			// clock.pressClock();
 		}
 		
 		board = temp;
@@ -394,11 +391,12 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 
 	@Override
 	public void onTick(ClockSnapshot snapshot) {
-		// probably no job here
+		lastClockSnapshot = snapshot;
 	}
 
 	@Override
 	public void onTimeUp(ClockSnapshot snapshot) {
+		lastClockSnapshot = snapshot;
 		onTimeIsUp(snapshot.getFlaggedSide());
 	} 
 }
