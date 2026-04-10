@@ -45,7 +45,7 @@ public class MainWindow extends JFrame implements GameEventListener {
 		GraphicSettings.initializeGraphicSettings();
 		menuManager = new MenuManager(this);
 		chessBoardPanel = new ChessBoardPanel(gameManager, menuManager);
-		rightPanel = new RightPanel(gameManager);
+		rightPanel = new RightPanel();
 		
 		setLayout(new BorderLayout());
 		menuManager.addGameEventListener(this);
@@ -97,7 +97,7 @@ public class MainWindow extends JFrame implements GameEventListener {
 	}
 
 	@Override
-	public void onGameStateChanged() {
+	public void onGameStateChanged(String pgn) {
 		// no job
 	}
 

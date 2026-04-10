@@ -20,7 +20,7 @@ public class Main {
 		}
 
 		GameStarter.setGameManager(gameManager);
-		GameStarter.addMainWindow(mainWindow);
+		GameStarter.setMainWindow(mainWindow);
 		GameStarter.startNewGame(new HumanPlayer(Sides.WHITE, "White"), new HumanPlayer(Sides.BLACK, "Black"), "N");
 	}
 }

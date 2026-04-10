@@ -13,7 +13,6 @@ import graphics.GraphicSettings;
 import graphics.MainWindow;
 import graphics.dialogs.InformationDialogs;
 import utility.Sides;
-import utility.TimeControl;
 
 /**
  * 
@@ -37,6 +36,48 @@ public class GameStarter {
 			t = null;
 		}
 		
+		setPlayers(white, black);
+
+		initializeGame(fen, white, black, timeControl);
+
+		setGraphics(white, black);
+		
+		setClockController(timeControl, fen);
+
+		if (mainWindow != null) mainWindow.repaint();
+		gameManager.notifyGameStateChanged();
+		
+		t = new Thread(gameManager);
+		t.start();
+	}
+
+	private static void setClockController(String timeControl, String fen){
+		Clock clock = new Clock();
+		try {
+			ClockBuilder.setClock(clock, timeControl);
+		}
+		catch (TimeInputException e){ }
+
+		ClockController clockController = new ClockController(new SwingTimer(), clock);
+		Board b = null;
+		try{
+			b = new Board(fen);
+			clockController.setActiveSide(b.tomove());
+		}
+		catch(FENException e) {	}
+	}
+
+	private static void setGraphics(Player white, Player black){
+		if (mainWindow != null) mainWindow.getRightPanel().setWhiteName(white.getName());
+		if (mainWindow != null) mainWindow.getRightPanel().setBlackName(black.getName());
+
+		GraphicSettings.rotateBoard = false;
+		if (!white.isHuman() && black.isHuman()){
+			GraphicSettings.rotateBoard = true;
+		}
+	}
+
+	private static void setPlayers(Player white, Player black){
 		try {
 			if (!white.isHuman()) ((EnginePlayer)white).validateEngine();
 		}
@@ -55,36 +96,6 @@ public class GameStarter {
 				
 		white.setMoveListener(gameManager);
 		black.setMoveListener(gameManager);
-		
-		initializeGame(fen, white, black, timeControl);
-		
-		if (mainWindow != null) mainWindow.getRightPanel().setWhiteName(white.getName());
-		if (mainWindow != null) mainWindow.getRightPanel().setBlackName(black.getName());
-
-		GraphicSettings.rotateBoard = false;
-		if (!white.isHuman() && black.isHuman()){
-			GraphicSettings.rotateBoard = true;
-		}
-
-		Clock clock = new Clock();
-		try {
-			ClockBuilder.setClock(clock, timeControl);
-		}
-		catch (TimeInputException e){ }
-
-		ClockController clockController = new ClockController(new SwingTimer(), clock);
-		Board b = null;
-		try{
-			b = new Board(fen);
-			clockController.setActiveSide(b.tomove());
-		}
-		catch(FENException e) {	}
-		
-		if (mainWindow != null) mainWindow.repaint();
-		gameManager.notifyGameStateChanged();
-		
-		t = new Thread(gameManager);
-		t.start();
 	}
 	
 	private static void initializeGame(String fen, Player white, Player black, String timeControl) {
@@ -95,14 +106,6 @@ public class GameStarter {
 			InformationDialogs.errorDialog(mainWindow, e.getMessage());
 			gameManager.initialzeGame(new Board(), white, black);
 		}
-
-		// try {
-		// 	ClockBuilder.setClock(gameManager.getClock(), timeControl);
-		// }
-		// catch (TimeInputException t){
-		// 	InformationDialogs.errorDialog(mainWindow, "Invalid time fromat: " + t.getMessage() + "\nTime set to no control");
-		// 	gameManager.getClock().setControlType(TimeControl.NO_CONTROL);
-		// }
 	}
 
 	public static void setGameManager(GameManager gameManager){
@@ -113,7 +116,7 @@ public class GameStarter {
 		return gameManager;
 	}
 
-	public static void addMainWindow(MainWindow mainWindow){
+	public static void setMainWindow(MainWindow mainWindow){
 		GameStarter.mainWindow = mainWindow;
 	}
 

@@ -11,6 +11,6 @@ public interface GameEventListener {
 	void onTimeIsUp();
 	void onResign(Sides won);
 	
-	void onGameStateChanged();
+	void onGameStateChanged(String pgn);
 	void onGameLooksChanged();
 }

@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 import core.chess.Board;
 import core.chess.Move;
 import core.chess.IO.FENException;
-import core.clock.Clock;
+import core.chess.IO.PGNConverter;
 import core.clock.ClockListener;
 import core.clock.ClockSnapshot;
 
@@ -72,9 +72,10 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 		eventListeners.add(listener); 
 	}
 
-	public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
+	// public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
 		// clock.setClockPanels(whiteClockPanel, blackClockPanel);
-	}
+	// }
+
 	public void setResult(Result r) {
 		result = r;
 	}
@@ -136,73 +137,63 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 	
 	@Override 
 	public void run() {
-		// logger.info("gameManager started");
+		logger.info("gameManager started");
 		
-		// running = true;		
-		// Thread t = null;
-		// if (clock.getTimeControl() != TimeControl.NO_CONTROL){
-		// 	t = new Thread(clock);
-		// 	t.start();
-		// 	clock.setTicking(true);
-		// }
+		running = true;
 		
-		// try {
-		// 	startEngines();
-		// } 
-		// catch (IOException e) {
-		// 	InformationDialogs.errorDialog(null, "Failed to communicate with engine: " + e.getMessage());
-		// 	stopRunning();
-		// }
+		try {
+			startEngines();
+		} 
+		catch (IOException e) {
+			InformationDialogs.errorDialog(null, "Failed to communicate with engine: " + e.getMessage());
+			stopRunning();
+		}
 	
-		// if (!currentPlayer.isHuman()) notifyEngine();
+		if (!currentPlayer.isHuman()) notifyEngine();
 
-		// while (running) {
-		// 	logger.info((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
-		// 	moveReady = false;
+		while (running) {
+			logger.info((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
+			moveReady = false;
 			
-		// 	synchronized (this) {
-		// 		while (!moveReady && !timeExpired && running) {
-		// 			try {
-		// 				wait(); 
-		// 			} catch (InterruptedException e) {
-		// 				Thread.currentThread().interrupt(); 
-		// 			}
-		// 		}
-		// 	}
+			synchronized (this) {
+				while (!moveReady && !timeExpired && running) {
+					try {
+						wait(); 
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt(); 
+					}
+				}
+			}
 
-		// 	if (timeExpired || !running) {
-		// 		if (!running) {
-		// 			logger.info("game not running");
-		// 		}
-		// 		if (timeExpired) {
-		// 			logger.info("time expired");
-		// 		}
-		// 		break; 
-		// 	}
+			if (timeExpired || !running) {
+				if (!running) {
+					logger.info("game not running");
+				}
+				if (timeExpired) {
+					logger.info("time expired");
+				}
+				break; 
+			}
 			
-		// 	if (board.isMoveLegal(currentMove)) {
-		// 		board.makeMove(currentMove);
-		// 		currentPlayer = (currentPlayer == white) ? black : white;
-		// 		moves.add(currentMove);
-									
-		// 		if (t != null){
-		// 			clock.pressClock();
-		// 		}
+			if (board.isMoveLegal(currentMove)) {
+				board.makeMove(currentMove);
+				currentPlayer = (currentPlayer == white) ? black : white;
+				moves.add(currentMove);
 
-		// 		notifyGameStateChanged();
-		// 		checkGameEnd();
+				notifyGameStateChanged();
+				checkGameEnd();
 				
-		// 		if (running && !currentPlayer.isHuman()) notifyEngine();
-		// 	}
-		// 	else {
-		// 		logger.info("Illegal input: ");
-		// 	}
-		// 	logger.info(currentMove.toString());
-		// }
+				if (running && !currentPlayer.isHuman()) notifyEngine();
+			}
+			else {
+				logger.info("Illegal input: ");
+			}
+			logger.info(currentMove.toString());
+		}
 		
-		// stopRunning();
-		// timeExpired = false;
-		// logger.info("gameManager stopped");
+		stopRunning();
+		timeExpired = false;
+		logger.info("gameManager stopped");
 	}
 	
 	/* * * * * * * * * *
@@ -315,7 +306,7 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 	
 	public void notifyGameStateChanged() {
 		for (GameEventListener listener : eventListeners) {
-			listener.onGameStateChanged();
+			listener.onGameStateChanged(PGNConverter.convertToMoves(getStartFEN(), getMoves()));
 		}
 	}
 

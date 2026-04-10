@@ -409,7 +409,7 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 	}
 
 	@Override
-	public void onGameStateChanged() {
+	public void onGameStateChanged(String pgn) {
 		repaint();
 	}
 
@@ -420,37 +420,36 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 
 	@Override
 	public void onCheckmate(Sides won) {
-		//
+		// no job
 	}
 
 	@Override
 	public void onDraw() {
-		//
+		// no job
 	}
 
 	@Override
 	public void onStalemate() {
-		//
+		// no job
 	}
 
 	@Override
 	public void onInsufficientMaterial() {
-		//
+		// no job
 	}
 
 	@Override
 	public void onTimeIsUp(Sides won) {
-		//
+		// no job
 	}
 
 	@Override
 	public void onTimeIsUp() {
-		//
+		// no job
 	}
 
 	@Override
 	public void onResign(Sides won) {
-		// 
+		// no job
 	}
-	
 }

@@ -10,9 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import core.chess.IO.PGNConverter;
 import game.GameEventListener;
-import game.GameManager;
 import utility.Sides;
 
 /**
@@ -24,9 +22,8 @@ public class RightPanel extends JPanel implements GameEventListener{
 	private JTextArea whiteName;
 	private JTextArea blackName;
 	private JTextArea movesArea;
-	private transient GameManager gameManager;
 	
-	public RightPanel(GameManager gameManager){
+	public RightPanel(){
 		setPreferredSize(new Dimension(300, getHeight()));
 
 		setLayout(new GridBagLayout());
@@ -68,9 +65,9 @@ public class RightPanel extends JPanel implements GameEventListener{
 		TimePanel blackClockPanel = new TimePanel(Sides.BLACK);
 		add(blackClockPanel, gbc);
 		
-		this.gameManager = gameManager;
+		// this.gameManager = gameManager;
 		// gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
-		gameManager.addGameChangeListener(this);
+		// gameManager.addGameChangeListener(this);
 		
 		movesArea = new JTextArea();
 		movesArea.setFont(new Font("Courier new", Font.PLAIN, 16));
@@ -94,57 +91,54 @@ public class RightPanel extends JPanel implements GameEventListener{
 
 	
 	public void setBlackName(String name){
+		// String temp = PGNConverter.convertToMoves(gameManager.getStartFEN(), gameManager.getMoves());
 		blackName.setText(name);
 	}
 
 	@Override
-	public void onGameStateChanged() {
-		updateMoves();
+	public void onGameStateChanged(String pgn) {
+		// updateMoves();
+		movesArea.setText(pgn);
 	}
 
 	@Override
 	public void onGameLooksChanged() {
-		updateMoves();
-	}
-
-	private void updateMoves(){
-		String temp = PGNConverter.convertToMoves(gameManager.getStartFEN(), gameManager.getMoves());
-		if (temp != null) movesArea.setText(temp);
+		// updateMoves();
 	}
 
 	@Override
 	public void onCheckmate(Sides won) {
-		updateMoves();
+		// updateMoves();
 	}
 
 	@Override
 	public void onDraw() {
-		updateMoves();
+		// updateMoves();
 	}
 
 	@Override
 	public void onStalemate() {
-		updateMoves();
+		// updateMoves();
 	}
 
 	@Override
 	public void onInsufficientMaterial() {
-		updateMoves();
+		// updateMoves();
 	}
 
 	@Override
 	public void onTimeIsUp(Sides won) {
-		updateMoves();
+		// updateMoves();
 	}
 
 	@Override
 	public void onTimeIsUp() {
-		updateMoves();
+		// updateMoves();
 	}
 
 	@Override
 	public void onResign(Sides won) {
-		updateMoves();
+		// updateMoves();
 	} 
 
 }

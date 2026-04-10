@@ -5,106 +5,6 @@ import java.util.List;
 
 import utility.*;
 
-/*
-public class Clock implements Runnable, GameEventListener {
-	private TimeControl controlType;
-	private int whiteTime; 
-	private int blackTime;
-	private int increment; 
-	private int incrementStartMove; //e.g. increment comes after the 40th move
-
-	private int plies; //how many times the clock was pressed
-	private int moveTime; 
-	private boolean isWhiteActive;
-	private ArrayList<Pair<Integer, Integer>> extraTimes; //after move X give players Y time (moveCount, extraTime)
-	
-	private TimeEventListener timeEventListener;
-	private ClockListener whiteClockPanel;
-	private ClockListener blackClockPanel;
-
-	private boolean clockWasPressed;
-	private boolean timerUp; // signal for time expiration
-	private boolean ticking; // tracks if the timer should be ticking
-	private volatile boolean gameEnded;
-
-	public Clock(GameManager gameManager){
-		controlType = TimeControl.NO_CONTROL;
-		extraTimes = new ArrayList<>();
-		isWhiteActive = true;
-		plies = 0;
-		increment = 0;
-		incrementStartMove = 0;
-		gameEnded = timerUp = gameEnded = ticking = false;
-		gameManager.addGameChangeListener(this);
-	}
-	@Override
-	public void run() {
-		updateDisplay();
-		long startTime = System.currentTimeMillis();
-		while (!timerUp && !gameEnded) {
-			int tikRateMillis = 50;
-			synchronized (this){
-				clockWasPressed = false;
-				try {
-					wait(tikRateMillis);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					return;
-				}
-			}
-			long elapsed = System.currentTimeMillis() - startTime;
-			
-			if (ticking) {
-				if (isWhiteActive) {
-					whiteTime -= (int)elapsed;
-					if (whiteTime <= 0) {
-						timerUp = true;
-						whiteTime = 0;
-					}
-				} else {
-					blackTime -= (int)elapsed;
-					if (blackTime <= 0) {
-						timerUp = true;
-						blackTime = 0;
-					}
-				}
-				if (timerUp){
-					updateDisplay();
-					signalTimeIsUp();
-					timerUp = false;
-					break;
-				}
-				else if (clockWasPressed){
-					updateClockData();
-				}
-				updateDisplay();
-			}
-			startTime = System.currentTimeMillis();
-		}
-	}
-   	 
-	private void updateClockData(){
-		if (controlType == TimeControl.FIX_TIME_PER_MOVE){
-			blackTime = whiteTime = moveTime;
-		}
-		else if (controlType == TimeControl.FISCHER){
-			if (plies/2 > incrementStartMove){
-				if (isWhiteActive) whiteTime += increment;
-				else blackTime += increment;
-			}
-			for (Pair<Integer, Integer> p : extraTimes){
-				if (plies/2 == p.first){
-					if (isWhiteActive) whiteTime += p.second;
-					else blackTime += p.second;
-				}
-			}
-		}
-		isWhiteActive = !isWhiteActive;
-
-		plies++;
-	}
-}*/
-
 /**
  * Represents an abstract chess clock.
  */
@@ -220,32 +120,25 @@ public final class Clock {
 		advanceToNow();
 		return whiteTimeMs;
 	}
-
 	public synchronized long getBlackTime() {
 		advanceToNow();
 		return blackTimeMs;
 	}
-
 	public synchronized int getIncrementStartMove() {
 		return incrementStartMove;
 	}
-
 	public synchronized int getIncrement() {
 		return (int) incrementMs;
 	}
-
 	public synchronized TimeControl getTimeControl() {
 		return controlType;
 	}
-
 	public synchronized Sides activeSide() {
 		return activeSide;
 	}
-
 	public List<Pair<Integer, Integer>> getExtraTime(){
 		return extraTimes;
 	}
-
     public boolean isRunning(){
         return running;
     }
