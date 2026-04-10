@@ -13,6 +13,7 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.management.RuntimeErrorException;
 import javax.swing.*;
 
 /**
@@ -34,9 +35,10 @@ public class MainWindow extends JFrame implements GameEventListener {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				if (GameStarter.getGameManager() != null) GameStarter.getGameManager().stopRunning();
-				try { Thread.sleep(100); } catch (InterruptedException exc) {}
-				System.exit(0);
+				throw new RuntimeErrorException(new Error("somehow stop the gamemanager here..."));
+				// if (GameStarter.getGameManager() != null) GameStarter.getGameManager().stopRunning();
+				// try { Thread.sleep(100); } catch (InterruptedException exc) {}
+				// System.exit(0);
 			}
 		});
 

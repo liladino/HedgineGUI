@@ -11,6 +11,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
+import javax.management.RuntimeErrorException;
+
 import core.chess.Move;
 import graphics.dialogs.InformationDialogs;
 import utility.Sides;
@@ -133,6 +135,8 @@ public class EnginePlayer extends Player {
 			sb.append(s);
 			sb.append('\n');
 		}
-		InformationDialogs.infoDialog(GameStarter.getMainWindow(), new String(sb));
+		logger.info(new String(sb));
+		throw new RuntimeErrorException(new Error("display engine info dialog not implemented"));
+		// InformationDialogs.infoDialog(GameStarter.getMainWindow(), new String(sb));
 	}
 }

@@ -105,12 +105,10 @@ public class PGNTest {
 	
 	@Test
 	void fullGameTest1() {
-		GameManager gameManager = new GameManager();
-
+		GameStarter gameStarter = new GameStarter();
 		HumanPlayer w = new HumanPlayer(Sides.WHITE, "White");
 		HumanPlayer b = new HumanPlayer(Sides.BLACK, "Black");
-		GameStarter.setGameManager(gameManager);
-		GameStarter.startNewGame(w, b, "N");
+		gameStarter.startNewUIGame(w, b, "N");
 		
 		try {
 			Thread.sleep(100);
@@ -127,11 +125,11 @@ public class PGNTest {
 		}
 		
 		String s = PGNConverter.convertToPGN(
-				gameManager.getPlayer(Sides.WHITE),
-				gameManager.getPlayer(Sides.BLACK),
-				gameManager.getStartFEN(), 
-				gameManager.getMoves(), 
-				gameManager.getResult());
+				gameStarter.getGameManager().getPlayer(Sides.WHITE),
+				gameStarter.getGameManager().getPlayer(Sides.BLACK),
+				gameStarter.getGameManager().getStartFEN(), 
+				gameStarter.getGameManager().getMoves(), 
+				gameStarter.getGameManager().getResult());
 
 		assertEquals("[Site \"HedgineGUI\"]\n"
 				+ "[White \"White\"]\n"
@@ -143,12 +141,10 @@ public class PGNTest {
 	
 	@Test
 	void fullGameTest2() {
-		GameManager gameManager = new GameManager();
-
 		HumanPlayer w = new HumanPlayer(Sides.WHITE, "White");
 		HumanPlayer b = new HumanPlayer(Sides.BLACK, "Black");
-		GameStarter.setGameManager(gameManager);
-		GameStarter.startNewGame("rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1", w, b, "N");
+		GameStarter gameStarter = new GameStarter();
+		gameStarter.startNewUIGame("rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1", w, b, "N");
 		
 		try {
 			Thread.sleep(100);
@@ -163,11 +159,11 @@ public class PGNTest {
 		}
 		
 		String s = PGNConverter.convertToPGN(
-				gameManager.getPlayer(Sides.WHITE),
-				gameManager.getPlayer(Sides.BLACK),
-				gameManager.getStartFEN(), 
-				gameManager.getMoves(), 
-				gameManager.getResult());
+				gameStarter.getGameManager().getPlayer(Sides.WHITE),
+				gameStarter.getGameManager().getPlayer(Sides.BLACK),
+				gameStarter.getGameManager().getStartFEN(), 
+				gameStarter.getGameManager().getMoves(), 
+				gameStarter.getGameManager().getResult());
 
 		assertEquals("[Site \"HedgineGUI\"]\n"
 				+ "[White \"White\"]\n"

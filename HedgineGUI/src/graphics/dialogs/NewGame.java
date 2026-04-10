@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
+import javax.management.RuntimeErrorException;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -448,14 +449,15 @@ public class NewGame extends JFrame {
 				timeControl = "N";
 			}
 			
-			GameStarter.getGameManager().stopRunning();
+			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
+			// GameStarter.getGameManager().stopRunning();
 
-			GameStarter.startNewGame(
-				(startPos.getText().equals("startpos") || startPos.getText().equals("") 
-					? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : startPos.getText()), 
-				w, b, timeControl);
+			// GameStarter.startNewGame(
+			// 	(startPos.getText().equals("startpos") || startPos.getText().equals("") 
+			// 		? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : startPos.getText()), 
+			// 	w, b, timeControl);
 
-			dispose();
+			// dispose();
 		}
 	} 
 

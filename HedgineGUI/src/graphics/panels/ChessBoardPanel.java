@@ -228,7 +228,8 @@ public class ChessBoardPanel extends JPanel implements GameEventListener {
 		} catch (IOException e) { e.printStackTrace(); }
 		
 		if (fail) {
-			InformationDialogs.errorDialog(GameStarter.getMainWindow(), "Can't load all images at \"" + imagesPath + "\".\nLetters will be visible instead.");
+			// InformationDialogs.errorDialog(GameStarter.getMainWindow(), "Can't load all images at \"" + imagesPath + "\".\nLetters will be visible instead.");
+			logger.info("Can't load all images at \"" + imagesPath + "\".\nLetters will be visible instead.");
 		}
 	}
 	

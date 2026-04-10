@@ -12,6 +12,7 @@ import core.clock.ClockSnapshot;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.StructuredTaskScope.TimeoutException;
 
 import graphics.dialogs.InformationDialogs;
 import utility.*;
@@ -20,6 +21,11 @@ import utility.*;
  * Manages the lifecycle and logic of a chess game
  */
 public class GameManager implements Runnable, MoveListener, TimeEventListener, ClockListener{
+	/* TODO: implement a GameController facade that exposes an interface for e.g. menu
+	 * to control the GameManager object, and request data from it.
+	 * 
+	 * TODO: implement GameState, which contains the relevant information for the chessboard panel
+	 */
 	private static final Logger logger = Logger.getLogger(GameManager.class.getName());
 
 	/* * * * * *
@@ -200,16 +206,12 @@ public class GameManager implements Runnable, MoveListener, TimeEventListener, C
 	 * Game end logic  *
 	 * * * * * * * * * */
 	private void checkGameEnd() {
-		if (board.getResult() == Result.ONGOING) {
+		result = board.getResult();
+		if (result == Result.ONGOING) {
 			return;
 		}
 		for (GameEventListener listener : eventListeners) {
 			//the game ended
-			if (board.getResult() == Result.ONGOING){
-				continue;
-			}
-			result = board.getResult();
-
 			if (Result.WHITE_WON == board.getResult()) {
 				listener.onCheckmate(Sides.WHITE);
 			}

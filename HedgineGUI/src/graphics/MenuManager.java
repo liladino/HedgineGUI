@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
+import javax.management.RuntimeErrorException;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -174,9 +175,10 @@ public class MenuManager implements ActionListener {
 		logger.info("\"" + s + "\"" + " selected");
 		
 		if (s.equals(fileMenuStrings.get(5))) {
-			GameStarter.getGameManager().stopRunning();
-			try { Thread.sleep(100); } catch (InterruptedException e) {}
-			System.exit(0);
+			throw new RuntimeErrorException(new Error("quit is yet to be implemented"));
+			// GameStarter.getGameManager().stopRunning();
+			// try { Thread.sleep(100); } catch (InterruptedException e) {}
+			// System.exit(0);
 		}
 		else if (s.equals(viewMenuStrings.get(0))) {
 			//rotate
@@ -236,20 +238,22 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(fileMenuStrings.get(2))){
 			//save fen
-			String fen = GameStarter.getGameManager().getBoard().convertToFEN();
-			
-			JFileChooser chooser = new JFileChooser();
-			chooser.setDialogTitle(fileMenuStrings.get(2));
-			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
+			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
 
-			int returnVal = chooser.showSaveDialog(mainWindow);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".fen")) {
-					fw.write(fen);
-				} catch (Exception e) {
-					InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
-				}
-			}
+			// String fen = GameStarter.getGameManager().getBoard().convertToFEN();
+			
+			// JFileChooser chooser = new JFileChooser();
+			// chooser.setDialogTitle(fileMenuStrings.get(2));
+			// chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
+
+			// int returnVal = chooser.showSaveDialog(mainWindow);
+			// if (returnVal == JFileChooser.APPROVE_OPTION) {
+			// 	try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".fen")) {
+			// 		fw.write(fen);
+			// 	} catch (Exception e) {
+			// 		InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
+			// 	}
+			// }
 		}
 		else if (s.equals(fileMenuStrings.get(1))){
 			//load board
@@ -271,95 +275,109 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(fileMenuStrings.get(4))){
 			//save board
-			try (
-				FileOutputStream fout = new FileOutputStream(System.getProperty("user.dir") + "/saves/board.ser");
-				ObjectOutputStream oos = new ObjectOutputStream(fout);
-			){
-				oos.writeObject(GameStarter.getGameManager().getBoard());
-				InformationDialogs.infoDialog(mainWindow, "Board saved, load it with \"File\" > \"Load board\"");
-			}
-			catch (IOException i){
-				InformationDialogs.errorDialog(mainWindow, "Problem while saving the file: " + i.getMessage());
-			}
+			
+			throw new RuntimeErrorException(new Error("serialization is not implemented"));
+			// try (
+			// 	FileOutputStream fout = new FileOutputStream(System.getProperty("user.dir") + "/saves/board.ser");
+			// 	ObjectOutputStream oos = new ObjectOutputStream(fout);
+			// ){
+			// 	oos.writeObject(GameStarter.getGameManager().getBoard());
+			// 	InformationDialogs.infoDialog(mainWindow, "Board saved, load it with \"File\" > \"Load board\"");
+			// }
+			// catch (IOException i){
+			// 	InformationDialogs.errorDialog(mainWindow, "Problem while saving the file: " + i.getMessage());
+			// }
 		}
 		else if (s.equals(fileMenuStrings.get(3))){
 			//save pgn
-			String pgn = PGNConverter.convertToPGN(
-				GameStarter.getGameManager().getPlayer(Sides.WHITE),
-				GameStarter.getGameManager().getPlayer(Sides.BLACK),
-				GameStarter.getGameManager().getStartFEN(), 
-				GameStarter.getGameManager().getMoves(), 
-				GameStarter.getGameManager().getResult());
+			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
+			// String pgn = PGNConverter.convertToPGN(
+			// 	GameStarter.getGameManager().getPlayer(Sides.WHITE),
+			// 	GameStarter.getGameManager().getPlayer(Sides.BLACK),
+			// 	GameStarter.getGameManager().getStartFEN(), 
+			// 	GameStarter.getGameManager().getMoves(), 
+			// 	GameStarter.getGameManager().getResult());
 
-			JFileChooser chooser = new JFileChooser();
-			chooser.setDialogTitle(fileMenuStrings.get(3));
-			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
+			// JFileChooser chooser = new JFileChooser();
+			// chooser.setDialogTitle(fileMenuStrings.get(3));
+			// chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
 
-			int returnVal = chooser.showSaveDialog(mainWindow);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".pgn")) {
-					fw.write(pgn);
-				} catch (Exception e) {
-					InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
-				}
-			}
+			// int returnVal = chooser.showSaveDialog(mainWindow);
+			// if (returnVal == JFileChooser.APPROVE_OPTION) {
+			// 	try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".pgn")) {
+			// 		fw.write(pgn);
+			// 	} catch (Exception e) {
+			// 		InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
+			// 	}
+			// }
 		}
 		else if (s.equals(gameMenuStrings.get(1))){
 			//resign
-			if (!GameStarter.getGameManager().isGameRunning() || !GameStarter.getGameManager().getCurrentPlayer().isHuman()) return;
+			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
+
+			// if (!GameStarter.getGameManager().isGameRunning() || !GameStarter.getGameManager().getCurrentPlayer().isHuman()) return;
 			
-			Sides won = (GameStarter.getGameManager().getBoard().tomove() == Sides.WHITE ? Sides.BLACK : Sides.WHITE);
-			GameStarter.getGameManager().stopRunning();
-			GameStarter.getGameManager().setResult(won == Sides.WHITE ? Result.WHITE_WON : Result.BLACK_WON);
+			// Sides won = (GameStarter.getGameManager().getBoard().tomove() == Sides.WHITE ? Sides.BLACK : Sides.WHITE);
+			// GameStarter.getGameManager().stopRunning();
+			// GameStarter.getGameManager().setResult(won == Sides.WHITE ? Result.WHITE_WON : Result.BLACK_WON);
 			
-			for (GameEventListener g : gameEventListeners){
-				g.onResign(won);
-			}
+			// for (GameEventListener g : gameEventListeners){
+			// 	g.onResign(won);
+			// }
 		}
 		else if (s.equals(gameMenuStrings.get(2))){
 			//take back
-			if (!GameStarter.getGameManager().isGameRunning()) return;
-			GameStarter.getGameManager().takeBack();
+			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
+
+			// if (!GameStarter.getGameManager().isGameRunning()) return;
+			// GameStarter.getGameManager().takeBack();
 		}
 		else if (s.equals(gameMenuStrings.get(3))){
 			//abort
-			if (!GameStarter.getGameManager().isGameRunning()) return;
+			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
+
+			// if (!GameStarter.getGameManager().isGameRunning()) return;
 			
-			GameStarter.getGameManager().stopRunning();
-			GameStarter.getGameManager().setResult(Result.DRAW);
+			// GameStarter.getGameManager().stopRunning();
+			// GameStarter.getGameManager().setResult(Result.DRAW);
 			
-			for (GameEventListener g : gameEventListeners){
-				g.onDraw();
-			}
+			// for (GameEventListener g : gameEventListeners){
+			// 	g.onDraw();
+			// }
 		}
 		else if (s.equals(enginesMenuStrings.get(0))){
 			//quit engine
-			EnginePlayer e;
-			if (!GameStarter.getGameManager().getWhite().isHuman()) {
-				e = (EnginePlayer) GameStarter.getGameManager().getWhite();
-				e.quitEngine();
-			}
-			if (!GameStarter.getGameManager().getBlack().isHuman()) {
-				e = (EnginePlayer) GameStarter.getGameManager().getBlack();
-				e.quitEngine();
-			}
+			
+			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
+
+			// EnginePlayer e;
+			// if (!GameStarter.getGameManager().getWhite().isHuman()) {
+			// 	e = (EnginePlayer) GameStarter.getGameManager().getWhite();
+			// 	e.quitEngine();
+			// }
+			// if (!GameStarter.getGameManager().getBlack().isHuman()) {
+			// 	e = (EnginePlayer) GameStarter.getGameManager().getBlack();
+			// 	e.quitEngine();
+			// }
 		}
 		else if (s.equals(enginesMenuStrings.get(1))){
 			//restart engine
-			EnginePlayer e = getEngine();
-			if (e == null) return;
-			try {
-				if (e.isRunning())
-					e.quitEngine();
+			
+			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
+			// EnginePlayer e = getEngine();
+			// if (e == null) return;
+			// try {
+			// 	if (e.isRunning())
+			// 		e.quitEngine();
 				
-				e.startEngine();
+			// 	e.startEngine();
 				
-				e.sendCommand("ucinewgame");
-				if (GameStarter.getGameManager().getCurrentPlayer() == e) 
-					e.sendCommand(GameStarter.getGameManager().lastEngineCommand());
-			} catch (IOException e1) {
-				return;
-			}
+			// 	e.sendCommand("ucinewgame");
+			// 	if (GameStarter.getGameManager().getCurrentPlayer() == e) 
+			// 		e.sendCommand(GameStarter.getGameManager().lastEngineCommand());
+			// } catch (IOException e1) {
+			// 	return;
+			// }
 		}
 		else if (s.equals(enginesMenuStrings.get(2))){
 			//engine stop -> get move
@@ -383,16 +401,17 @@ public class MenuManager implements ActionListener {
 	}
 	
 	private EnginePlayer getEngine() {
-		EnginePlayer e;
-		if (!GameStarter.getGameManager().getCurrentPlayer().isHuman()) e = (EnginePlayer) GameStarter.getGameManager().getCurrentPlayer();
-		else {
-			Sides notActiveSide = (GameStarter.getGameManager().getCurrentPlayer().getSide() == Sides.BLACK ? Sides.WHITE : Sides.BLACK); 
-			if (GameStarter.getGameManager().getPlayer(notActiveSide).isHuman()) {
-				return null;
-			}
-			e = (EnginePlayer) GameStarter.getGameManager().getPlayer(notActiveSide);
-		}
-		return e;
+			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
+		// EnginePlayer e;
+		// if (!GameStarter.getGameManager().getCurrentPlayer().isHuman()) e = (EnginePlayer) GameStarter.getGameManager().getCurrentPlayer();
+		// else {
+		// 	Sides notActiveSide = (GameStarter.getGameManager().getCurrentPlayer().getSide() == Sides.BLACK ? Sides.WHITE : Sides.BLACK); 
+		// 	if (GameStarter.getGameManager().getPlayer(notActiveSide).isHuman()) {
+		// 		return null;
+		// 	}
+		// 	e = (EnginePlayer) GameStarter.getGameManager().getPlayer(notActiveSide);
+		// }
+		// return e;
 	}
 	
 	public void addGameEventListener(GameEventListener listener) {

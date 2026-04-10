@@ -18,16 +18,18 @@ import utility.Sides;
  * 
  */
 public class GameStarter {
-	private static Thread t = null;
-	private static MainWindow mainWindow = null;
-	private static GameManager gameManager = null;
-	private GameStarter(){ }
-
-	public static void startNewGame(Player white, Player black, String timeControl){
-		startNewGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", white, black, timeControl);
+	private Thread t = null;
+	private MainWindow mainWindow = null;
+	private GameManager gameManager;
+	public GameStarter(){
+		gameManager = new GameManager();
 	}
 
-	public static void startNewGame(String fen, Player white, Player black, String timeControl){
+	public void startNewUIGame(Player white, Player black, String timeControl){
+		startNewUIGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", white, black, timeControl);
+	}
+
+	public void startNewUIGame(String fen, Player white, Player black, String timeControl){
 		if (t != null){
 			//stop the current game
 			if (t.isAlive()){
@@ -51,7 +53,7 @@ public class GameStarter {
 		t.start();
 	}
 
-	private static void setClockController(String timeControl, String fen){
+	private void setClockController(String timeControl, String fen){
 		Clock clock = new Clock();
 		try {
 			ClockBuilder.setClock(clock, timeControl);
@@ -67,7 +69,7 @@ public class GameStarter {
 		catch(FENException e) {	}
 	}
 
-	private static void setGraphics(Player white, Player black){
+	private void setGraphics(Player white, Player black){
 		if (mainWindow != null) mainWindow.getRightPanel().setWhiteName(white.getName());
 		if (mainWindow != null) mainWindow.getRightPanel().setBlackName(black.getName());
 
@@ -77,7 +79,7 @@ public class GameStarter {
 		}
 	}
 
-	private static void setPlayers(Player white, Player black){
+	private void setPlayers(Player white, Player black){
 		try {
 			if (!white.isHuman()) ((EnginePlayer)white).validateEngine();
 		}
@@ -98,7 +100,7 @@ public class GameStarter {
 		black.setMoveListener(gameManager);
 	}
 	
-	private static void initializeGame(String fen, Player white, Player black, String timeControl) {
+	private void initializeGame(String fen, Player white, Player black, String timeControl) {
 		try{
 			gameManager.initialzeGame(new Board(fen), white, black);
 		}
@@ -108,19 +110,19 @@ public class GameStarter {
 		}
 	}
 
-	public static void setGameManager(GameManager gameManager){
-		GameStarter.gameManager = gameManager;
-	}
+	// public void setGameManager(GameManager gameManager){
+	// 	this.gameManager = gameManager;
+	// }
 
-	public static GameManager getGameManager(){
+	public GameManager getGameManager(){
 		return gameManager;
 	}
 
-	public static void setMainWindow(MainWindow mainWindow){
-		GameStarter.mainWindow = mainWindow;
+	public void setMainWindow(MainWindow mainWindow){
+		this.mainWindow = mainWindow;
 	}
 
-	public static MainWindow getMainWindow(){
+	public MainWindow getMainWindow(){
 		return mainWindow;
 	}
 
