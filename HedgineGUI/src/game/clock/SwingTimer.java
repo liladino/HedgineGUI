@@ -1,4 +1,4 @@
-package core.clock;
+package game.clock;
 
 import java.awt.event.*;
 import javax.swing.Timer;

@@ -1,4 +1,4 @@
-package core.clock;
+package game.clock;
 
 import utility.Sides;
 import utility.TimeControl;

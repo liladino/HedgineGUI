@@ -7,9 +7,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import core.ClockBuilder;
-import core.TimeInputException;
-import core.clock.Clock;
+import game.clock.Clock;
+import game.clock.ClockBuilder;
+import game.clock.TimeInputException;
 import utility.Pair;
 import utility.Second;
 import utility.TimeControl;

@@ -1,4 +1,4 @@
-package core.clock;
+package game.clock;
 
 public interface Ticker {
 	void start(Runnable tick);

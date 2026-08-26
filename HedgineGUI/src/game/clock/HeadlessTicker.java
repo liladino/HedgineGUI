@@ -1,4 +1,4 @@
-package core.clock;
+package game.clock;
 
 public class HeadlessTicker implements Ticker {
 	private Runnable tick;

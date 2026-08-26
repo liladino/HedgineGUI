@@ -2,13 +2,13 @@ package game;
 
 import java.io.IOException;
 
-import core.ClockBuilder;
-import core.TimeInputException;
 import core.chess.Board;
 import core.chess.IO.FENException;
-import core.clock.Clock;
-import core.clock.ClockController;
-import core.clock.SwingTimer;
+import game.clock.Clock;
+import game.clock.ClockBuilder;
+import game.clock.ClockController;
+import game.clock.SwingTimer;
+import game.clock.TimeInputException;
 import graphics.GraphicSettings;
 import graphics.MainWindow;
 import graphics.dialogs.InformationDialogs;

@@ -6,8 +6,8 @@ import core.chess.Board;
 import core.chess.Move;
 import core.chess.IO.FENException;
 import core.chess.IO.PGNConverter;
-import core.clock.ClockListener;
-import core.clock.ClockSnapshot;
+import game.clock.ClockListener;
+import game.clock.ClockSnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import utility.*;
  * Manages the lifecycle and logic of a chess game
  */
 public class GameManager implements Runnable, MoveListener, TimeEventListener, ClockListener{
-	/* TODO: implement a GameController facade that exposes an interface for e.g. menu
+	/* TODO: implement a GameController that exposes an interface for e.g. menu
 	 * to control the GameManager object, and request data from it.
 	 * 
 	 * TODO: implement GameState, which contains the relevant information for the chessboard panel

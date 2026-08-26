@@ -3,7 +3,7 @@ package graphics.panels;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import core.clock.ClockSnapshot;
+import game.clock.ClockSnapshot;
 
 import java.awt.Color;
 import java.awt.Font;

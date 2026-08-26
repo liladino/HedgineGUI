@@ -1,4 +1,4 @@
-package core.clock;
+package game.clock;
 
 import java.util.ArrayList;
 import java.util.List;

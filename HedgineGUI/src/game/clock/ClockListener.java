@@ -1,4 +1,4 @@
-package core.clock;
+package game.clock;
 
 public interface ClockListener {
 	void onTick(ClockSnapshot snapshot);

@@ -9,7 +9,6 @@ import core.chess.Board;
 import core.chess.Move;
 import core.chess.Square;
 import core.chess.IO.PGNConverter;
-import game.GameManager;
 import game.GameStarter;
 import game.HumanPlayer;
 import utility.Sides;

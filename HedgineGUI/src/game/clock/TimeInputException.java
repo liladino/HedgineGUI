@@ -1,4 +1,4 @@
-package core;
+package game.clock;
 
 import java.io.IOException;
 

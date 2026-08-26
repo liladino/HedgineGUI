@@ -1,6 +1,5 @@
-package core;
+package game.clock;
 
-import core.clock.Clock;
 import utility.Second;
 import utility.TimeControl;
 
