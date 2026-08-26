@@ -55,6 +55,7 @@ public class MenuManager implements ActionListener {
 	private ArrayList<String> aboutMenuStrings;
 	
 	private ArrayList<GameEventListener> gameEventListeners;
+	private ArrayList<Runnable> appearanceListeners;
 
 
 	public MenuManager(MainWindow mainWindow) {
@@ -66,6 +67,7 @@ public class MenuManager implements ActionListener {
 		viewMenuElements = new ArrayList<>();
 		enginesMenuStrings = new ArrayList<>();
 		gameEventListeners = new ArrayList<>();
+		appearanceListeners = new ArrayList<>();
 		aboutMenuStrings = new ArrayList<>();
 
 		colors = new ArrayList<>();
@@ -186,6 +188,7 @@ public class MenuManager implements ActionListener {
 			for (GameEventListener listener : gameEventListeners) {
 				listener.onGameLooksChanged();	
 			}
+			notifyAppearanceListeners();
 		}
 		else if (s.equals(gameMenuStrings.get(0))){
 			//new game
@@ -197,6 +200,7 @@ public class MenuManager implements ActionListener {
 			for (GameEventListener listener : gameEventListeners) {
 				listener.onGameLooksChanged();	
 			}
+			notifyAppearanceListeners();
 		}
 		else if (inputModesStrings.contains(s)) {
 			//input mode
@@ -210,6 +214,7 @@ public class MenuManager implements ActionListener {
 			for (GameEventListener listener : gameEventListeners) {
 				listener.onGameLooksChanged();	
 			}
+			notifyAppearanceListeners();
 		}
 		else if (s.equals(fileMenuStrings.get(0))){
 			//load fen
@@ -416,5 +421,15 @@ public class MenuManager implements ActionListener {
 	
 	public void addGameEventListener(GameEventListener listener) {
 		gameEventListeners.add(listener);
+	}
+
+	public void addAppearanceListener(Runnable listener) {
+		appearanceListeners.add(listener);
+	}
+
+	private void notifyAppearanceListeners() {
+		for (Runnable listener : appearanceListeners) {
+			listener.run();
+		}
 	}
 }

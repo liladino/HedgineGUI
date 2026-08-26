@@ -1,394 +1,449 @@
 package game;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import core.chess.Board;
 import core.chess.Move;
 import core.chess.IO.FENException;
-import core.chess.IO.PGNConverter;
+import game.clock.ClockController;
 import game.clock.ClockListener;
 import game.clock.ClockSnapshot;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import graphics.dialogs.InformationDialogs;
-import utility.*;
+import game.clock.TimeInputException;
+import utility.Result;
+import utility.Sides;
 
 /**
- * Manages the lifecycle and logic of a chess game
+ * Event-driven game loop. It coordinates Player objects without knowing how
+ * either player obtains a move and has no dependency on Swing or the control UI.
  */
-public class GameManager implements Runnable, MoveListener, TimeEventListener, ClockListener{
-	/* TODO: implement a GameController that exposes an interface for e.g. menu
-	 * to control the GameManager object, and request data from it.
-	 * 
-	 * TODO: implement GameState, which contains the relevant information for the chessboard panel
-	 */
-	private static final Logger logger = Logger.getLogger(GameManager.class.getName());
+public final class GameManager implements MoveReceiver, ClockListener {
+    private static final Logger LOGGER = Logger.getLogger(GameManager.class.getName());
 
-	/* * * * * *
-	 * Players *
-	 * * * * * */
-	private Player black = null;
-	private Player white = null;
-	private Player currentPlayer;
+    @FunctionalInterface
+    public interface StateListener {
+        void onStateChanged(GameSnapshot snapshot);
+    }
 
-	/* * * * *
-	 * Meta  *
-	 * * * * */
-	private volatile boolean moveReady;
-	private volatile boolean timeExpired;
-	private volatile boolean running;
-	private List<GameEventListener> eventListeners;
-	private String lastEngineCommand = null;
+    private final Object stateLock = new Object();
+    private final List<StateListener> listeners = new CopyOnWriteArrayList<>();
 
-	/* * * * *
-	 * Game  *
-	 * * * * */
-	private Move currentMove = null;
-	private Board board = null;
-	private ArrayList<Move> moves;
-	private String startFEN = null;
-	private Result result;
-	private ClockSnapshot lastClockSnapshot = null;
+    private Player white;
+    private Player black;
+    private Player currentPlayer;
+    private Board board;
+    private String initialFen;
+    private final List<Move> moves = new ArrayList<>();
+    private final List<ClockSnapshot> clockHistory = new ArrayList<>();
+    private ClockController clockController;
+    private ClockSnapshot clockSnapshot;
+    private Result result = Result.ONGOING;
+    private GameTermination termination = GameTermination.NONE;
+    private Sides winner;
+    private boolean running;
+    private boolean awaitingMove;
+    private String errorMessage;
 
-	/* * * * * * * *
-	 * Constructor *
-	 * * * * * * * */
-	public GameManager() {
-		eventListeners = new ArrayList<>();
-	}
-		
-	/* * * * * *
-	 * Setters *
-	 * * * * * */
-	// public void setBoard() {
-	// 	setBoard(new Board());
-	// }
-	private void setBoard(Board b) {
-		moves = new ArrayList<>();
-		board = b;
-		int plies = b.getFullMoveCount() * 2 + (b.tomove() == Sides.WHITE ? 0 : 1);
-		startFEN = b.convertToFEN();
-	}
+    public void addStateListener(StateListener listener) {
+        listeners.add(listener);
+    }
 
-	public void addGameChangeListener(GameEventListener listener) {
-		eventListeners.add(listener); 
-	}
+    public void removeStateListener(StateListener listener) {
+        listeners.remove(listener);
+    }
 
-	// public void setClockPanels(ClockListener whiteClockPanel, ClockListener blackClockPanel){
-		// clock.setClockPanels(whiteClockPanel, blackClockPanel);
-	// }
+    public void startGame(GameConfiguration configuration) throws GameException {
+        if (isGameRunning()) {
+            stopGame();
+        }
 
-	public void setResult(Result r) {
-		result = r;
-	}
+        final Board newBoard;
+        final ClockController newClock;
+        try {
+            newBoard = configuration.createBoard();
+            newClock = configuration.createClockController();
+        } catch (FENException | TimeInputException error) {
+            throw new GameException("Invalid game configuration: " + error.getMessage(), error);
+        }
 
-	/* * * * * *
-	 * Getters *
-	 * * * * * */
-	public Board getBoard() {
-		return board;
-	}
-	public Player getCurrentPlayer() {
-		return currentPlayer;
-	}
-	public Player getWhite() {
-		return white;
-	}
-	public Player getBlack() {
-		return black;
-	}
-	public List<Move> getMoves(){
-		return moves;
-	}
-	public String getStartFEN(){
-		return startFEN;
-	}
-	public Result getResult(){
-		return result;
-	}
-	public boolean isGameRunning() {
-		return running;
-	}
-	public String lastEngineCommand() {
-		return lastEngineCommand;
-	}
-	public Player getPlayer(Sides s){
-		if (s == Sides.BLACK){
-			return black;
-		}
-		return white;
-	}
-	
-	/* * * * * * * *
-	 * Game Logic  *
-	 * * * * * * * */
-	public void initialzeGame(Board b, Player p1, Player p2) {
-		if (p1.getSide() == Sides.WHITE) {
-			white = p1;
-			black = p2;
-		}
-		else {
-			white = p2;
-			black = p1;
-		}
-		setBoard(b);
-		
-		currentPlayer = white;
-		result = Result.ONGOING;
-	}
-	
-	@Override 
-	public void run() {
-		logger.info("gameManager started");
-		
-		running = true;
-		
-		try {
-			startEngines();
-		} 
-		catch (IOException e) {
-			InformationDialogs.errorDialog(null, "Failed to communicate with engine: " + e.getMessage());
-			stopRunning();
-		}
-	
-		if (!currentPlayer.isHuman()) notifyEngine();
+        Player newWhite = configuration.getWhite();
+        Player newBlack = configuration.getBlack();
+        try {
+            newWhite.startGame();
+            newBlack.startGame();
+        } catch (IOException error) {
+            newWhite.endGame();
+            newBlack.endGame();
+            throw new GameException("Could not start player: " + error.getMessage(), error);
+        }
 
-		while (running) {
-			logger.info((board.tomove() == Sides.WHITE ? "White to move" : "Black to move"));
-			moveReady = false;
-			
-			synchronized (this) {
-				while (!moveReady && !timeExpired && running) {
-					try {
-						wait(); 
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt(); 
-					}
-				}
-			}
+        newClock.subscribe(this);
+        newClock.setActiveSide(newBoard.tomove());
+        newClock.setPlyCount(pliesBeforePosition(newBoard));
+        newClock.startClock();
 
-			if (timeExpired || !running) {
-				if (!running) {
-					logger.info("game not running");
-				}
-				if (timeExpired) {
-					logger.info("time expired");
-				}
-				break; 
-			}
-			
-			if (board.isMoveLegal(currentMove)) {
-				board.makeMove(currentMove);
-				currentPlayer = (currentPlayer == white) ? black : white;
-				moves.add(currentMove);
+        synchronized (stateLock) {
+            white = newWhite;
+            black = newBlack;
+            board = newBoard;
+            initialFen = newBoard.convertToFEN();
+            moves.clear();
+            clockHistory.clear();
+            clockController = newClock;
+            clockSnapshot = newClock.snapshot();
+            currentPlayer = playerFor(newBoard.tomove());
+            result = Result.ONGOING;
+            termination = GameTermination.NONE;
+            winner = null;
+            errorMessage = null;
+            running = true;
+            awaitingMove = false;
+        }
 
-				notifyGameStateChanged();
-				checkGameEnd();
-				
-				if (running && !currentPlayer.isHuman()) notifyEngine();
-			}
-			else {
-				logger.info("Illegal input: ");
-			}
-			logger.info(currentMove.toString());
-		}
-		
-		stopRunning();
-		timeExpired = false;
-		logger.info("gameManager stopped");
-	}
-	
-	/* * * * * * * * * *
-	 * Game end logic  *
-	 * * * * * * * * * */
-	private void checkGameEnd() {
-		result = board.getResult();
-		if (result == Result.ONGOING) {
-			return;
-		}
-		for (GameEventListener listener : eventListeners) {
-			//the game ended
-			if (Result.WHITE_WON == board.getResult()) {
-				listener.onCheckmate(Sides.WHITE);
-			}
-			else if (Result.BLACK_WON == board.getResult()){
-				listener.onCheckmate(Sides.BLACK);
-			}
-			else if (Result.STALEMATE == board.getResult()) {
-				listener.onStalemate();
-			}
-			else if (Result.DRAW == board.getResult()) {
-				listener.onDraw();
-			}
-		}
-		stopRunning();
-	}
+        publishCurrentState();
+        requestCurrentMove();
+    }
 
-	private void handleTimeExpired(Sides active){
-		for (GameEventListener listener : eventListeners) {
-			if (active == Sides.WHITE){
-				if (board.sufficientMaterial(Sides.BLACK)){
-					listener.onTimeIsUp(Sides.BLACK);
-				}
-				else{
-					listener.onTimeIsUp();
-				}
-			}
-			else {
-				if (board.sufficientMaterial(Sides.WHITE)){
-					listener.onTimeIsUp(Sides.WHITE);
-				}
-				else{
-					listener.onTimeIsUp();
-				}
-			}
-		}
-	}
+    private int pliesBeforePosition(Board position) {
+        return Math.max(0, (position.getFullMoveCount() - 1) * 2
+                + (position.tomove() == Sides.BLACK ? 1 : 0));
+    }
 
-	/* * * * * * * * *
-	 * COMMUNICATION *
-	 * * * * * * * * */
-	private void notifyEngine() {
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append("position fen " + startFEN);
-		
-		if (!moves.isEmpty()) {
-			sb.append(" moves ");
-			for (Move m : moves) {
-				sb.append(m.toString() + " ");
-			}
-		}
-		sb.append("\n");
-		
-		if (null == lastClockSnapshot) {
-			sb.append("go movetime 2000");
-		}
-		else {
-			if (lastClockSnapshot.getTimeControl() == TimeControl.NO_CONTROL) {
-				sb.append("go movetime 2000");
-			}
-			else if (lastClockSnapshot.getTimeControl() == TimeControl.FIX_TIME_PER_MOVE) {
-				sb.append("go movetime " + (int)(lastClockSnapshot.getWhiteTimeMs() * 0.9));
-			}
-			else if (lastClockSnapshot.getTimeControl() == TimeControl.FISCHER) {
-				sb.append("go wtime ");
-				sb.append(lastClockSnapshot.getWhiteTimeMs());
-				sb.append(" btime ");
-				sb.append(lastClockSnapshot.getBlackTimeMs());
-				if (lastClockSnapshot.getWincMs() != 0 || lastClockSnapshot.getBincMs() != 0) {
-					sb.append(" winc ");
-					sb.append(lastClockSnapshot.getWincMs());
-					sb.append(" binc ");
-					sb.append(lastClockSnapshot.getWincMs());
-				}
-			}
-		}
-		
-		lastEngineCommand = new String(sb);
-		try {
-			((EnginePlayer)currentPlayer).sendCommand(lastEngineCommand);
-		} catch (IOException e) {
-			return;
-		}
-	}
-	
-	private void startEngines() throws IOException {
-		if (!white.isHuman()) {
-			((EnginePlayer)white).sendCommand("ucinewgame");
-		}
-		if (!black.isHuman()) {
-			((EnginePlayer)black).sendCommand("ucinewgame");
-		}
-	}
-	
-	public void notifyGameStateChanged() {
-		for (GameEventListener listener : eventListeners) {
-			listener.onGameStateChanged(PGNConverter.convertToMoves(getStartFEN(), getMoves()));
-		}
-	}
+    private void requestCurrentMove() {
+        final Player player;
+        final Position position;
+        synchronized (stateLock) {
+            if (!running || board == null) {
+                return;
+            }
+            player = currentPlayer;
+            awaitingMove = true;
+            position = new Position(
+                    initialFen,
+                    board.convertToFEN(),
+                    board.tomove(),
+                    moves,
+                    clockSnapshot);
+        }
 
-	@Override
-	public synchronized void onMoveReady(Move m) {
-		currentMove = m;
-		moveReady = true;
-		notifyAll();
-	}
+        try {
+            player.requestMove(position, this);
+        } catch (RuntimeException error) {
+            onMoveRequestFailed(player, error);
+            return;
+        }
+        publishCurrentState();
+    }
 
-	@Override
-	public synchronized void onTimeIsUp(Sides active) {
-		timeExpired = true;
-		notifyAll();
-		handleTimeExpired(active);
-	}
+    /** Routes external input through the active Player's polymorphic API. */
+    public boolean submitMove(Move move) {
+        Player player;
+        synchronized (stateLock) {
+            if (!running || !awaitingMove || currentPlayer == null) {
+                return false;
+            }
+            player = currentPlayer;
+        }
+        return player.submitMove(move);
+    }
 
-	public synchronized void stopRunning(){
-		running = false;
-		if (!white.isHuman()) {
-			((EnginePlayer)white).quitEngine();
-		}
-		if (!black.isHuman()) {
-			((EnginePlayer)black).quitEngine();
-		}
-		notifyAll();
-	}
-	
-	public synchronized void takeBack(){
-		Board temp;
-		try{
-			temp = new Board(startFEN);
-		}
-		catch (FENException f){
-			return;
-		}
-		if (moves.isEmpty()) return;
-		
-		int takebacks = 1;
-		
-		if (!currentPlayer.isHuman()) {
-			try {
-				((EnginePlayer)(currentPlayer)).sendCommand("stop");
-			} catch (IOException e) {
-				return;
-			}
-		}
-		else {
-			//if the other player is an engine, one should take back 2 moves.
-			Player otherPlayer = (currentPlayer == white ? black : white);
-			if (!otherPlayer.isHuman()) {
-				takebacks = 2;
-			}
-		}
-		
-		for (int i = 0; i < moves.size()-takebacks; i++){
-			temp.makeMove(moves.get(i));
-		}
-		for (int i = 0; i < takebacks; i++) {
-			moves.remove(moves.size()-1);
-			currentPlayer = (currentPlayer == white) ? black : white;
-		}
-		
-		if (takebacks == 1) {
-			// clock.pressClock();
-		}
-		
-		board = temp;
-		if (!currentPlayer.isHuman()) notifyEngine();
-		
-		notifyGameStateChanged();
-	}
+    @Override
+    public void onMoveReceived(Player player, Move move) {
+        boolean continueGame;
+        boolean gameEnded;
 
-	@Override
-	public void onTick(ClockSnapshot snapshot) {
-		lastClockSnapshot = snapshot;
-	}
+        synchronized (stateLock) {
+            if (!running || !awaitingMove || player != currentPlayer) {
+                return;
+            }
+            awaitingMove = false;
 
-	@Override
-	public void onTimeUp(ClockSnapshot snapshot) {
-		lastClockSnapshot = snapshot;
-		onTimeIsUp(snapshot.getFlaggedSide());
-	} 
+            if (move.isNull() || !board.isMoveLegal(move)) {
+                errorMessage = "Illegal move submitted by " + player.getName() + ": " + move;
+                continueGame = true;
+                gameEnded = false;
+            } else {
+                clockHistory.add(clockController.snapshot());
+                board.makeMove(new Move(move));
+                moves.add(new Move(move));
+                clockController.pressClock();
+                clockSnapshot = clockController.snapshot();
+                result = board.getResult();
+                errorMessage = null;
+                currentPlayer = playerFor(board.tomove());
+
+                gameEnded = result != Result.ONGOING;
+                continueGame = !gameEnded;
+                if (gameEnded) {
+                    running = false;
+                    setBoardTermination();
+                }
+            }
+        }
+
+        if (gameEnded) {
+            stopResources();
+            publishCurrentState();
+        } else {
+            publishCurrentState();
+            if (continueGame) {
+                requestCurrentMove();
+            }
+        }
+    }
+
+    @Override
+    public void onMoveRequestFailed(Player player, Exception error) {
+        synchronized (stateLock) {
+            if (!running || player != currentPlayer) {
+                return;
+            }
+            awaitingMove = false;
+            running = false;
+            termination = GameTermination.ERROR;
+            errorMessage = error.getMessage();
+        }
+        stopResources();
+        publishCurrentState();
+    }
+
+    public void resign() {
+        synchronized (stateLock) {
+            if (!running || currentPlayer == null) {
+                return;
+            }
+            winner = opposite(currentPlayer.getSide());
+            result = winner == Sides.WHITE ? Result.WHITE_WON : Result.BLACK_WON;
+            termination = GameTermination.RESIGNATION;
+            running = false;
+            awaitingMove = false;
+        }
+        stopResources();
+        publishCurrentState();
+    }
+
+    /** Takes back one ply. Policies such as two-ply takeback belong in Control. */
+    public boolean takeBack() {
+        final Player playerToCancel;
+        final ClockSnapshot clockToRestore;
+        synchronized (stateLock) {
+            if (!running || moves.isEmpty()) {
+                return false;
+            }
+            playerToCancel = currentPlayer;
+            awaitingMove = false;
+
+            moves.remove(moves.size() - 1);
+            try {
+                board = new Board(initialFen);
+            } catch (FENException impossible) {
+                throw new IllegalStateException("Stored initial FEN became invalid", impossible);
+            }
+            for (Move move : moves) {
+                board.makeMove(move);
+            }
+
+            clockToRestore = clockHistory.remove(clockHistory.size() - 1);
+            currentPlayer = playerFor(board.tomove());
+            result = Result.ONGOING;
+            termination = GameTermination.NONE;
+            winner = null;
+            errorMessage = null;
+        }
+
+        playerToCancel.cancelMoveRequest();
+        clockController.restore(clockToRestore);
+        synchronized (stateLock) {
+            clockSnapshot = clockController.snapshot();
+        }
+        publishCurrentState();
+        requestCurrentMove();
+        return true;
+    }
+
+    public void stopGame() {
+        synchronized (stateLock) {
+            if (board == null) {
+                return;
+            }
+            running = false;
+            awaitingMove = false;
+            if (termination == GameTermination.NONE) {
+                termination = GameTermination.ABORTED;
+            }
+        }
+        stopResources();
+        publishCurrentState();
+    }
+
+    private void stopResources() {
+        Player whiteToStop;
+        Player blackToStop;
+        ClockController clockToStop;
+        synchronized (stateLock) {
+            whiteToStop = white;
+            blackToStop = black;
+            clockToStop = clockController;
+        }
+
+        if (whiteToStop != null) {
+            whiteToStop.endGame();
+        }
+        if (blackToStop != null) {
+            blackToStop.endGame();
+        }
+        if (clockToStop != null) {
+            clockToStop.pauseClock();
+            synchronized (stateLock) {
+                clockSnapshot = clockToStop.snapshot();
+            }
+        }
+    }
+
+    private void setBoardTermination() {
+        if (result == Result.WHITE_WON) {
+            winner = Sides.WHITE;
+            termination = GameTermination.CHECKMATE;
+        } else if (result == Result.BLACK_WON) {
+            winner = Sides.BLACK;
+            termination = GameTermination.CHECKMATE;
+        } else if (result == Result.STALEMATE) {
+            winner = null;
+            termination = GameTermination.STALEMATE;
+        } else {
+            winner = null;
+            termination = GameTermination.DRAW;
+        }
+    }
+
+    @Override
+    public void onTick(ClockSnapshot snapshot) {
+        synchronized (stateLock) {
+            if (!running) {
+                return;
+            }
+            clockSnapshot = snapshot;
+        }
+        publishCurrentState();
+    }
+
+    @Override
+    public void onTimeUp(ClockSnapshot snapshot) {
+        synchronized (stateLock) {
+            if (!running) {
+                return;
+            }
+            clockSnapshot = snapshot;
+            awaitingMove = false;
+            running = false;
+            termination = GameTermination.TIMEOUT;
+
+            Sides flagged = snapshot.getFlaggedSide();
+            Sides potentialWinner = opposite(flagged);
+            if (board.sufficientMaterial(potentialWinner)) {
+                winner = potentialWinner;
+                result = winner == Sides.WHITE ? Result.WHITE_WON : Result.BLACK_WON;
+            } else {
+                winner = null;
+                result = Result.DRAW;
+            }
+        }
+        stopResources();
+        publishCurrentState();
+    }
+
+    private Sides opposite(Sides side) {
+        return side == Sides.WHITE ? Sides.BLACK : Sides.WHITE;
+    }
+
+    private Player playerFor(Sides side) {
+        return side == Sides.WHITE ? white : black;
+    }
+
+    public GameSnapshot getSnapshot() {
+        synchronized (stateLock) {
+            return createSnapshot();
+        }
+    }
+
+    private GameSnapshot createSnapshot() {
+        if (board == null) {
+            return GameSnapshot.empty();
+        }
+
+        List<Move> legalMoves = new ArrayList<>();
+        int legalMoveCount = board.numberOfLegalMoves();
+        for (int index = 0; index < legalMoveCount; index++) {
+            legalMoves.add(new Move(board.getLegalMove(index)));
+        }
+
+        boolean inputAllowed = running
+                && awaitingMove
+                && currentPlayer != null
+                && currentPlayer.acceptsExternalMoves();
+        return new GameSnapshot(
+                board,
+                legalMoves,
+                moves,
+                initialFen,
+                white.getName(),
+                black.getName(),
+                result,
+                termination,
+                winner,
+                running,
+                inputAllowed,
+                clockSnapshot,
+                errorMessage);
+    }
+
+    private void publishCurrentState() {
+        GameSnapshot snapshot = getSnapshot();
+        for (StateListener listener : listeners) {
+            try {
+                listener.onStateChanged(snapshot);
+            } catch (RuntimeException error) {
+                LOGGER.warning("State listener failed: " + error.getMessage());
+            }
+        }
+    }
+
+    /* Read-only migration accessors for PGN/export code. */
+    public Player getPlayer(Sides side) {
+        synchronized (stateLock) {
+            return playerFor(side);
+        }
+    }
+
+    public List<Move> getMoves() {
+        synchronized (stateLock) {
+            List<Move> copy = new ArrayList<>(moves.size());
+            for (Move move : moves) {
+                copy.add(new Move(move));
+            }
+            return Collections.unmodifiableList(copy);
+        }
+    }
+
+    public String getStartFEN() {
+        synchronized (stateLock) {
+            return initialFen;
+        }
+    }
+
+    public Result getResult() {
+        synchronized (stateLock) {
+            return result;
+        }
+    }
+
+    public boolean isGameRunning() {
+        synchronized (stateLock) {
+            return running;
+        }
+    }
 }

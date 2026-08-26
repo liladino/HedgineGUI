@@ -9,136 +9,81 @@ import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
-import game.GameEventListener;
+import control.GameController;
+import control.GameState;
 import utility.Sides;
 
-/**
- * The panel on the right side of the screen. 
- * Shows the players' names, their remaining time, and the moves made in the game.
- */
-public class RightPanel extends JPanel implements GameEventListener{
-	private static final long serialVersionUID = 3474454907485110512L;
-	private JTextArea whiteName;
-	private JTextArea blackName;
-	private JTextArea movesArea;
-	
-	public RightPanel(){
-		setPreferredSize(new Dimension(300, getHeight()));
+/** Player names, clocks and move text rendered solely from GameState. */
+public final class RightPanel extends JPanel {
+    private static final long serialVersionUID = 3474454907485110512L;
 
-		setLayout(new GridBagLayout());
+    private final JTextArea whiteName = playerNameArea("White Player");
+    private final JTextArea blackName = playerNameArea("Black Player");
+    private final JTextArea movesArea = new JTextArea();
+    private final TimePanel whiteClock = new TimePanel(Sides.WHITE);
+    private final TimePanel blackClock = new TimePanel(Sides.BLACK);
 
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.insets = new Insets(10, 10, 20, 10);
+    public RightPanel(GameController controller) {
+        setPreferredSize(new Dimension(300, getHeight()));
+        setLayout(new GridBagLayout());
 
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.weighty = 0.05;
-		gbc.weightx = 0.5;
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		whiteName = new JTextArea("White Player");
-		whiteName.setEditable(false);
-		whiteName.setLineWrap(true);
-		Font font = new Font("Courier new", Font.BOLD, 17);
-        whiteName.setFont(font);
-		
-		add(whiteName, gbc);
-		
-		gbc.gridx = 1;
-		gbc.gridy = 0;
-		blackName = new JTextArea("Black Player");
-		blackName.setEditable(false);
-		blackName.setColumns(5);
-		blackName.setLineWrap(true);
-		blackName.setFont(font);
-		add(blackName, gbc);
-	
-		gbc.weighty = 0.05;
-		gbc.weightx = 1;
-		gbc.gridx = 0;
-		gbc.gridy = 1;
-		TimePanel whiteClockPanel = new TimePanel(Sides.WHITE);
-		add(whiteClockPanel, gbc);
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(10, 10, 20, 10);
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.weighty = 0.05;
+        constraints.weightx = 0.5;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        add(whiteName, constraints);
 
-		gbc.gridx = 1;
-		gbc.gridy = 1;
-		TimePanel blackClockPanel = new TimePanel(Sides.BLACK);
-		add(blackClockPanel, gbc);
-		
-		// this.gameManager = gameManager;
-		// gameManager.setClockPanels(whiteClockPanel, blackClockPanel);
-		// gameManager.addGameChangeListener(this);
-		
-		movesArea = new JTextArea();
-		movesArea.setFont(new Font("Courier new", Font.PLAIN, 16));
-		movesArea.setLineWrap(true);
-		movesArea.setWrapStyleWord(true);
-		movesArea.setEditable(false);
-		JScrollPane movesScrollPane = new JScrollPane(movesArea);
- 
-		gbc.gridx = 0;
-		gbc.gridy = 2;
-		gbc.gridwidth = 2;  // Span both columns
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.weightx = 1.0;
-		gbc.weighty = 1.0;
-		add(movesScrollPane, gbc);
-	}
+        constraints.gridx = 1;
+        add(blackName, constraints);
 
-	public void setWhiteName(String name){
-		whiteName.setText(name);
-	}
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        add(whiteClock, constraints);
 
-	
-	public void setBlackName(String name){
-		// String temp = PGNConverter.convertToMoves(gameManager.getStartFEN(), gameManager.getMoves());
-		blackName.setText(name);
-	}
+        constraints.gridx = 1;
+        add(blackClock, constraints);
 
-	@Override
-	public void onGameStateChanged(String pgn) {
-		// updateMoves();
-		movesArea.setText(pgn);
-	}
+        movesArea.setFont(new Font("Courier new", Font.PLAIN, 16));
+        movesArea.setLineWrap(true);
+        movesArea.setWrapStyleWord(true);
+        movesArea.setEditable(false);
 
-	@Override
-	public void onGameLooksChanged() {
-		// updateMoves();
-	}
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.gridwidth = 2;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        add(new JScrollPane(movesArea), constraints);
 
-	@Override
-	public void onCheckmate(Sides won) {
-		// updateMoves();
-	}
+        controller.addStateListener(this::receiveState);
+    }
 
-	@Override
-	public void onDraw() {
-		// updateMoves();
-	}
+    private static JTextArea playerNameArea(String initialText) {
+        JTextArea area = new JTextArea(initialText);
+        area.setEditable(false);
+        area.setLineWrap(true);
+        area.setFont(new Font("Courier new", Font.BOLD, 17));
+        return area;
+    }
 
-	@Override
-	public void onStalemate() {
-		// updateMoves();
-	}
-
-	@Override
-	public void onInsufficientMaterial() {
-		// updateMoves();
-	}
-
-	@Override
-	public void onTimeIsUp(Sides won) {
-		// updateMoves();
-	}
-
-	@Override
-	public void onTimeIsUp() {
-		// updateMoves();
-	}
-
-	@Override
-	public void onResign(Sides won) {
-		// updateMoves();
-	} 
-
+    private void receiveState(GameState state) {
+        Runnable render = () -> {
+            whiteName.setText(state.getWhiteName());
+            blackName.setText(state.getBlackName());
+            movesArea.setText(state.getMoveText());
+            whiteClock.render(state.getClock());
+            blackClock.render(state.getClock());
+        };
+        if (SwingUtilities.isEventDispatchThread()) {
+            render.run();
+        } else {
+            SwingUtilities.invokeLater(render);
+        }
+    }
 }

@@ -23,8 +23,12 @@ public class ClockController {
 		clock = c;
 	}
 	
-    public void setActiveSide(Sides s){
+	public void setActiveSide(Sides s){
 		clock.setActiveSide(s);
+	}
+
+	public void setPlyCount(int plies) {
+		clock.setPlyCount(plies);
 	}
 
 	public void subscribe(ClockListener listener){
@@ -50,9 +54,11 @@ public class ClockController {
 	}
 
 	public void startClock() {
-		isRunning = true;
 		clock.start();
-        ticker.start(() -> this.onTick());
+		isRunning = clock.isRunning();
+		if (isRunning) {
+			ticker.start(this::onTick);
+		}
 	}
 
 	public void pauseClock() {
@@ -62,9 +68,11 @@ public class ClockController {
 	}
 
 	public void resumeClock() {
-		isRunning = true;
 		clock.resume();
-		ticker.start(() -> this.onTick());
+		isRunning = clock.isRunning();
+		if (isRunning) {
+			ticker.start(this::onTick);
+		}
 	}
 
 	public void pressClock() {
@@ -73,5 +81,14 @@ public class ClockController {
 
 	public ClockSnapshot snapshot() {
 		return clock.snapshot();
+	}
+
+	public void restore(ClockSnapshot snapshot) {
+		ticker.stop();
+		clock.restore(snapshot);
+		isRunning = clock.isRunning();
+		if (isRunning) {
+			ticker.start(this::onTick);
+		}
 	}
 }

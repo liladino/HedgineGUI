@@ -7,136 +7,239 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import javax.management.RuntimeErrorException;
-
 import core.chess.Move;
-import graphics.dialogs.InformationDialogs;
+import game.clock.ClockSnapshot;
 import utility.Sides;
+import utility.TimeControl;
 
-public class EnginePlayer extends Player {
-	private File enginePath;
-	private static final Logger logger = Logger.getLogger(EnginePlayer.class.getName());
-	private Process process;
-	private BufferedWriter engineInput;
-	private BufferedReader engineOutput;
-	private boolean gotInfos = false;
-	private ArrayList<String> infos = null;
-	private ExecutorService executorService;
-	private boolean uciok = false;
-	private boolean running = false;
-	
-	public EnginePlayer(Sides side, String name, File enginePath){
-		super(side, name);
-		human = false;
-		this.enginePath = enginePath;
-		infos = new ArrayList<>();
-	}
+/** A Player backed by a UCI-compatible engine process. */
+public final class EnginePlayer extends Player {
+    private static final Logger LOGGER = Logger.getLogger(EnginePlayer.class.getName());
+    private static final long UCI_HANDSHAKE_TIMEOUT_MS = 2_000;
 
-	@Override
-	public void makeMove(Move m) {
-		// tell the gameManager, that we have a move ready
-		listener.onMoveReady(m);
-	}
-	
-	public void validateEngine() throws IOException {
-		if (!enginePath.exists() || enginePath.isDirectory() || !enginePath.isFile() || !enginePath.canExecute()) {
-			throw new IOException("The file is not an executable.");
-		}
-		uciok = false;
-		startEngine();
-		int current = 0;
-		while (!uciok) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				break;
-			}
-			current++;
-			if (current > 20) {
-				break;
-			}
-		}
-		if (!uciok) throw new IOException("Not UCI compatible engine");
-		gotInfos = true;
-		running = true;
-	}
+    private final File enginePath;
+    private final List<String> engineInfo = new ArrayList<>();
 
-	public void startEngine() throws IOException {
-		ProcessBuilder processBuilder = new ProcessBuilder(enginePath.getAbsolutePath());
-		//redirecting std error to stdout to listen to all kinds of output
-		processBuilder.redirectErrorStream(true); 
-		process = processBuilder.start();
-		
-		engineInput = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-		engineOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		executorService = Executors.newSingleThreadExecutor();
+    private Process process;
+    private BufferedWriter engineInput;
+    private BufferedReader engineOutput;
+    private ExecutorService outputReader;
+    private CountDownLatch uciReady;
+    private volatile boolean running;
 
-		// Start listening to the engine's output in a separate thread
-		executorService.submit(this::listenToEngineOutput);
-		sendCommand("uci");
+    public EnginePlayer(Sides side, String name, File enginePath) {
+        super(side, name);
+        this.enginePath = enginePath;
+    }
 
-		running = true;
-	}
-	
-	private void listenToEngineOutput() {
-		try {
-			String output;
-			while ((output = engineOutput.readLine()) != null) {
-				System.out.println(output);
-				
-				if (!gotInfos) {
-					infos.add(output);
-				}
-				
-				String[] outputParsed = output.split(" ");
-				if (outputParsed[0].equals("bestmove")) {
-					Move m = new Move(outputParsed[1]);
-					if (m != null) makeMove(m);
-				}
-				else if (outputParsed[0].equals("uciok")) {
-					uciok = true;
-				}
-			}
-		} catch (IOException e) {
-			running = false;
-			logger.info("Error reading engine output: " + e.getMessage());
-		}
-	}
+    @Override
+    public synchronized void startGame() throws IOException {
+        if (!running) {
+            startEngine();
+        }
+        sendCommand("ucinewgame");
+    }
 
-	public void sendCommand(String command) throws IOException {
-		logger.info("command sent: " + command);
-		engineInput.write(command + "\n");
-		engineInput.flush();
-	}
-	
-	public boolean isRunning() {
-		return running;
-	}
+    @Override
+    protected void onMoveRequested(Position position) throws IOException {
+        if (!running) {
+            startGame();
+        }
+        sendCommand(buildPositionCommand(position));
+        sendCommand(buildGoCommand(position));
+    }
 
-	public void quitEngine() {
-		running = false;
-		try {
-			sendCommand("quit");
-			process.waitFor();
-		} catch (IOException | InterruptedException e) {
-			//e.printStackTrace();
-		} finally {
-			executorService.shutdown();
-		}
-	}
-	
-	public void getInfo() {
-		StringBuilder sb = new StringBuilder();
-		for (String s : infos) {
-			sb.append(s);
-			sb.append('\n');
-		}
-		logger.info(new String(sb));
-		throw new RuntimeErrorException(new Error("display engine info dialog not implemented"));
-		// InformationDialogs.infoDialog(GameStarter.getMainWindow(), new String(sb));
-	}
+    @Override
+    protected void onMoveRequestCancelled() {
+        if (!running) {
+            return;
+        }
+        try {
+            sendCommand("stop");
+        } catch (IOException error) {
+            LOGGER.fine("Could not stop engine search: " + error.getMessage());
+        }
+    }
+
+    @Override
+    public synchronized void endGame() {
+        super.endGame();
+        if (!running) {
+            return;
+        }
+
+        try {
+            sendCommand("quit");
+        } catch (IOException error) {
+            LOGGER.fine("Could not send quit to engine: " + error.getMessage());
+        } finally {
+            running = false;
+            if (process != null) {
+                process.destroy();
+            }
+            if (outputReader != null) {
+                outputReader.shutdownNow();
+            }
+            closeStreams();
+        }
+    }
+
+    private void startEngine() throws IOException {
+        validateExecutable();
+
+        ProcessBuilder processBuilder = new ProcessBuilder(enginePath.getAbsolutePath());
+        processBuilder.redirectErrorStream(true);
+        process = processBuilder.start();
+        engineInput = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+        engineOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        outputReader = Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "uci-output-" + getName());
+            thread.setDaemon(true);
+            return thread;
+        });
+        uciReady = new CountDownLatch(1);
+        running = true;
+
+        outputReader.submit(this::listenToEngineOutput);
+        sendCommand("uci");
+
+        try {
+            if (!uciReady.await(UCI_HANDSHAKE_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                endGame();
+                throw new IOException("Engine did not answer 'uciok' within "
+                        + UCI_HANDSHAKE_TIMEOUT_MS + " ms");
+            }
+        } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+            endGame();
+            throw new IOException("Interrupted while waiting for UCI handshake", error);
+        }
+    }
+
+    private void validateExecutable() throws IOException {
+        if (enginePath == null || !enginePath.isFile() || !enginePath.canExecute()) {
+            throw new IOException("Engine path is not an executable file");
+        }
+    }
+
+    private void listenToEngineOutput() {
+        try {
+            String output;
+            while (running && (output = engineOutput.readLine()) != null) {
+                handleEngineOutput(output);
+            }
+        } catch (IOException error) {
+            if (running) {
+                running = false;
+                failMoveRequest(error);
+            }
+        }
+    }
+
+    private void handleEngineOutput(String output) {
+        LOGGER.fine(output);
+        synchronized (engineInfo) {
+            engineInfo.add(output);
+        }
+
+        String[] tokens = output.trim().split("\\s+");
+        if (tokens.length == 0) {
+            return;
+        }
+        if ("uciok".equals(tokens[0])) {
+            uciReady.countDown();
+            return;
+        }
+        if ("bestmove".equals(tokens[0]) && tokens.length >= 2
+                && !"(none)".equals(tokens[1])) {
+            Move move = new Move(tokens[1]);
+            if (!move.isNull()) {
+                returnMove(move);
+            }
+        }
+    }
+
+    private String buildPositionCommand(Position position) {
+        StringBuilder command = new StringBuilder("position fen ")
+                .append(position.getInitialFen());
+        if (!position.getMoveHistory().isEmpty()) {
+            command.append(" moves");
+            for (Move move : position.getMoveHistory()) {
+                command.append(' ').append(move);
+            }
+        }
+        return command.toString();
+    }
+
+    private String buildGoCommand(Position position) {
+        ClockSnapshot clock = position.getClock();
+        if (clock == null || clock.getTimeControl() == TimeControl.NO_CONTROL) {
+            return "go movetime 2000";
+        }
+        if (clock.getTimeControl() == TimeControl.FIX_TIME_PER_MOVE) {
+            long available = getSide() == Sides.WHITE
+                    ? clock.getWhiteTimeMs()
+                    : clock.getBlackTimeMs();
+            return "go movetime " + Math.max(1, (long) (available * 0.9));
+        }
+
+        return new StringBuilder("go wtime ")
+                .append(clock.getWhiteTimeMs())
+                .append(" btime ").append(clock.getBlackTimeMs())
+                .append(" winc ").append(clock.getWincMs())
+                .append(" binc ").append(clock.getBincMs())
+                .toString();
+    }
+
+    public synchronized void sendCommand(String command) throws IOException {
+        if (!running || engineInput == null) {
+            throw new IOException("Engine is not running");
+        }
+        LOGGER.fine("UCI command: " + command);
+        engineInput.write(command);
+        engineInput.newLine();
+        engineInput.flush();
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public String getInfo() {
+        synchronized (engineInfo) {
+            return String.join(System.lineSeparator(), engineInfo);
+        }
+    }
+
+    /** Temporary migration alias. */
+    @Deprecated
+    public void quitEngine() {
+        endGame();
+    }
+
+    private void closeStreams() {
+        try {
+            if (engineInput != null) {
+                engineInput.close();
+            }
+        } catch (IOException ignored) {
+            // Best-effort cleanup.
+        }
+        try {
+            if (engineOutput != null) {
+                engineOutput.close();
+            }
+        } catch (IOException ignored) {
+            // Best-effort cleanup.
+        }
+        engineInput = null;
+        engineOutput = null;
+    }
 }

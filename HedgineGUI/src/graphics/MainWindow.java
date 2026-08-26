@@ -1,110 +1,113 @@
 package graphics;
 
-import game.GameEventListener;
-import game.GameManager;
-import game.GameStarter;
-import graphics.dialogs.GameEndDialogs;
-import graphics.panels.ChessBoardPanel;
-import graphics.panels.RightPanel;
-import utility.Sides;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.management.RuntimeErrorException;
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
-/**
- * The main window of the application. 
- * Implements GameEventListener, and shows the appropiate message upon the end of the game
- */
-public class MainWindow extends JFrame implements GameEventListener {
-	private static final long serialVersionUID = 38435486L;
-	private ChessBoardPanel chessBoardPanel;
-	private RightPanel rightPanel;
-	private transient MenuManager menuManager;
-	
-	public MainWindow(GameManager gameManager) {
-		setTitle("Chess");
-		setMinimumSize(new Dimension(600 + getInsets().left + getInsets().right, 400 + getInsets().top + getInsets().bottom));
-		setSize(900 + getInsets().left + getInsets().right, 640 + getInsets().top + getInsets().bottom);
+import control.GameController;
+import control.GameState;
+import game.GameTermination;
+import graphics.dialogs.GameEndDialogs;
+import graphics.dialogs.InformationDialogs;
+import graphics.panels.ChessBoardPanel;
+import graphics.panels.RightPanel;
 
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				throw new RuntimeErrorException(new Error("somehow stop the gamemanager here..."));
-				// if (GameStarter.getGameManager() != null) GameStarter.getGameManager().stopRunning();
-				// try { Thread.sleep(100); } catch (InterruptedException exc) {}
-				// System.exit(0);
-			}
-		});
+/** Top-level Swing composition root for the UI layer. */
+public final class MainWindow extends JFrame {
+    private static final long serialVersionUID = 38435486L;
 
-		gameManager.addGameChangeListener(this);
-		
-		GraphicSettings.initializeGraphicSettings();
-		menuManager = new MenuManager(this);
-		chessBoardPanel = new ChessBoardPanel(gameManager, menuManager);
-		rightPanel = new RightPanel();
-		
-		setLayout(new BorderLayout());
-		menuManager.addGameEventListener(this);
-		// menuManager.addGameEventListener(gameManager.getClock());
-		
-		add(chessBoardPanel, BorderLayout.CENTER);
-		add(rightPanel, BorderLayout.EAST);
-		pack();
-		
-		chessBoardPanel.repaint();
-		
-		setVisible(true);
-	}
+    private final GameController controller;
+    private final ChessBoardPanel chessBoardPanel;
+    private final RightPanel rightPanel;
+    private final MenuManager menuManager;
+    private GameTermination lastShownTermination = GameTermination.NONE;
 
-	public RightPanel getRightPanel(){
-		return rightPanel;
-	}
-	
-	@Override
-	public void onCheckmate(Sides won) {
-		GameEndDialogs.showCheckmate(this, won);
-	}
-	@Override
-	public void onDraw() {
-		GameEndDialogs.showDraw(this);
-	}
-	@Override
-	public void onStalemate() {
-		GameEndDialogs.showStalemate(this);
-	}
-	@Override
-	public void onInsufficientMaterial() {
-		GameEndDialogs.showInsufficientMaterial(this);
-	}
+    public MainWindow(GameController controller) {
+        this.controller = controller;
 
-	@Override
-	public void onTimeIsUp(Sides won) {
-		GameEndDialogs.showWonOnTime(this, won);
-	}
+        setTitle("Chess");
+        setMinimumSize(new Dimension(
+                600 + getInsets().left + getInsets().right,
+                400 + getInsets().top + getInsets().bottom));
+        setSize(
+                900 + getInsets().left + getInsets().right,
+                640 + getInsets().top + getInsets().bottom);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent event) {
+                MainWindow.this.controller.stopGame();
+                dispose();
+            }
+        });
 
-	@Override
-	public void onTimeIsUp() {
-		GameEndDialogs.showDraw(this);
-	}
+        GraphicSettings.initializeGraphicSettings();
+        menuManager = new MenuManager(this);
+        chessBoardPanel = new ChessBoardPanel(controller, menuManager);
+        rightPanel = new RightPanel(controller);
 
-	@Override
-	public void onResign(Sides won) {
-		GameEndDialogs.showResigned(this, won);
-	}
+        setLayout(new BorderLayout());
+        add(chessBoardPanel, BorderLayout.CENTER);
+        add(rightPanel, BorderLayout.EAST);
+        pack();
 
-	@Override
-	public void onGameStateChanged(String pgn) {
-		// no job
-	}
+        controller.addStateListener(this::receiveState);
+        setVisible(true);
+    }
 
-	@Override
-	public void onGameLooksChanged() {
-		// no job
-	}
+    public RightPanel getRightPanel() {
+        return rightPanel;
+    }
+
+    private void receiveState(GameState state) {
+        Runnable renderEndState = () -> {
+            GameTermination termination = state.getTermination();
+            if (termination == GameTermination.NONE) {
+                lastShownTermination = GameTermination.NONE;
+                return;
+            }
+            if (termination == lastShownTermination) {
+                return;
+            }
+            lastShownTermination = termination;
+
+            switch (termination) {
+                case CHECKMATE:
+                    GameEndDialogs.showCheckmate(this, state.getWinner());
+                    break;
+                case STALEMATE:
+                    GameEndDialogs.showStalemate(this);
+                    break;
+                case DRAW:
+                    GameEndDialogs.showDraw(this);
+                    break;
+                case RESIGNATION:
+                    GameEndDialogs.showResigned(this, state.getWinner());
+                    break;
+                case TIMEOUT:
+                    if (state.getWinner() == null) {
+                        GameEndDialogs.showDraw(this);
+                    } else {
+                        GameEndDialogs.showWonOnTime(this, state.getWinner());
+                    }
+                    break;
+                case ERROR:
+                    InformationDialogs.errorDialog(this, state.getErrorMessage());
+                    break;
+                case ABORTED:
+                case NONE:
+                    break;
+            }
+        };
+
+        if (SwingUtilities.isEventDispatchThread()) {
+            renderEndState.run();
+        } else {
+            SwingUtilities.invokeLater(renderEndState);
+        }
+    }
 }

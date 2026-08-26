@@ -109,8 +109,22 @@ public final class Clock {
 			running,
 			controlType != TimeControl.NO_CONTROL, // if there is time control, clock should be visible
 			flaggedSide != null, //if one side is flagged, time is up
-			flaggedSide
+			flaggedSide,
+			controlType == TimeControl.FISCHER ? incrementMs : 0,
+			controlType == TimeControl.FISCHER ? incrementMs : 0
 		);
+	}
+
+	/** Restores a previously emitted state, for example after a takeback. */
+	public synchronized void restore(ClockSnapshot snapshot) {
+		controlType = snapshot.getTimeControl();
+		whiteTimeMs = snapshot.getWhiteTimeMs();
+		blackTimeMs = snapshot.getBlackTimeMs();
+		activeSide = snapshot.getActiveSide();
+		flaggedSide = snapshot.getFlaggedSide();
+		running = snapshot.isRunning() && flaggedSide == null
+				&& controlType != TimeControl.NO_CONTROL;
+		lastUpdateMs = System.currentTimeMillis();
 	}
 
 	/**
