@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
-import javax.management.RuntimeErrorException;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -30,9 +29,13 @@ import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import control.GameController;
 import game.EnginePlayer;
+import game.GameConfiguration;
+import game.GameException;
 import game.HumanPlayer;
 import game.Player;
+import graphics.SwingTicker;
 import utility.Sides;
 
 /**
@@ -61,11 +64,14 @@ public class NewGame extends JFrame {
 	private static final String PERS_whiteEnginePath = System.getProperty("user.dir") + "/saves/.wep";
 	private static final String PERS_blackEnginePath = System.getProperty("user.dir") + "/saves/.bep";
 	
-	public NewGame(){
-		this("startpos");
+	private final GameController controller;
+
+	public NewGame(GameController controller){
+		this("startpos", controller);
 	}
 
-	public NewGame(String fen){
+	public NewGame(String fen, GameController controller){
+		this.controller = controller; 
 		if (whiteEngine == null) {
 			try{ 
 				File load = new File(PERS_whiteEnginePath);
@@ -448,15 +454,19 @@ public class NewGame extends JFrame {
 				timeControl = "N";
 			}
 			
-			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
-			// GameStarter.getGameManager().stopRunning();
+			try {
+				controller.startGame(new GameConfiguration(
+                    startPos.getText(),
+                    w, b,
+                    timeControl,
+                    new SwingTicker()));
+			}
+			catch (GameException g)
+			{
+				// TODO: info dialog
+			}
 
-			// GameStarter.startNewGame(
-			// 	(startPos.getText().equals("startpos") || startPos.getText().equals("") 
-			// 		? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : startPos.getText()), 
-			// 	w, b, timeControl);
-
-			// dispose();
+			dispose();
 		}
 	} 
 

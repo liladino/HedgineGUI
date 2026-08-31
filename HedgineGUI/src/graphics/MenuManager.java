@@ -18,6 +18,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import control.GameController;
 import core.chess.Board;
 import game.EnginePlayer;
 import game.GameEventListener;
@@ -30,6 +31,7 @@ import graphics.dialogs.NewGame;
 public class MenuManager implements ActionListener {
 	private static final Logger logger = Logger.getLogger(MenuManager.class.getName());
 	private MainWindow mainWindow;
+	private GameController gameController;
 	
 	private JMenu file;
 	private ArrayList<String> fileMenuStrings;
@@ -51,8 +53,9 @@ public class MenuManager implements ActionListener {
 	private ArrayList<Runnable> appearanceListeners;
 
 
-	public MenuManager(MainWindow mainWindow) {
+	public MenuManager(MainWindow mainWindow, GameController gameController) {
 		this.mainWindow = mainWindow;
+		this.gameController = gameController;
 
 		fileMenuStrings = new ArrayList<>();
 		gameMenuStrings = new ArrayList<>();
@@ -185,7 +188,7 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(gameMenuStrings.get(0))){
 			//new game
-			new NewGame();
+			new NewGame(gameController);
 		}
 		else if (GraphicSettings.colors.containsKey(s)) {
 			//color scheme
@@ -221,7 +224,7 @@ public class MenuManager implements ActionListener {
 				try{ 
 					Scanner scanner = new Scanner(chooser.getSelectedFile());
 					if (scanner.hasNextLine()){
-						new NewGame(scanner.nextLine());
+						new NewGame(scanner.nextLine(), gameController);
 						scanner.close();
 						return;
 					}
@@ -269,7 +272,7 @@ public class MenuManager implements ActionListener {
 			catch (ClassNotFoundException c){
 				return;
 			}
-			if (temp != null) new NewGame(temp.convertToFEN());
+			if (temp != null) new NewGame(temp.convertToFEN(), gameController);
 		}
 		else if (s.equals(fileMenuStrings.get(4))){
 			//save board

@@ -46,7 +46,7 @@ public final class MainWindow extends JFrame {
         });
 
         GraphicSettings.initializeGraphicSettings();
-        menuManager = new MenuManager(this);
+        menuManager = new MenuManager(this, controller);
         chessBoardPanel = new ChessBoardPanel(controller, menuManager);
         rightPanel = new RightPanel(controller);
 
