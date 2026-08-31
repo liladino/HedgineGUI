@@ -218,12 +218,6 @@ public final class EnginePlayer extends Player {
         }
     }
 
-    /** Temporary migration alias. */
-    @Deprecated
-    public void quitEngine() {
-        endGame();
-    }
-
     private void closeStreams() {
         try {
             if (engineInput != null) {
