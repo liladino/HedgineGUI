@@ -21,4 +21,10 @@ public interface GameController {
     void addStateListener(GameStateListener listener);
 
     void removeStateListener(GameStateListener listener);
+
+    String getStartFEN();
+
+    String getFEN();
+
+    String getPGN();
 }

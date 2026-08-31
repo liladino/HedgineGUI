@@ -412,13 +412,6 @@ public final class GameManager implements MoveReceiver, ClockListener {
         }
     }
 
-    /* Read-only migration accessors for PGN/export code. */
-    public Player getPlayer(Sides side) {
-        synchronized (stateLock) {
-            return playerFor(side);
-        }
-    }
-
     public List<Move> getMoves() {
         synchronized (stateLock) {
             List<Move> copy = new ArrayList<>(moves.size());
@@ -445,5 +438,10 @@ public final class GameManager implements MoveReceiver, ClockListener {
         synchronized (stateLock) {
             return running;
         }
+    }
+
+    public Board getBoard(){
+        Board newBoard = board;
+        return newBoard;
     }
 }

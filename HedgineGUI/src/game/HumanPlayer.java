@@ -23,10 +23,4 @@ public final class HumanPlayer extends Player {
     public boolean acceptsExternalMoves() {
         return true;
     }
-
-    /** Temporary migration alias for code that still calls makeMove. */
-    @Deprecated
-    public boolean makeMove(Move move) {
-        return submitMove(move);
-    }
 }

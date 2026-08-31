@@ -6,7 +6,6 @@ import java.util.List;
 import core.chess.Board;
 import core.chess.Move;
 import core.chess.Square;
-import game.Player;
 import utility.Result;
 import utility.Sides;
 
@@ -138,13 +137,13 @@ public class PGNConverter {
 	}
 
 
-	public static String convertToPGN(Player white, Player black, String fen, List<Move> moves, Result r){
+	public static String convertToPGN(String whiteName, String blackName, String fen, List<Move> moves, Result r){
 		StringBuilder sb = new StringBuilder();
 		sb.append("[Site \"HedgineGUI\"]\n");
 		sb.append("[White \"");
-		sb.append(white.getName());
+		sb.append(whiteName);
 		sb.append("\"]\n[Black \"");
-		sb.append(black.getName());
+		sb.append(blackName);
 
 		String lineEnd = "\"]\n";
 		sb.append(lineEnd);

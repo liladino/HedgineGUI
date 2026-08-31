@@ -31,7 +31,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import game.EnginePlayer;
-import game.GameStarter;
 import game.HumanPlayer;
 import game.Player;
 import utility.Sides;

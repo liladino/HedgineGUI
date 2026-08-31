@@ -5,12 +5,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import control.DefaultGameController;
+import control.GameController;
 import core.chess.Board;
 import core.chess.Move;
 import core.chess.Square;
 import core.chess.IO.PGNConverter;
-import game.GameStarter;
+import game.GameConfiguration;
+import game.GameManager;
 import game.HumanPlayer;
+import game.Player;
+import game.clock.HeadlessTicker;
 import utility.Sides;
 
 public class PGNTest {
@@ -104,31 +109,33 @@ public class PGNTest {
 	
 	@Test
 	void fullGameTest1() {
-		GameStarter gameStarter = new GameStarter();
-		HumanPlayer w = new HumanPlayer(Sides.WHITE, "White");
-		HumanPlayer b = new HumanPlayer(Sides.BLACK, "Black");
-		gameStarter.startNewUIGame(w, b, "N");
-		
-		try {
-			Thread.sleep(100);
-			w.makeMove(new Move(new Square('f', 2), new Square('f', 4), ' '));
-			Thread.sleep(100);
-			b.makeMove(new Move(new Square('e', 7), new Square('e', 6), ' '));
-			Thread.sleep(100);
-			w.makeMove(new Move(new Square('g', 2), new Square('g', 4), ' '));
-			Thread.sleep(100);
-			b.makeMove(new Move(new Square('d', 8), new Square('h', 4), ' '));
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			fail();
-		}
-		
-		String s = PGNConverter.convertToPGN(
-				gameStarter.getGameManager().getPlayer(Sides.WHITE),
-				gameStarter.getGameManager().getPlayer(Sides.BLACK),
-				gameStarter.getGameManager().getStartFEN(), 
-				gameStarter.getGameManager().getMoves(), 
-				gameStarter.getGameManager().getResult());
+		GameController controller = new DefaultGameController(new GameManager());
+
+		Player w = new HumanPlayer(Sides.WHITE, "White"); 
+		Player b = new HumanPlayer(Sides.BLACK, "Black"); 
+
+		assertDoesNotThrow(
+			() -> controller.startGame(new GameConfiguration(
+				"startpos",
+				w, b,
+				"N",
+				new HeadlessTicker())));
+
+		assertDoesNotThrow(
+			() -> {
+				Thread.sleep(100);
+				w.submitMove(new Move(new Square('f', 2), new Square('f', 4), ' '));
+				Thread.sleep(100);
+				b.submitMove(new Move(new Square('e', 7), new Square('e', 6), ' '));
+				Thread.sleep(100);
+				w.submitMove(new Move(new Square('g', 2), new Square('g', 4), ' '));
+				Thread.sleep(100);
+				b.submitMove(new Move(new Square('d', 8), new Square('h', 4), ' '));
+				Thread.sleep(100);
+			}
+		);
+
+		String s = controller.getPGN();
 
 		assertEquals("[Site \"HedgineGUI\"]\n"
 				+ "[White \"White\"]\n"
@@ -140,29 +147,31 @@ public class PGNTest {
 	
 	@Test
 	void fullGameTest2() {
-		HumanPlayer w = new HumanPlayer(Sides.WHITE, "White");
-		HumanPlayer b = new HumanPlayer(Sides.BLACK, "Black");
-		GameStarter gameStarter = new GameStarter();
-		gameStarter.startNewUIGame("rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1", w, b, "N");
+		Player w = new HumanPlayer(Sides.WHITE, "White");
+		Player b = new HumanPlayer(Sides.BLACK, "Black");
+		
+		GameController controller = new DefaultGameController(new GameManager());
+
+		assertDoesNotThrow(
+			() -> controller.startGame(new GameConfiguration(
+				"rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1",
+				w, b,
+				"N",
+				new HeadlessTicker())));
 		
 		try {
 			Thread.sleep(100);
-			b.makeMove(new Move(new Square('e', 7), new Square('e', 6), ' '));
+			b.submitMove(new Move(new Square('e', 7), new Square('e', 6), ' '));
 			Thread.sleep(100);
-			w.makeMove(new Move(new Square('g', 2), new Square('g', 4), ' '));
+			w.submitMove(new Move(new Square('g', 2), new Square('g', 4), ' '));
 			Thread.sleep(100);
-			b.makeMove(new Move(new Square('d', 8), new Square('h', 4), ' '));
+			b.submitMove(new Move(new Square('d', 8), new Square('h', 4), ' '));
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			fail();
 		}
 		
-		String s = PGNConverter.convertToPGN(
-				gameStarter.getGameManager().getPlayer(Sides.WHITE),
-				gameStarter.getGameManager().getPlayer(Sides.BLACK),
-				gameStarter.getGameManager().getStartFEN(), 
-				gameStarter.getGameManager().getMoves(), 
-				gameStarter.getGameManager().getResult());
+		String s = controller.getPGN();
 
 		assertEquals("[Site \"HedgineGUI\"]\n"
 				+ "[White \"White\"]\n"

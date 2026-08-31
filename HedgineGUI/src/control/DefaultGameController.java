@@ -3,6 +3,7 @@ package control;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import core.chess.Move;
+import core.chess.IO.PGNConverter;
 import game.GameConfiguration;
 import game.GameException;
 import game.GameManager;
@@ -14,15 +15,18 @@ public final class DefaultGameController implements GameController {
     private final CopyOnWriteArrayList<GameStateListener> listeners =
             new CopyOnWriteArrayList<>();
     private volatile GameState state;
+    private GameConfiguration startconfConfiguration;
 
     public DefaultGameController(GameManager gameManager) {
         this.gameManager = gameManager;
         this.state = new GameState(gameManager.getSnapshot());
         gameManager.addStateListener(this::receiveSnapshot);
+        startconfConfiguration = null;
     }
 
     @Override
     public void startGame(GameConfiguration configuration) throws GameException {
+        startconfConfiguration = configuration;
         gameManager.startGame(configuration);
     }
 
@@ -60,6 +64,26 @@ public final class DefaultGameController implements GameController {
     @Override
     public void removeStateListener(GameStateListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public String getFEN(){
+        return gameManager.getStartFEN();
+    }
+
+    @Override
+    public String getStartFEN(){
+        return gameManager.getStartFEN();
+    }
+
+    @Override
+    public String getPGN(){
+        return PGNConverter.convertToPGN(
+            startconfConfiguration.getWhite().getName(), 
+            startconfConfiguration.getBlack().getName(), 
+            getFEN(), 
+            gameManager.getMoves(), 
+            gameManager.getResult());
     }
 
     private void receiveSnapshot(GameSnapshot snapshot) {

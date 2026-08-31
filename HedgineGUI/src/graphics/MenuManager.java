@@ -5,11 +5,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Logger;
@@ -22,14 +19,10 @@ import javax.swing.JMenuItem;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import core.chess.Board;
-import core.chess.IO.PGNConverter;
 import game.EnginePlayer;
 import game.GameEventListener;
-import game.GameStarter;
 import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.NewGame;
-import utility.Result;
-import utility.Sides;
 
 /**
  * Initializes the menubar, and handles the interactions.
