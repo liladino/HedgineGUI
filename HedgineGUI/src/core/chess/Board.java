@@ -5,8 +5,8 @@ import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import core.chess.IO.FENException;
-import core.chess.IO.FENManager;
+import core.IO.FENException;
+import core.IO.FENManager;
 import utility.Result;
 import utility.Sides;
 

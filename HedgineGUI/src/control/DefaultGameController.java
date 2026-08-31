@@ -2,12 +2,11 @@ package control;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import core.IO.PGNConverter;
 import core.chess.Move;
-import core.chess.IO.PGNConverter;
 import game.GameConfiguration;
 import game.GameException;
 import game.GameManager;
-import game.GameSnapshot;
 
 /** Translates GameManager snapshots and commands into the UI-facing API. */
 public final class DefaultGameController implements GameController {
@@ -19,7 +18,7 @@ public final class DefaultGameController implements GameController {
 
     public DefaultGameController(GameManager gameManager) {
         this.gameManager = gameManager;
-        this.state = new GameState(gameManager.getSnapshot());
+        this.state = gameManager.getSnapshot();
         gameManager.addStateListener(this::receiveSnapshot);
         startconfConfiguration = null;
     }
@@ -86,8 +85,8 @@ public final class DefaultGameController implements GameController {
             gameManager.getResult());
     }
 
-    private void receiveSnapshot(GameSnapshot snapshot) {
-        GameState newState = new GameState(snapshot);
+    private void receiveSnapshot(GameState newState) 
+    {
         state = newState;
         for (GameStateListener listener : listeners) {
             listener.onGameStateChanged(newState);

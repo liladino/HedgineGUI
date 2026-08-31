@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
+import control.GameState;
+import core.IO.FENException;
 import core.chess.Board;
 import core.chess.Move;
-import core.chess.IO.FENException;
 import game.clock.ClockController;
 import game.clock.ClockListener;
 import game.clock.ClockSnapshot;
@@ -26,7 +27,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
 
     @FunctionalInterface
     public interface StateListener {
-        void onStateChanged(GameSnapshot snapshot);
+        void onStateChanged(GameState snapshot);
     }
 
     private final Object stateLock = new Object();
@@ -364,15 +365,15 @@ public final class GameManager implements MoveReceiver, ClockListener {
         return side == Sides.WHITE ? white : black;
     }
 
-    public GameSnapshot getSnapshot() {
+    public GameState getSnapshot() {
         synchronized (stateLock) {
             return createSnapshot();
         }
     }
 
-    private GameSnapshot createSnapshot() {
+    private GameState createSnapshot() {
         if (board == null) {
-            return GameSnapshot.empty();
+            return GameState.empty();
         }
 
         List<Move> legalMoves = new ArrayList<>();
@@ -385,7 +386,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
                 && awaitingMove
                 && currentPlayer != null
                 && currentPlayer.acceptsExternalMoves();
-        return new GameSnapshot(
+        return new GameState(
                 board,
                 legalMoves,
                 moves,
@@ -402,7 +403,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
     }
 
     private void publishCurrentState() {
-        GameSnapshot snapshot = getSnapshot();
+        GameState snapshot = getSnapshot();
         for (StateListener listener : listeners) {
             try {
                 listener.onStateChanged(snapshot);

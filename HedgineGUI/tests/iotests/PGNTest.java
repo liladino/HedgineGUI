@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import control.DefaultGameController;
 import control.GameController;
+import core.IO.PGNConverter;
 import core.chess.Board;
 import core.chess.Move;
 import core.chess.Square;
-import core.chess.IO.PGNConverter;
 import game.GameConfiguration;
 import game.GameManager;
 import game.HumanPlayer;

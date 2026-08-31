@@ -2,8 +2,8 @@ package game;
 
 import java.util.Objects;
 
+import core.IO.FENException;
 import core.chess.Board;
-import core.chess.IO.FENException;
 import game.clock.Clock;
 import game.clock.ClockBuilder;
 import game.clock.ClockController;
