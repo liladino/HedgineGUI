@@ -14,7 +14,11 @@ public interface GameController {
 
     boolean takeBack();
 
+    void smartTakeBack();
+
     void stopGame();
+
+    void stopEngines();
 
     GameState getState();
 

@@ -45,8 +45,18 @@ public final class DefaultGameController implements GameController {
     }
 
     @Override
+    public void smartTakeBack(){
+        gameManager.smartTakeBack();
+    }
+
+    @Override
     public void stopGame() {
         gameManager.stopGame();
+    }
+
+    @Override
+    public void stopEngines(){
+        gameManager.stopEngines();
     }
 
     @Override

@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import game.EnginePlayer;
 import game.GameEventListener;
 import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.NewGame;
+import utility.Result;
 
 /**
  * Initializes the menubar, and handles the interactions.
@@ -87,7 +89,6 @@ public class MenuManager implements ActionListener {
 		fileMenuStrings.add("Load board");	  //1
 		fileMenuStrings.add("Save FEN");		//2
 		fileMenuStrings.add("Save PGN");		//3
-		fileMenuStrings.add("Save board");	  //4
 		fileMenuStrings.add("Quit");			//5
 		
 		for (String s : fileMenuStrings){
@@ -172,11 +173,10 @@ public class MenuManager implements ActionListener {
 		 
 		logger.info("\"" + s + "\"" + " selected");
 		
-		if (s.equals(fileMenuStrings.get(5))) {
-			throw new RuntimeErrorException(new Error("quit is yet to be implemented"));
-			// GameStarter.getGameManager().stopRunning();
-			// try { Thread.sleep(100); } catch (InterruptedException e) {}
-			// System.exit(0);
+		if (s.equals(fileMenuStrings.get(4))) {
+			gameController.stopGame();
+			try { Thread.sleep(100); } catch (InterruptedException e) {}
+			System.exit(0);
 		}
 		else if (s.equals(viewMenuStrings.get(0))) {
 			//rotate
@@ -239,22 +239,20 @@ public class MenuManager implements ActionListener {
 		}
 		else if (s.equals(fileMenuStrings.get(2))){
 			//save fen
-			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
-
-			// String fen = GameStarter.getGameManager().getBoard().convertToFEN();
+			String fen = gameController.getFEN();
 			
-			// JFileChooser chooser = new JFileChooser();
-			// chooser.setDialogTitle(fileMenuStrings.get(2));
-			// chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
+			JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle(fileMenuStrings.get(2));
+			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
 
-			// int returnVal = chooser.showSaveDialog(mainWindow);
-			// if (returnVal == JFileChooser.APPROVE_OPTION) {
-			// 	try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".fen")) {
-			// 		fw.write(fen);
-			// 	} catch (Exception e) {
-			// 		InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
-			// 	}
-			// }
+			int returnVal = chooser.showSaveDialog(mainWindow);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".fen")) {
+					fw.write(fen);
+				} catch (Exception e) {
+					InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
+				}
+			}
 		}
 		else if (s.equals(fileMenuStrings.get(1))){
 			//load board
@@ -274,77 +272,46 @@ public class MenuManager implements ActionListener {
 			}
 			if (temp != null) new NewGame(temp.convertToFEN(), gameController);
 		}
-		else if (s.equals(fileMenuStrings.get(4))){
-			//save board
-			
-			throw new RuntimeErrorException(new Error("serialization is not implemented"));
-			// try (
-			// 	FileOutputStream fout = new FileOutputStream(System.getProperty("user.dir") + "/saves/board.ser");
-			// 	ObjectOutputStream oos = new ObjectOutputStream(fout);
-			// ){
-			// 	oos.writeObject(GameStarter.getGameManager().getBoard());
-			// 	InformationDialogs.infoDialog(mainWindow, "Board saved, load it with \"File\" > \"Load board\"");
-			// }
-			// catch (IOException i){
-			// 	InformationDialogs.errorDialog(mainWindow, "Problem while saving the file: " + i.getMessage());
-			// }
-		}
 		else if (s.equals(fileMenuStrings.get(3))){
 			//save pgn
-			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
-			// String pgn = PGNConverter.convertToPGN(
-			// 	GameStarter.getGameManager().getPlayer(Sides.WHITE),
-			// 	GameStarter.getGameManager().getPlayer(Sides.BLACK),
-			// 	GameStarter.getGameManager().getStartFEN(), 
-			// 	GameStarter.getGameManager().getMoves(), 
-			// 	GameStarter.getGameManager().getResult());
+			String pgn = gameController.getPGN();
+			
+			JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle(fileMenuStrings.get(3));
+			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
 
-			// JFileChooser chooser = new JFileChooser();
-			// chooser.setDialogTitle(fileMenuStrings.get(3));
-			// chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
-
-			// int returnVal = chooser.showSaveDialog(mainWindow);
-			// if (returnVal == JFileChooser.APPROVE_OPTION) {
-			// 	try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".pgn")) {
-			// 		fw.write(pgn);
-			// 	} catch (Exception e) {
-			// 		InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
-			// 	}
-			// }
+			int returnVal = chooser.showSaveDialog(mainWindow);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				try(FileWriter fw = new FileWriter(chooser.getSelectedFile() + ".pgn")) {
+					fw.write(pgn);
+				} catch (Exception e) {
+					InformationDialogs.errorDialog(mainWindow, "Problem while writing: " + e.getMessage());
+				}
+			}
 		}
 		else if (s.equals(gameMenuStrings.get(1))){
 			//resign
-			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
+			if (Result.ONGOING != gameController.getState().getResult()) return;
+			
+			gameController.resign();
 
-			// if (!GameStarter.getGameManager().isGameRunning() || !GameStarter.getGameManager().getCurrentPlayer().isHuman()) return;
-			
-			// Sides won = (GameStarter.getGameManager().getBoard().tomove() == Sides.WHITE ? Sides.BLACK : Sides.WHITE);
-			// GameStarter.getGameManager().stopRunning();
-			// GameStarter.getGameManager().setResult(won == Sides.WHITE ? Result.WHITE_WON : Result.BLACK_WON);
-			
-			// for (GameEventListener g : gameEventListeners){
-			// 	g.onResign(won);
-			// }
+			for (GameEventListener g : gameEventListeners){
+				g.onResign(gameController.getState().getWinner());
+			}
 		}
 		else if (s.equals(gameMenuStrings.get(2))){
 			//take back
-			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
-
-			// if (!GameStarter.getGameManager().isGameRunning()) return;
-			// GameStarter.getGameManager().takeBack();
+			gameController.smartTakeBack();
 		}
 		else if (s.equals(gameMenuStrings.get(3))){
 			//abort
-			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
-
-			// if (!GameStarter.getGameManager().isGameRunning()) return;
+			if (Result.ONGOING != gameController.getState().getResult()) return;
 			
-			// GameStarter.getGameManager().stopRunning();
-			// GameStarter.getGameManager().setResult(Result.DRAW);
+			gameController.stopGame();
 			
-			// for (GameEventListener g : gameEventListeners){
-			// 	g.onDraw();
-			// }
+			for (GameEventListener g : gameEventListeners){
+				g.onDraw();
+			}
 		}
 		else if (s.equals(enginesMenuStrings.get(0))){
 			//quit engine

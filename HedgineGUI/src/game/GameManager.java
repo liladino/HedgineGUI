@@ -266,6 +266,25 @@ public final class GameManager implements MoveReceiver, ClockListener {
         return true;
     }
 
+    /** 
+     * if the current player is a human, and the opponent is an engine, take back two moves, otherwise one move
+     */
+    public void smartTakeBack(){
+        if (currentPlayer instanceof HumanPlayer){
+            Player oterhPlayer = currentPlayer.getSide() == Sides.WHITE ? black : white;
+            if (oterhPlayer instanceof EnginePlayer){
+                takeBack();
+                takeBack();
+            }
+            else {
+                takeBack();
+            }
+        }
+        else {
+            takeBack();
+        }
+    }
+
     public void stopGame() {
         synchronized (stateLock) {
             if (board == null) {
@@ -281,22 +300,29 @@ public final class GameManager implements MoveReceiver, ClockListener {
         publishCurrentState();
     }
 
-    private void stopResources() {
+    public void stopEngines(){
         Player whiteToStop;
         Player blackToStop;
-        ClockController clockToStop;
         synchronized (stateLock) {
             whiteToStop = white;
             blackToStop = black;
-            clockToStop = clockController;
         }
-
         if (whiteToStop != null) {
             whiteToStop.endGame();
         }
         if (blackToStop != null) {
             blackToStop.endGame();
         }
+    }
+
+    private void stopResources() {
+        stopEngines();
+        
+        ClockController clockToStop;
+        synchronized (stateLock) {
+            clockToStop = clockController;
+        }
+
         if (clockToStop != null) {
             clockToStop.pauseClock();
             synchronized (stateLock) {

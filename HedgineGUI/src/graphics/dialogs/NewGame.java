@@ -421,10 +421,15 @@ public class NewGame extends JFrame {
 		gbc.gridy++;
 		add(startGame, gbc);
 
-		startGame.addActionListener(new StartGameAction());
+		startGame.addActionListener(new StartGameAction(this));
 	}
 
-	private class StartGameAction implements ActionListener{
+	private class StartGameAction implements ActionListener {
+		private JFrame window;
+		public StartGameAction(JFrame window){
+			this.window = window;
+		}
+
 		@Override
 		public void actionPerformed(ActionEvent e) {			
 			Player w = null;
@@ -460,13 +465,13 @@ public class NewGame extends JFrame {
                     w, b,
                     timeControl,
                     new SwingTicker()));
-			}
+			
+					dispose();
+				}
 			catch (GameException g)
 			{
-				// TODO: info dialog
+				InformationDialogs.errorDialog(window, "Error with starting the game:\n" + g.getMessage());
 			}
-
-			dispose();
 		}
 	} 
 
