@@ -23,6 +23,7 @@ import control.GameController;
 import core.chess.Board;
 import game.EnginePlayer;
 import game.GameEventListener;
+import game.Player;
 import graphics.dialogs.InformationDialogs;
 import graphics.dialogs.NewGame;
 import utility.Result;
@@ -314,38 +315,26 @@ public class MenuManager implements ActionListener {
 			}
 		}
 		else if (s.equals(enginesMenuStrings.get(0))){
-			//quit engine
+			//quit engines
 			
-			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
-
-			// EnginePlayer e;
-			// if (!GameStarter.getGameManager().getWhite().isHuman()) {
-			// 	e = (EnginePlayer) GameStarter.getGameManager().getWhite();
-			// 	e.quitEngine();
-			// }
-			// if (!GameStarter.getGameManager().getBlack().isHuman()) {
-			// 	e = (EnginePlayer) GameStarter.getGameManager().getBlack();
-			// 	e.quitEngine();
-			// }
+			gameController.quitEngines();
 		}
 		else if (s.equals(enginesMenuStrings.get(1))){
 			//restart engine
-			
-			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
-			// EnginePlayer e = getEngine();
-			// if (e == null) return;
-			// try {
-			// 	if (e.isRunning())
-			// 		e.quitEngine();
-				
-			// 	e.startEngine();
-				
-			// 	e.sendCommand("ucinewgame");
-			// 	if (GameStarter.getGameManager().getCurrentPlayer() == e) 
-			// 		e.sendCommand(GameStarter.getGameManager().lastEngineCommand());
-			// } catch (IOException e1) {
-			// 	return;
-			// }
+			EnginePlayer e = getEngine();
+			if (e == null) return;
+			try {
+				if (e.isRunning()) e.endGame();
+				Thread.sleep(100);
+				e.startGame();
+				gameController.requestMove();
+			} catch (IOException e1) {
+				logger.info("Error while communicating with engine");
+				logger.info(e1.getMessage());
+			}
+			catch (InterruptedException ir) {
+				logger.info(ir.getMessage());
+			}
 		}
 		else if (s.equals(enginesMenuStrings.get(2))){
 			//engine stop -> get move
@@ -369,17 +358,12 @@ public class MenuManager implements ActionListener {
 	}
 	
 	private EnginePlayer getEngine() {
-			throw new RuntimeErrorException(new Error("game manager commmunication is not implemented"));
-		// EnginePlayer e;
-		// if (!GameStarter.getGameManager().getCurrentPlayer().isHuman()) e = (EnginePlayer) GameStarter.getGameManager().getCurrentPlayer();
-		// else {
-		// 	Sides notActiveSide = (GameStarter.getGameManager().getCurrentPlayer().getSide() == Sides.BLACK ? Sides.WHITE : Sides.BLACK); 
-		// 	if (GameStarter.getGameManager().getPlayer(notActiveSide).isHuman()) {
-		// 		return null;
-		// 	}
-		// 	e = (EnginePlayer) GameStarter.getGameManager().getPlayer(notActiveSide);
-		// }
-		// return e;
+		Player p = gameController.getCurrentPlayer();
+		if (p instanceof EnginePlayer){
+			EnginePlayer e = (EnginePlayer)p;
+			return e;
+		}
+		return null;
 	}
 	
 	public void addGameEventListener(GameEventListener listener) {

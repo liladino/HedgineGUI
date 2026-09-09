@@ -7,6 +7,7 @@ import core.chess.Move;
 import game.GameConfiguration;
 import game.GameException;
 import game.GameManager;
+import game.Player;
 
 /** Translates GameManager snapshots and commands into the UI-facing API. */
 public final class DefaultGameController implements GameController {
@@ -40,11 +41,6 @@ public final class DefaultGameController implements GameController {
     }
 
     @Override
-    public boolean takeBack() {
-        return gameManager.takeBack();
-    }
-
-    @Override
     public void smartTakeBack(){
         gameManager.smartTakeBack();
     }
@@ -54,14 +50,24 @@ public final class DefaultGameController implements GameController {
         gameManager.stopGame();
     }
 
+    @Override 
+    public void requestMove(){
+        gameManager.requestCurrentMove();
+    }
+
     @Override
-    public void stopEngines(){
-        gameManager.stopEngines();
+    public void quitEngines(){
+        gameManager.quitEngines();
     }
 
     @Override
     public GameState getState() {
         return state;
+    }
+
+    @Override 
+    public Player getCurrentPlayer(){
+        return gameManager.getCurrentPlayer();
     }
 
     @Override
@@ -77,7 +83,7 @@ public final class DefaultGameController implements GameController {
 
     @Override
     public String getFEN(){
-        return gameManager.getStartFEN();
+        return gameManager.getBoard().convertToFEN();
     }
 
     @Override

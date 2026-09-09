@@ -114,7 +114,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
                 + (position.tomove() == Sides.BLACK ? 1 : 0));
     }
 
-    private void requestCurrentMove() {
+    public void requestCurrentMove() {
         final Player player;
         final Position position;
         synchronized (stateLock) {
@@ -227,7 +227,9 @@ public final class GameManager implements MoveReceiver, ClockListener {
         publishCurrentState();
     }
 
-    /** Takes back one ply. Policies such as two-ply takeback belong in Control. */
+    /** 
+     * Takes back one ply. Doesn't re-request move.
+     */
     public boolean takeBack() {
         final Player playerToCancel;
         final ClockSnapshot clockToRestore;
@@ -262,7 +264,6 @@ public final class GameManager implements MoveReceiver, ClockListener {
             clockSnapshot = clockController.snapshot();
         }
         publishCurrentState();
-        requestCurrentMove();
         return true;
     }
 
@@ -283,6 +284,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
         else {
             takeBack();
         }
+        requestCurrentMove();
     }
 
     public void stopGame() {
@@ -300,7 +302,22 @@ public final class GameManager implements MoveReceiver, ClockListener {
         publishCurrentState();
     }
 
-    public void stopEngines(){
+    public void quitEngines(){
+        Player whiteToStop;
+        Player blackToStop;
+        synchronized (stateLock) {
+            whiteToStop = white;
+            blackToStop = black;
+        }
+        if (whiteToStop != null && whiteToStop instanceof EnginePlayer) {
+            whiteToStop.endGame();
+        }
+        if (blackToStop != null && blackToStop instanceof EnginePlayer) {
+            blackToStop.endGame();
+        }
+    }
+
+    private void quitEverything(){
         Player whiteToStop;
         Player blackToStop;
         synchronized (stateLock) {
@@ -316,7 +333,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
     }
 
     private void stopResources() {
-        stopEngines();
+        quitEverything();
         
         ClockController clockToStop;
         synchronized (stateLock) {
@@ -395,6 +412,10 @@ public final class GameManager implements MoveReceiver, ClockListener {
         synchronized (stateLock) {
             return createSnapshot();
         }
+    }
+
+    public Player getCurrentPlayer(){
+        return currentPlayer;
     }
 
     private GameState createSnapshot() {

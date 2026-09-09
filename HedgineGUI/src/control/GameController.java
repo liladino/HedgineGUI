@@ -3,6 +3,7 @@ package control;
 import core.chess.Move;
 import game.GameConfiguration;
 import game.GameException;
+import game.Player;
 
 /** The only game-facing API the UI layer needs. */
 public interface GameController {
@@ -12,15 +13,17 @@ public interface GameController {
 
     void resign();
 
-    boolean takeBack();
-
     void smartTakeBack();
 
     void stopGame();
 
-    void stopEngines();
+    void quitEngines();
+
+    void requestMove();
 
     GameState getState();
+
+    Player getCurrentPlayer();
 
     void addStateListener(GameStateListener listener);
 

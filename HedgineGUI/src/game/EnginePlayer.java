@@ -144,7 +144,7 @@ public final class EnginePlayer extends Player {
     }
 
     private void handleEngineOutput(String output) {
-        LOGGER.fine(output);
+        LOGGER.info(output);
         synchronized (engineInfo) {
             engineInfo.add(output);
         }
@@ -167,12 +167,18 @@ public final class EnginePlayer extends Player {
     }
 
     private String buildPositionCommand(Position position) {
-        StringBuilder command = new StringBuilder("position fen ")
-                .append(position.getInitialFen());
+        StringBuilder command;
+        if ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".equals(position.getInitialFen().trim())){
+            command = new StringBuilder("position startpos");
+        }
+        else {
+            command = new StringBuilder("position fen ").append(position.getInitialFen());
+        }
+        
         if (!position.getMoveHistory().isEmpty()) {
             command.append(" moves");
             for (Move move : position.getMoveHistory()) {
-                command.append(' ').append(move);
+                command.append(' ').append(move.toString().trim());
             }
         }
         return command.toString();
@@ -202,7 +208,7 @@ public final class EnginePlayer extends Player {
         if (!running || engineInput == null) {
             throw new IOException("Engine is not running");
         }
-        LOGGER.fine("UCI command: " + command);
+        LOGGER.info("UCI command: " + command);
         engineInput.write(command);
         engineInput.newLine();
         engineInput.flush();
