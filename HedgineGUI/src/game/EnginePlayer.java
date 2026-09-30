@@ -209,7 +209,7 @@ public final class EnginePlayer extends Player {
         if (!running || engineInput == null) {
             throw new IOException("Engine is not running");
         }
-        LOGGER.log(Level.INFO, "UCI command: {}", command);
+        LOGGER.log(Level.INFO, "UCI command: {0}", command);
         engineInput.write(command);
         engineInput.newLine();
         engineInput.flush();
