@@ -11,6 +11,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
@@ -45,13 +47,16 @@ import utility.Sides;
  * Note: upon closing this window, the game should continue
  */
 public class NewGame extends JFrame {
-	private static final long serialVersionUID = -421311633940977178L;	
+	private static final Logger logger = Logger.getLogger(NewGame.class.getName());
+	private static final long serialVersionUID = -421311633940977178L;
+	public static final String ENGINE = "Engine";
+	public static final String HUMAN = "Human";
 	private JTextField whiteName;
 	private JTextField blackName;
 	private JComboBox<String> comboWhitePlayer;
-	private static File whiteEngine = null;
+	private File whiteEngine = null;
 	private JComboBox<String> comboBlackPlayer;
-	private static File blackEngine = null; 
+	private File blackEngine = null;
 	private JTextField startPos;
 	private String timeControl;
 	private JTextField fischerControl;
@@ -61,52 +66,43 @@ public class NewGame extends JFrame {
 	private JRadioButton radioFixTime;
 	private boolean updatingFromPreset = false;
 
-	private static final String PERS_whiteEnginePath = System.getProperty("user.dir") + "/saves/.wep";
-	private static final String PERS_blackEnginePath = System.getProperty("user.dir") + "/saves/.bep";
+	private static final String PERS_WHITE_ENGINE_PATH = System.getProperty("user.dir") + "/saves/.wep";
+	private static final String PERS_BLACK_ENGINE_PATH = System.getProperty("user.dir") + "/saves/.bep";
 	
-	private final GameController controller;
+	private final transient GameController controller;
 
 	public NewGame(GameController controller){
 		this("startpos", controller);
 	}
 
-	public NewGame(String fen, GameController controller){
-		this.controller = controller; 
+	public NewGame(String fen, GameController controller) {
+		this.controller = controller;
 		if (whiteEngine == null) {
-			try{ 
-				File load = new File(PERS_whiteEnginePath);
-				Scanner scanner = new Scanner(load);
-				if (scanner.hasNextLine()){
+			try (Scanner scanner = new Scanner(new File(PERS_WHITE_ENGINE_PATH))) {
+				if (scanner.hasNextLine()) {
 					whiteEngine = new File(scanner.nextLine());
 				}
-				scanner.close();
-			}
-			catch(Exception e){
-				System.out.println("Can't load previous white engine path");
+			} catch (Exception e) {
+				logger.log(Level.INFO, "Can't load previous white engine path ");
 			}
 		}
 		if (blackEngine == null) {
-			try{ 
-				File load = new File(PERS_blackEnginePath);
-				Scanner scanner = new Scanner(load);
-				if (scanner.hasNextLine()){
+			try (Scanner scanner = new Scanner(new File(PERS_BLACK_ENGINE_PATH))) {
+				if (scanner.hasNextLine()) {
 					blackEngine = new File(scanner.nextLine());
 				}
-				scanner.close();
-			}
-			catch(Exception e){
-				System.out.println("Can't load previous black engine path");
+			} catch (Exception e) {
+				logger.log(Level.INFO, "Can't load previous black engine path ");
 			}
 		}
-		
-		startPos = new JTextField(fen, 20);	
-		initialzeWindow();
-		initialze();
+		startPos = new JTextField(fen, 20);
+		initializeWindow();
+		initialize();
 		pack();
 		setVisible(true);
 	}
 
-	void initialzeWindow(){
+	void initializeWindow(){
 		setTitle("New game");
 		
 		setResizable(false);
@@ -115,12 +111,10 @@ public class NewGame extends JFrame {
 		setLayout(new GridBagLayout());
 	}
 
-	void initialze(){
+	void initialize(){
   		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(10, 10, 10, 10);
-		
-		//whiteEngine = blackEngine = null;
-		
+
 		initRightPanel(gbc);
 
 		initPlayerInfo(gbc);
@@ -155,7 +149,7 @@ public class NewGame extends JFrame {
 			JLabel picLabel = new JLabel(menu);
 			add(picLabel, gbc);
 		}
-		catch (IOException i){
+		catch (IOException _){
 			//Image missing panel
 			gbc.gridx = 3;
 			gbc.gridy = 0;
@@ -184,8 +178,8 @@ public class NewGame extends JFrame {
 		add(whiteName, gbc);
 
 		gbc.gridx = 1;
-		String[] playertypes = {"Human", "Engine"};
-		comboWhitePlayer = new JComboBox<>(playertypes);
+		String[] playerTypes = { HUMAN, ENGINE };
+		comboWhitePlayer = new JComboBox<>(playerTypes);
 		add(comboWhitePlayer, gbc);
 
 		/* * * * * * * * * * * *
@@ -204,18 +198,17 @@ public class NewGame extends JFrame {
 		whiteEnginePath.setVisible(false);
 		whiteEngineFromFile.setVisible(false);
 		comboWhitePlayer.addActionListener(e -> {
-			if (comboWhitePlayer.getSelectedItem().equals("Engine")){
+			if (ENGINE.equals(comboWhitePlayer.getSelectedItem())) {
 				whiteEnginePath.setVisible(true);
 				whiteEngineFromFile.setVisible(true);
-				if (whiteEngine.exists()) whiteName.setText(whiteEngine.getName());
-			}
-			else{
-				whiteName.setText("White");
+
+				if (whiteEngine != null && whiteEngine.exists()) {
+					whiteName.setText(whiteEngine.getName());
+				}
+			} else {
 				whiteEnginePath.setVisible(false);
 				whiteEngineFromFile.setVisible(false);
 			}
-			NewGame.this.revalidate();
-			NewGame.this.repaint();
 		});
 
 		/* * * * * * * * *
@@ -229,7 +222,7 @@ public class NewGame extends JFrame {
 		add(blackName, gbc);
 
 		gbc.gridx = 1;
-		comboBlackPlayer = new JComboBox<>(playertypes);
+		comboBlackPlayer = new JComboBox<>(playerTypes);
 		add(comboBlackPlayer, gbc);
 
 		/* * * * * * * * * * * *
@@ -248,20 +241,18 @@ public class NewGame extends JFrame {
 		blackEnginePath.setVisible(false);
 		blackEngineFromFile.setVisible(false);
 		comboBlackPlayer.addActionListener(e -> {
-			if (comboBlackPlayer.getSelectedItem().equals("Engine")){
+			if (ENGINE.equals(comboBlackPlayer.getSelectedItem())) {
 				blackEnginePath.setVisible(true);
 				blackEngineFromFile.setVisible(true);
-				if (blackEngine.exists()) blackName.setText(blackEngine.getName());
-			}
-			else{
-				blackName.setText("Black");
+
+				if (blackEngine != null && blackEngine.exists()) {
+					blackName.setText(blackEngine.getName());
+				}
+			} else {
 				blackEnginePath.setVisible(false);
 				blackEngineFromFile.setVisible(false);
 			}
-			NewGame.this.revalidate();
-			NewGame.this.repaint();
 		});
-
 		
 	}
 
@@ -434,14 +425,14 @@ public class NewGame extends JFrame {
 		public void actionPerformed(ActionEvent e) {			
 			Player w = null;
 			Player b = null;
-			if (comboWhitePlayer.getSelectedItem().equals("Human")){
+			if (comboWhitePlayer.getSelectedItem().equals(HUMAN)){
 				w = new HumanPlayer(Sides.WHITE, whiteName.getText());
 			}
 			else {
 				if (whiteEngine == null) return;
 				w = new EnginePlayer(Sides.WHITE, whiteName.getText(), whiteEngine);
 			}
-			if (comboBlackPlayer.getSelectedItem().equals("Human")){
+			if (comboBlackPlayer.getSelectedItem().equals(HUMAN)){
 				b = new HumanPlayer(Sides.BLACK, blackName.getText());
 			}
 			else {
@@ -500,21 +491,19 @@ public class NewGame extends JFrame {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				if (side == Sides.WHITE){
 					whiteEngine = chooser.getSelectedFile();
-					try {
-						FileWriter fw = new FileWriter(PERS_whiteEnginePath);
-					    fw.write(whiteEngine.toString());
-					    fw.close();
+
+					try (FileWriter fw = new FileWriter(PERS_WHITE_ENGINE_PATH)) {
+						fw.write(whiteEngine.toString());
+					} catch (Exception exc) {
+						logger.warning(exc.getMessage());
 					}
-					catch (Exception exc) {	System.out.println(exc.getMessage()); }
-				}
-				else {
+				} else {
 					blackEngine = chooser.getSelectedFile();
-					try {
-						FileWriter fw = new FileWriter(PERS_blackEnginePath);
-					    fw.write(blackEngine.toString());
-					    fw.close();
+					try (FileWriter fw = new FileWriter(PERS_BLACK_ENGINE_PATH)) {
+						fw.write(blackEngine.toString());
+					} catch (Exception exc) {
+						logger.warning(exc.getMessage());
 					}
-					catch (Exception exc) {	System.out.println(exc.getMessage()); }
 				}
 				setTextAndLabel(chooser.getSelectedFile());
 			}

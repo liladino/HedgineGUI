@@ -154,7 +154,6 @@ public final class GameManager implements MoveReceiver, ClockListener {
 
     @Override
     public void onMoveReceived(Player player, Move move) {
-        boolean continueGame;
         boolean gameEnded;
 
         synchronized (stateLock) {
@@ -165,7 +164,6 @@ public final class GameManager implements MoveReceiver, ClockListener {
 
             if (move.isNull() || !board.isMoveLegal(move)) {
                 errorMessage = "Illegal move submitted by " + player.getName() + ": " + move;
-                continueGame = true;
                 gameEnded = false;
             } else {
                 clockHistory.add(clockController.snapshot());
@@ -178,7 +176,6 @@ public final class GameManager implements MoveReceiver, ClockListener {
                 currentPlayer = playerFor(board.tomove());
 
                 gameEnded = result != Result.ONGOING;
-                continueGame = !gameEnded;
                 if (gameEnded) {
                     running = false;
                     setBoardTermination();
@@ -191,9 +188,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
             publishCurrentState();
         } else {
             publishCurrentState();
-            if (continueGame) {
-                requestCurrentMove();
-            }
+            requestCurrentMove();
         }
     }
 
@@ -309,10 +304,10 @@ public final class GameManager implements MoveReceiver, ClockListener {
             whiteToStop = white;
             blackToStop = black;
         }
-        if (whiteToStop != null && whiteToStop instanceof EnginePlayer) {
+        if (whiteToStop instanceof EnginePlayer) {
             whiteToStop.endGame();
         }
-        if (blackToStop != null && blackToStop instanceof EnginePlayer) {
+        if (blackToStop instanceof EnginePlayer) {
             blackToStop.endGame();
         }
     }
@@ -349,18 +344,24 @@ public final class GameManager implements MoveReceiver, ClockListener {
     }
 
     private void setBoardTermination() {
-        if (result == Result.WHITE_WON) {
-            winner = Sides.WHITE;
-            termination = GameTermination.CHECKMATE;
-        } else if (result == Result.BLACK_WON) {
-            winner = Sides.BLACK;
-            termination = GameTermination.CHECKMATE;
-        } else if (result == Result.STALEMATE) {
-            winner = null;
-            termination = GameTermination.STALEMATE;
-        } else {
-            winner = null;
-            termination = GameTermination.DRAW;
+        switch (result){
+            case Result.WHITE_WON:
+                winner = Sides.WHITE;
+                termination = GameTermination.CHECKMATE;
+                break;
+            case Result.BLACK_WON:
+                winner = Sides.BLACK;
+                termination = GameTermination.CHECKMATE;
+                break;
+            case Result.STALEMATE:
+                winner = null;
+                termination = GameTermination.STALEMATE;
+                break;
+            default:
+                winner = null;
+                termination = GameTermination.DRAW;
+                break;
+
         }
     }
 
@@ -488,8 +489,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
         }
     }
 
-    public Board getBoard(){
-        Board newBoard = board;
-        return newBoard;
+    public Board getBoardCopy(){
+        return new Board(board);
     }
 }

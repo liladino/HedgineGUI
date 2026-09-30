@@ -137,8 +137,7 @@ public class Move {
 	
 	public boolean isNull() {
 		if (from.isNull()) return true;
-		if (to.isNull()) return true;
-		return false;
+		return to.isNull();
 	}
 	
 	@Override
@@ -146,16 +145,23 @@ public class Move {
 		if (this == o) return true;
 		
 		Move m = (Move)o;
+		if (null == m) return false;
 		if (!m.getFrom().equals(from)) return false;
 		if (!m.getTo().equals(to)) return false;
-		if (m.getPromotion() != promotion) return false;
-		return true;
+		return (m.getPromotion() == promotion);
 	}
-	
+
+	@Override
+	public int hashCode() {
+		int result = from.hashCode();
+		result = 31 * result + to.hashCode();
+		return result;
+	}
+
 	/* * * *
 	 * IO  *
-	 * * * */
-	public void printMove(PrintStream out) {
+	 * * * */ public void printMove(PrintStream out)
+	{
 		out.printf("%c%d%c%d%c", from.getFile(), from.getRank(), to.getFile(), to.getRank(), promotion);
 	}
 	

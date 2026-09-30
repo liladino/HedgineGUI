@@ -190,7 +190,7 @@ public class PGNConverter {
 		try {
 			temp = new Board(fen);
 		}
-		catch (FENException f){
+		catch (FENException _){
 			return null;
 		}
 		StringBuilder sb = new StringBuilder();
@@ -207,7 +207,8 @@ public class PGNConverter {
 				sb.append(temp.getFullMoveCount());
 				sb.append(". ");
 			}
-			sb.append(PGNConverter.convertMoveToPGNString(temp, m) + " ");
+			sb.append(PGNConverter.convertMoveToPGNString(temp, m));
+			sb.append(" ");
 			temp.makeMove(m);
 			c++;
 		}

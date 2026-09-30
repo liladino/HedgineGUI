@@ -83,24 +83,19 @@ public class Square implements Serializable{
 	 * Checks if it's a nullmove
 	 */
 	public boolean isNull() {
-		if (rank == -1 || rank == 0) {
-			return true;
-		}
-		return false;
+		return (rank == -1 || rank == 0);
 	}
-	
+
+	@Override
+	public int hashCode(){
+		return (file-'a') * 100 + rank;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == this) return true;
-		
-		Square s = (Square)o;
-		if (s.getFile() != file) {
-			return false;
-		}
-		if (s.getRank() != rank) {
-			return false;
-		}
-		return true;
+		if (!(o instanceof Square s)) return false;
+		return !(s.getFile() != file || s.getRank() != rank);
 	}
 	
 	@Override

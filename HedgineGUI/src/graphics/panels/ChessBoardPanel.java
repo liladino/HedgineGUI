@@ -258,9 +258,7 @@ public final class ChessBoardPanel extends JPanel {
                         ? boardTop + (rank - 1) * squareSize
                         : boardTop + (8 - rank) * squareSize;
 
-                graphics.setColor((file - 'a' + rank) % 2 == 0
-                        ? getSquareColor(Sides.WHITE)
-                        : getSquareColor(Sides.BLACK));
+                graphics.setColor(getSquareColor( (file - 'a' + rank) % 2 == 0 ? Sides.WHITE : Sides.BLACK) );
                 graphics.fillRect(x, y, squareSize, squareSize);
 
                 Square square = new Square(file, rank);

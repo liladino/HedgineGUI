@@ -3,6 +3,9 @@ package game.clock;
 import utility.Second;
 import utility.TimeControl;
 
+import java.util.regex.Pattern;
+
+
 /**
  * Helps setting a Clock object / or its values based on the time info string.
  * Works in both ways:
@@ -64,9 +67,10 @@ public class ClockBuilder {
 		if (!tokens[0].equals("N") && tokens.length < 2){
 			throw new TimeInputException("No starttime specified");
 		}
-		
-		for (int i = 1; i < tokens.length; i++){
-			if (!tokens[i].matches("^[0-9 ]*$")) {
+
+		Pattern validTokenPattern = Pattern.compile("^[0-9 ]*$");
+		for (int i = 1; i < tokens.length; i++) {
+			if (!validTokenPattern.matcher(tokens[i]).matches()) {
 				throw new TimeInputException("Invalid String format");
 			}
 		}

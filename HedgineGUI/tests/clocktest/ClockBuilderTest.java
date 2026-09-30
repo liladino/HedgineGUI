@@ -14,7 +14,7 @@ import utility.Pair;
 import utility.Second;
 import utility.TimeControl;
 
-public class ClockBuilderTest {
+class ClockBuilderTest {
 	Clock clock;
 	ClockBuilder t;
 	@BeforeEach

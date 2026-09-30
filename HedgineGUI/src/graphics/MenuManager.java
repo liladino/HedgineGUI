@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-import javax.management.RuntimeErrorException;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -33,6 +32,8 @@ import utility.Result;
  */
 public class MenuManager implements ActionListener {
 	private static final Logger logger = Logger.getLogger(MenuManager.class.getName());
+	public static final String USER_DIR = "user.dir";
+	public static final String SAVES = "/saves";
 	private MainWindow mainWindow;
 	private GameController gameController;
 	
@@ -176,10 +177,10 @@ public class MenuManager implements ActionListener {
 		
 		if (s.equals(fileMenuStrings.get(4))) {
 			gameController.stopGame();
-			try { Thread.sleep(100); } catch (InterruptedException e) {}
+			try { Thread.sleep(100); } catch (InterruptedException _) { Thread.currentThread().interrupt(); }
 			System.exit(0);
 		}
-		else if (s.equals(viewMenuStrings.get(0))) {
+		else if (s.equals(viewMenuStrings.getFirst())) {
 			//rotate
 			GraphicSettings.rotateBoard = !GraphicSettings.rotateBoard;
 			for (GameEventListener listener : gameEventListeners) {
@@ -201,13 +202,7 @@ public class MenuManager implements ActionListener {
 		}
 		else if (inputModesStrings.contains(s)) {
 			//input mode
-			//System.out.println("kurvaelet");
-			if (inputModesStrings.get(0).equals(s)) {
-				GraphicSettings.dragDrop = true;				
-			}
-			else {
-				GraphicSettings.dragDrop = false;
-			}
+            GraphicSettings.dragDrop = inputModesStrings.getFirst().equals(s);
 			for (GameEventListener listener : gameEventListeners) {
 				listener.onGameLooksChanged();	
 			}
@@ -217,8 +212,8 @@ public class MenuManager implements ActionListener {
 			//load fen
 			JFileChooser chooser = new JFileChooser();
 			chooser.setFileFilter(new FileNameExtensionFilter("FEN files", "fen", "FEN", "txt"));
-			chooser.setDialogTitle(fileMenuStrings.get(0));
-			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
+			chooser.setDialogTitle(fileMenuStrings.getFirst());
+			chooser.setCurrentDirectory(new File(System.getProperty(USER_DIR) + SAVES));
 
 			int returnVal = chooser.showOpenDialog(mainWindow);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -232,7 +227,7 @@ public class MenuManager implements ActionListener {
 					scanner.close();
 					InformationDialogs.errorDialog(mainWindow, "Can't load FEN");
 				}
-				catch(FileNotFoundException f){
+				catch(FileNotFoundException _){
 					InformationDialogs.errorDialog(mainWindow, "Can't open file");
 				}
 			}
@@ -244,7 +239,7 @@ public class MenuManager implements ActionListener {
 			
 			JFileChooser chooser = new JFileChooser();
 			chooser.setDialogTitle(fileMenuStrings.get(2));
-			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
+			chooser.setCurrentDirectory(new File(System.getProperty(USER_DIR) + SAVES));
 
 			int returnVal = chooser.showSaveDialog(mainWindow);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -259,7 +254,7 @@ public class MenuManager implements ActionListener {
 			//load board
 			Board temp = null;
 			try (
-				FileInputStream fin = new FileInputStream(System.getProperty("user.dir") + "/saves/board.ser");
+				FileInputStream fin = new FileInputStream(System.getProperty(USER_DIR) + "/saves/board.ser");
 				ObjectInputStream oin = new ObjectInputStream(fin);
 			){
 				temp = (Board) oin.readObject();
@@ -268,7 +263,7 @@ public class MenuManager implements ActionListener {
 			} catch (IOException i) {
 				InformationDialogs.errorDialog(mainWindow, "Problem while opening: " + i.getMessage());
 			}
-			catch (ClassNotFoundException c){
+			catch (ClassNotFoundException _){
 				return;
 			}
 			if (temp != null) new NewGame(temp.convertToFEN(), gameController);
@@ -279,7 +274,7 @@ public class MenuManager implements ActionListener {
 			
 			JFileChooser chooser = new JFileChooser();
 			chooser.setDialogTitle(fileMenuStrings.get(3));
-			chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/saves"));
+			chooser.setCurrentDirectory(new File(System.getProperty(USER_DIR) + SAVES));
 
 			int returnVal = chooser.showSaveDialog(mainWindow);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -334,6 +329,7 @@ public class MenuManager implements ActionListener {
 			}
 			catch (InterruptedException ir) {
 				logger.info(ir.getMessage());
+				Thread.currentThread().interrupt();
 			}
 		}
 		else if (s.equals(enginesMenuStrings.get(2))){
@@ -342,8 +338,8 @@ public class MenuManager implements ActionListener {
 			if (e == null) return;
 			try {
 				if (e.isRunning()) e.sendCommand("stop");
-			} catch (IOException e1) {
-				return;
+			} catch (IOException _) {
+				// .
 			}
 		}
 		else if (s.equals(enginesMenuStrings.get(3))){
@@ -356,12 +352,11 @@ public class MenuManager implements ActionListener {
 			InformationDialogs.aboutDialog(mainWindow);
 		}
 	}
-	
+
 	private EnginePlayer getEngine() {
 		Player p = gameController.getCurrentPlayer();
-		if (p instanceof EnginePlayer){
-			EnginePlayer e = (EnginePlayer)p;
-			return e;
+		if (p instanceof EnginePlayer enginePlayer) {
+			return enginePlayer;
 		}
 		return null;
 	}

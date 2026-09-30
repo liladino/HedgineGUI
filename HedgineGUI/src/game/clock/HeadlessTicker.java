@@ -3,7 +3,9 @@ package game.clock;
 public class HeadlessTicker implements Ticker {
 	private Runnable tick;
 
-	public HeadlessTicker(){ }
+	public HeadlessTicker(){
+		//No operation implementation
+	}
 
 	public void simulateTick(){
 		tick.run();

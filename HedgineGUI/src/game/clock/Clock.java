@@ -88,7 +88,7 @@ public final class Clock {
 	public synchronized void pressClock() {
 		advanceToNow();
 		if (flaggedSide != null) {
-			return; // flaggedSide;
+			return;
 		}
 
 		applyTimeControl();
@@ -96,7 +96,6 @@ public final class Clock {
 		activeSide = (activeSide == Sides.WHITE) ? Sides.BLACK : Sides.WHITE;
 		plies++;
 		lastUpdateMs = System.currentTimeMillis();
-		// return null;
 	}
 
 	public synchronized ClockSnapshot snapshot() {

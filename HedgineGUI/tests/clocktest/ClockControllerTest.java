@@ -13,7 +13,7 @@ import game.clock.ClockSnapshot;
 import game.clock.HeadlessTicker;
 import utility.Sides;
 
-public class ClockControllerTest implements ClockListener {
+class ClockControllerTest implements ClockListener {
 	ClockController controller;
 	Clock clock;
 	HeadlessTicker ticker;

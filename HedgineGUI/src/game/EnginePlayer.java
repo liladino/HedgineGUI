@@ -12,6 +12,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import core.chess.Move;
@@ -208,7 +209,7 @@ public final class EnginePlayer extends Player {
         if (!running || engineInput == null) {
             throw new IOException("Engine is not running");
         }
-        LOGGER.info("UCI command: " + command);
+        LOGGER.log(Level.INFO, "UCI command: {}", command);
         engineInput.write(command);
         engineInput.newLine();
         engineInput.flush();
@@ -229,14 +230,14 @@ public final class EnginePlayer extends Player {
             if (engineInput != null) {
                 engineInput.close();
             }
-        } catch (IOException ignored) {
+        } catch (IOException _) {
             // Best-effort cleanup.
         }
         try {
             if (engineOutput != null) {
                 engineOutput.close();
             }
-        } catch (IOException ignored) {
+        } catch (IOException _) {
             // Best-effort cleanup.
         }
         engineInput = null;

@@ -5,8 +5,7 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import control.GameController;
 import control.GameState;
@@ -20,10 +19,8 @@ import graphics.panels.RightPanel;
 public final class MainWindow extends JFrame {
     private static final long serialVersionUID = 38435486L;
 
-    private final GameController controller;
-    private final ChessBoardPanel chessBoardPanel;
+    private final transient GameController controller;
     private final RightPanel rightPanel;
-    private final MenuManager menuManager;
     private GameTermination lastShownTermination = GameTermination.NONE;
 
     public MainWindow(GameController controller) {
@@ -36,7 +33,7 @@ public final class MainWindow extends JFrame {
         setSize(
                 900 + getInsets().left + getInsets().right,
                 640 + getInsets().top + getInsets().bottom);
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent event) {
@@ -46,8 +43,8 @@ public final class MainWindow extends JFrame {
         });
 
         GraphicSettings.initializeGraphicSettings();
-        menuManager = new MenuManager(this, controller);
-        chessBoardPanel = new ChessBoardPanel(controller, menuManager);
+        MenuManager menuManager = new MenuManager(this, controller);
+        ChessBoardPanel chessBoardPanel = new ChessBoardPanel(controller, menuManager);
         rightPanel = new RightPanel(controller);
 
         setLayout(new BorderLayout());
@@ -98,8 +95,7 @@ public final class MainWindow extends JFrame {
                 case ERROR:
                     InformationDialogs.errorDialog(this, state.getErrorMessage());
                     break;
-                case ABORTED:
-                case NONE:
+                case ABORTED, NONE:
                     break;
             }
         };

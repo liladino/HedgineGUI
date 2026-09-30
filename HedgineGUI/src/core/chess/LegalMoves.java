@@ -6,7 +6,7 @@ import utility.Sides;
 
 /**
  * An extension on ArrayList, to store the legal moves in a position.
- * It get's a Board in its constructor, and adds the moves automatically.
+ * It gets a Board in its constructor, and adds the moves automatically.
  * */
 public class LegalMoves extends ArrayList<Move> {
 	private static final long serialVersionUID = 9706338641357L;
@@ -29,12 +29,10 @@ public class LegalMoves extends ArrayList<Move> {
 	
 	private boolean friendlyPiece(char c) {
 		if (c >= 'a' && c <= 'z') {
-			if (currentCol == Sides.BLACK) return true;
-			else return false;
+			return (currentCol == Sides.BLACK);
 		}
 		else if (c >= 'A' && c <= 'Z'){
-			if (currentCol == Sides.WHITE) return true;
-			else return false;
+			return (currentCol == Sides.WHITE);
 		}
 		return false;
 	}
@@ -61,6 +59,7 @@ public class LegalMoves extends ArrayList<Move> {
 					case 'q': addQueenMoves(k, l); break;
 					case 'k': addKingMoves(k, l); break;
 					case 'p': addPawnMoves(k, l); break;
+					default: break;
 				}
 			}
 		}

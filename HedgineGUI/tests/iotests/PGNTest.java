@@ -159,7 +159,7 @@ public class PGNTest {
 				"N",
 				new HeadlessTicker())));
 		
-		try {
+		assertDoesNotThrow(() -> {
 			Thread.sleep(100);
 			b.submitMove(new Move(new Square('e', 7), new Square('e', 6), ' '));
 			Thread.sleep(100);
@@ -167,18 +167,17 @@ public class PGNTest {
 			Thread.sleep(100);
 			b.submitMove(new Move(new Square('d', 8), new Square('h', 4), ' '));
 			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			fail();
-		}
+		});
 		
 		String s = controller.getPGN();
 
-		assertEquals("[Site \"HedgineGUI\"]\n"
-				+ "[White \"White\"]\n"
-				+ "[Black \"Black\"]\n"
-				+ "[Variation \"From Position\"]\n"
-				+ "[FEN \"rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1\"]\n"
-				+ "[Result \"0-1\"]\n"
-				+ "1... e6 2. g4 Qh4# 0-1", s);
+		assertEquals("""
+[Site "HedgineGUI"]
+[White "White"]
+[Black "Black"]
+[Variation "From Position"]
+[FEN "rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1"]
+[Result "0-1"]
+1... e6 2. g4 Qh4# 0-1""", s);
 	}
 }

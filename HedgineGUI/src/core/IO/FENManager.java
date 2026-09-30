@@ -62,7 +62,7 @@ public class FENManager {
 	}
 	
 	private char[][] startpos() {
-		char[][] board = {
+		return new char[][] {
 				{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
 				{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
 				{ 0, 0,'R','N','B','Q','K','B','N','R', 0, 0 },
@@ -76,7 +76,6 @@ public class FENManager {
 				{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 },
 				{ 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0, 0 }
 			};
-		return board;
 	}
 
 	private static String missing = "Missing element(s)";
@@ -95,7 +94,8 @@ public class FENManager {
 
 		if (pos.length != 8) throw new FENException(missing, readSuccesses);
 		
-		int wking = 0, bking = 0;
+		int wking = 0;
+		int bking = 0;
 		int k = 0;
 		for (int i = 2; i < 10; i++) {			
 			for (int j = 0; j < pos[i-2].length(); j++){
@@ -214,15 +214,12 @@ public class FENManager {
 	}
 	
 	public Square parseEnPassant(String fen) throws FENException {
-		String[] s = fen.split(" ");
+		String[] s = fen.split("\\s+");
 		
 		if (s.length < 4) {
 			throw new FENException(missing, readSuccesses);
 		}
-		
-		if (s[3].length() < 1) {
-			throw new FENException("Can't parse en passant", readSuccesses);
-		}
+
 		if (s[3].length() == 1) {
 			if (s[3].charAt(0) == '-') {
 				readSuccesses[3] = true;

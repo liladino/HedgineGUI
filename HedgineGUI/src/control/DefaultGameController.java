@@ -15,18 +15,18 @@ public final class DefaultGameController implements GameController {
     private final CopyOnWriteArrayList<GameStateListener> listeners =
             new CopyOnWriteArrayList<>();
     private volatile GameState state;
-    private GameConfiguration startconfConfiguration;
+    private GameConfiguration startConfiguration;
 
     public DefaultGameController(GameManager gameManager) {
         this.gameManager = gameManager;
         this.state = gameManager.getSnapshot();
         gameManager.addStateListener(this::receiveSnapshot);
-        startconfConfiguration = null;
+        startConfiguration = null;
     }
 
     @Override
     public void startGame(GameConfiguration configuration) throws GameException {
-        startconfConfiguration = configuration;
+        startConfiguration = configuration;
         gameManager.startGame(configuration);
     }
 
@@ -83,7 +83,7 @@ public final class DefaultGameController implements GameController {
 
     @Override
     public String getFEN(){
-        return gameManager.getBoard().convertToFEN();
+        return gameManager.getBoardCopy().convertToFEN();
     }
 
     @Override
@@ -94,8 +94,8 @@ public final class DefaultGameController implements GameController {
     @Override
     public String getPGN(){
         return PGNConverter.convertToPGN(
-            startconfConfiguration.getWhite().getName(), 
-            startconfConfiguration.getBlack().getName(), 
+            startConfiguration.getWhite().getName(),
+            startConfiguration.getBlack().getName(),
             getFEN(), 
             gameManager.getMoves(), 
             gameManager.getResult());

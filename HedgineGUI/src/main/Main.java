@@ -17,7 +17,7 @@ import utility.Sides;
 public final class Main {
     private Main() {}
 
-    public static void main(String[] args) {
+    static void main() {
         SwingUtilities.invokeLater(Main::startApplication);
     }
 
