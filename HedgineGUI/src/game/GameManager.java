@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import control.GameState;
@@ -21,6 +22,20 @@ import utility.Sides;
 /**
  * Event-driven game loop. It coordinates Player objects without knowing how
  * either player obtains a move and has no dependency on Swing or the control UI.
+ * 
+ * Lifecycle:
+ * 
+ * startGame():
+ *     starts the game, starts the players
+ *     -> requestCurrentMove()
+ * <- onMoveReceived():
+ *     the player sends a move to make
+ * <- submitMove():
+ *     alternative route of the move to arrive: the ui doesn't know the 
+ *     human player, sends it to the manager, which routes it to the player
+ *     
+ * 
+ * 
  */
 public final class GameManager implements MoveReceiver, ClockListener {
     private static final Logger LOGGER = Logger.getLogger(GameManager.class.getName());
@@ -186,6 +201,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
         if (gameEnded) {
             stopResources();
             publishCurrentState();
+            LOGGER.log(Level.INFO, "Game ended, result {0}", result);
         } else {
             publishCurrentState();
             requestCurrentMove();
@@ -361,7 +377,6 @@ public final class GameManager implements MoveReceiver, ClockListener {
                 winner = null;
                 termination = GameTermination.DRAW;
                 break;
-
         }
     }
 

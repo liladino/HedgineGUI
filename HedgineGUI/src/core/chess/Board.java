@@ -241,7 +241,7 @@ public class Board implements Serializable {
 		
 		legalMoves = null;
 		
-		int tempFiftyMove = fiftyMoveRule;
+		boolean fiftyMoveNulled = false;
 		
 		//setting castling rights
 		//if anything moves to one of the corners, no castling that way
@@ -285,8 +285,8 @@ public class Board implements Serializable {
 		
 		//making the move
 		if (charBoard[m.getTo().getRowCoord()][m.getTo().getColCoord()] != ' ') {
-			fiftyMoveRule = 0;
-			//takes
+			//capture
+			fiftyMoveNulled = true;
 			if (m.getTo().getRank() == 8 && charBoard[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'P') {
 				//white takes and promotes
 				if (m.getPromotion() == ' ') charBoard[m.getTo().getRowCoord()][m.getTo().getColCoord()] = 'Q'; //promotion unspecified
@@ -309,8 +309,8 @@ public class Board implements Serializable {
 					(charBoard[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'p' && m.getTo().getRank() == 3
 					&& charBoard[m.getFrom().getRowCoord()][m.getTo().getColCoord()] == 'P'
 					&& charBoard[m.getTo().getRowCoord()][m.getTo().getColCoord()] == ' ')) {
-			fiftyMoveRule = 0;
 			//en passant
+			fiftyMoveNulled = true;
 			charBoard[m.getFrom().getRowCoord()][m.getTo().getColCoord()] = ' ';
 			charBoard[m.getTo().getRowCoord()][m.getTo().getColCoord()] = charBoard[m.getFrom().getRowCoord()][m.getFrom().getColCoord()];
 		}
@@ -337,20 +337,20 @@ public class Board implements Serializable {
 			
 		}
 		else if (m.getTo().getRank() == 8 && charBoard[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'P') {
-			fiftyMoveRule = 0;
 			//white promotes
+			fiftyMoveNulled = true;
 			if (m.getPromotion() == ' ') charBoard[m.getTo().getRowCoord()][m.getTo().getColCoord()] = 'Q'; //promotion unspecified
 			charBoard[m.getTo().getRowCoord()][m.getTo().getColCoord()] = (char)(m.getPromotion() - 'a' + 'A');
 		}
 		else if (m.getTo().getRank() == 1 && charBoard[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'p') {
-			fiftyMoveRule = 0;
 			//black promotes
+			fiftyMoveNulled = true;
 			if (m.getPromotion() == ' ') charBoard[m.getTo().getRowCoord()][m.getTo().getColCoord()] = 'q';
 			charBoard[m.getTo().getRowCoord()][m.getTo().getColCoord()] = m.getPromotion();
 		}
 		else {
 			if (charBoard[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'p' || charBoard[m.getFrom().getRowCoord()][m.getFrom().getColCoord()] == 'P') {
-				fiftyMoveRule = 0;
+				fiftyMoveNulled = true;
 			}
 			charBoard[m.getTo().getRowCoord()][m.getTo().getColCoord()] = charBoard[m.getFrom().getRowCoord()][m.getFrom().getColCoord()];
 		}
@@ -360,8 +360,11 @@ public class Board implements Serializable {
 		//set meta values
 		if (toMove == Sides.BLACK) {
 			fullMoveCount++;
-			if (tempFiftyMove == fiftyMoveRule) {
+			if (!fiftyMoveNulled) {
 				fiftyMoveRule++;
+			}
+			else {
+				fiftyMoveRule = 0;
 			}
 		}
 		
