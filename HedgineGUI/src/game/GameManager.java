@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 import control.GameState;
 import core.IO.FENException;
@@ -141,7 +140,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
             player = currentPlayer;
             awaitingMove = true;
             position = new Position(
-                    positionFENStrings.get(0),
+                    positionFENStrings.getFirst(),
                     board.convertToFEN(),
                     board.tomove(),
                     moves,
@@ -220,15 +219,15 @@ public final class GameManager implements MoveReceiver, ClockListener {
     private boolean checkThreeFoldRepetition() {
         LOGGER.log(Level.INFO, "fen {0}", positionFENStrings.getLast());
 
-        String currentPosition = repetitionFen(positionFENStrings.getLast());
+        String currentPosition = trimMoveAndHalfMoveCounter(positionFENStrings.getLast());
 
         return positionFENStrings.stream()
-                .map(this::repetitionFen)
+                .map(this::trimMoveAndHalfMoveCounter)
                 .filter(currentPosition::equals)
                 .count() >= 3;
     }
 
-    private String repetitionFen(String fen) {
+    private String trimMoveAndHalfMoveCounter(String fen) {
         return fen.trim()
                 .replaceFirst("\\s+\\S+\\s+\\S+$", "")
                 .trim();
@@ -280,7 +279,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
             moves.remove(moves.size() - 1);
             positionFENStrings.remove(positionFENStrings.size() - 1);
             try {
-                board = new Board(positionFENStrings.get(0));
+                board = new Board(positionFENStrings.getFirst());
             } catch (FENException impossible) {
                 throw new IllegalStateException("Stored initial FEN became invalid", impossible);
             }
@@ -480,7 +479,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
                 board,
                 legalMoves,
                 moves,
-                positionFENStrings.get(0),
+                positionFENStrings.getFirst(),
                 white.getName(),
                 black.getName(),
                 result,
@@ -515,7 +514,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
 
     public String getStartFEN() {
         synchronized (stateLock) {
-            return positionFENStrings.get(0);
+            return positionFENStrings.getFirst();
         }
     }
 

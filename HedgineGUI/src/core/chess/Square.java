@@ -22,7 +22,7 @@ public class Square implements Serializable{
 	}
 	
 	/**
-	 * Constructor from user friendly coordinates
+	 * Constructor from user-friendly coordinates
 	 * @param file
 	 * @param rank
 	 */
@@ -34,6 +34,20 @@ public class Square implements Serializable{
 		}
 		this.rank = rank;
 		this.file = file;
+	}
+
+	/**
+	 * Constructor from user-friendly coordinates
+	 * @param square > string, like e4
+	 */
+	public Square(String square) {
+		char f = ' ';
+		int r = ' ';
+		if (square.length() == 2) {
+			f = square.charAt(0);
+			r = square.charAt(1)-'0';
+		}
+		this(f, r);
 	}
 	
 	/**

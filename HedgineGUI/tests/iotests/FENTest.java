@@ -3,7 +3,10 @@ package iotests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import core.chess.Move;
+import core.chess.Square;
 import org.junit.jupiter.api.Test;
 
 import core.IO.FENException;
@@ -16,6 +19,7 @@ class FENTest {
 	Board c;
 	Board d;
 	Board badFEN;
+	Board enPassant;
 
 	@Test
 	void testRandomPositionConversions()
@@ -63,11 +67,97 @@ class FENTest {
 	}
 
 	@Test
-	void testConvertToFEN() {
+	void testConvertToFENStart() {
 		start = new Board();
 		assertEquals(0, start.getFiftyMoveRule());
 		assertEquals(1, start.getFullMoveCount());
 		assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", start.convertToFEN());
 	}
 
+	@Test
+	void testEnPassant1() {
+		// in pin, not legal
+		assertDoesNotThrow(() -> enPassant = new Board("5k2/8/8/3p4/5p2/8/4P3/K4R2 w - - 0 1"));
+		enPassant.makeMove(new Move("e2e4"));
+
+		assertEquals(
+				"5k2/8/8/3p4/4Pp2/8/8/K4R2 b - -",
+				trimMoveAndHalfMoveCounter(enPassant.convertToFEN())
+		);
+		assertTrue(enPassant.getEnPassantTarget().isNull());
+	}
+
+	@Test
+	void testEnPassant1b() {
+		// test1 with black
+		assertDoesNotThrow(() -> enPassant = new Board("k3r3/3p1p2/8/4P3/8/8/8/4K3 b - - 0 1"));
+		enPassant.makeMove(new Move("d7d5"));
+
+		assertEquals(
+				"k3r3/5p2/8/3pP3/8/8/8/4K3 w - -",
+				trimMoveAndHalfMoveCounter(enPassant.convertToFEN())
+		);
+		assertTrue(enPassant.getEnPassantTarget().isNull());
+	}
+
+	@Test
+	void testEnPassant2() {
+		// only one in pin, legal
+		assertDoesNotThrow(() -> enPassant = new Board("5k2/8/8/8/3p1p2/8/4P3/K4R2 w - - 0 1"));
+		enPassant.makeMove(new Move("e2e4"));
+
+		assertEquals(
+				"5k2/8/8/8/3pPp2/8/8/K4R2 b - e3",
+				trimMoveAndHalfMoveCounter(enPassant.convertToFEN())
+		);
+		assertEquals(new Square("e3"), enPassant.getEnPassantTarget());
+	}
+
+	@Test
+	void testEnPassant2b() {
+		// only one in pin, legal, with black
+		assertDoesNotThrow(() -> enPassant = new Board("k3r3/3p1p2/8/2P1P3/8/8/8/4K3 b - - 0 1"));
+		enPassant.makeMove(new Move("d7d5"));
+
+		assertEquals(
+				"k3r3/5p2/8/2PpP3/8/8/8/4K3 w - d6",
+				trimMoveAndHalfMoveCounter(enPassant.convertToFEN())
+		);
+		assertEquals(new Square("d6"), enPassant.getEnPassantTarget());
+	}
+
+	@Test
+	void testEnPassant3() {
+		// No pawn near
+		assertDoesNotThrow(() -> enPassant = new Board("5k2/8/3p1p2/8/8/8/4P3/K4R2 w - - 0 1"));
+		enPassant.makeMove(new Move("e2e4"));
+
+		assertEquals(
+				"5k2/8/3p1p2/8/4P3/8/8/K4R2 b - -",
+				trimMoveAndHalfMoveCounter(enPassant.convertToFEN())
+		);
+		assertTrue(enPassant.getEnPassantTarget().isNull());
+	}
+
+	@Test
+	void testEnPassant4() {
+		// no double pawn move
+		assertDoesNotThrow(() -> enPassant = new Board("k3r3/3p1p2/8/2P1P3/8/8/8/4K3 b - - 0 1"));
+		enPassant.makeMove(new Move("d7d6"));
+		enPassant.makeMove(new Move("e1d2"));
+		enPassant.makeMove(new Move("d6d5"));
+
+		assertEquals(
+				"k3r3/5p2/8/2PpP3/8/8/3K4/8 w - -",
+				trimMoveAndHalfMoveCounter(enPassant.convertToFEN())
+		);
+		assertTrue(enPassant.getEnPassantTarget().isNull());
+	}
+
+	private String trimMoveAndHalfMoveCounter(String fen) {
+		int lastSpace = fen.lastIndexOf(' ');
+		int secondLastSpace = fen.lastIndexOf(' ', lastSpace - 1);
+
+		return fen.substring(0, secondLastSpace);
+	}
 }

@@ -369,6 +369,19 @@ public class Board implements Serializable {
 		}
 		
 		switchColor();
+
+		/* possible en passant, check if it's legal */
+		if (!enPassantTarget.isNull()){
+			generateLegalMoves();
+			if (legalMoves
+					.stream()
+					.noneMatch(
+						move -> move.getTo()
+							.equals(enPassantTarget)
+							&& Character.toLowerCase(boardAt(move.getFrom())) == 'p')){
+				enPassantTarget = new Square();
+			}
+		}
 	}
 	
 	
