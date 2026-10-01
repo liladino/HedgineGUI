@@ -217,17 +217,15 @@ public final class GameManager implements MoveReceiver, ClockListener {
     }
 
     private boolean checkThreeFoldRepetition() {
-        LOGGER.log(Level.INFO, "fen {0}", positionFENStrings.getLast());
-
-        String currentPosition = trimMoveAndHalfMoveCounter(positionFENStrings.getLast());
+        String currentPosition = trimMoveCounters(positionFENStrings.getLast());
 
         return positionFENStrings.stream()
-                .map(this::trimMoveAndHalfMoveCounter)
+                .map(this::trimMoveCounters)
                 .filter(currentPosition::equals)
                 .count() >= 3;
     }
 
-    private String trimMoveAndHalfMoveCounter(String fen) {
+    private String trimMoveCounters(String fen) {
         return fen.trim()
                 .replaceFirst("\\s+\\S+\\s+\\S+$", "")
                 .trim();
