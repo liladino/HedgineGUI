@@ -180,4 +180,89 @@ public class PGNTest {
 [Result "0-1"]
 1... e6 2. g4 Qh4# 0-1""", s);
 	}
+	
+	@Test
+	void fullGameTest3() { //repetition
+		Player w = new HumanPlayer(Sides.WHITE, "Alef");
+		Player b = new HumanPlayer(Sides.BLACK, "Beta");
+		
+		GameController controller = new DefaultGameController(new GameManager());
+
+		assertDoesNotThrow(
+			() -> controller.startGame(new GameConfiguration(
+				"startpos",
+				w, b,
+				"N",
+				new HeadlessTicker())));
+		
+		assertDoesNotThrow(() -> {
+			Thread.sleep(50);
+			w.submitMove(new Move(new Square("g1"), new Square("f3"), ' '));
+			Thread.sleep(50);
+			b.submitMove(new Move(new Square("g8"), new Square("f6"), ' '));
+			Thread.sleep(50);
+			w.submitMove(new Move(new Square("f3"), new Square("g1"), ' '));
+			Thread.sleep(50);
+			b.submitMove(new Move(new Square("f6"), new Square("g8"), ' '));
+			Thread.sleep(50);
+			w.submitMove(new Move(new Square("g1"), new Square("f3"), ' '));
+			Thread.sleep(50);
+			b.submitMove(new Move(new Square("g8"), new Square("f6"), ' '));
+			Thread.sleep(50);
+			w.submitMove(new Move(new Square("f3"), new Square("g1"), ' '));
+			Thread.sleep(50);
+			b.submitMove(new Move(new Square("f6"), new Square("g8"), ' '));
+		});
+		
+		String s = controller.getPGN();
+
+		assertEquals("""
+[Site "HedgineGUI"]
+[White "Alef"]
+[Black "Beta"]
+[Variation "Standard"]
+[Result "1/2-1/2"]
+1. Nf3 Nf6 2. Ng1 Ng8 3. Nf3 Nf6 4. Ng1 Ng8 1/2-1/2""", s);
+	}
+
+	@Test
+	void fullGameTest4() { //50 move rule
+		Player w = new HumanPlayer(Sides.WHITE, "Alef");
+		Player b = new HumanPlayer(Sides.BLACK, "Beta");
+		
+		GameController controller = new DefaultGameController(new GameManager());
+
+		assertDoesNotThrow(
+			() -> controller.startGame(new GameConfiguration(
+				"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 48 60",
+				w, b,
+				"N",
+				new HeadlessTicker())));
+		
+		assertDoesNotThrow(() -> {
+			Thread.sleep(50);
+			w.submitMove(new Move(new Square("g1"), new Square("f3"), ' '));
+			Thread.sleep(50);
+			b.submitMove(new Move(new Square("g8"), new Square("f6"), ' '));
+			Thread.sleep(50);
+			w.submitMove(new Move(new Square("f3"), new Square("g1"), ' '));
+			Thread.sleep(50);
+			b.submitMove(new Move(new Square("f6"), new Square("g8"), ' '));
+			Thread.sleep(50);
+			w.submitMove(new Move(new Square("g1"), new Square("f3"), ' '));
+			Thread.sleep(50);
+			b.submitMove(new Move(new Square("g8"), new Square("f6"), ' '));
+		});
+		
+		String s = controller.getPGN();
+
+		assertEquals("""
+[Site "HedgineGUI"]
+[White "Alef"]
+[Black "Beta"]
+[Variation "From Position"]
+[FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 48 60"]
+[Result "1/2-1/2"]
+60. Nf3 Nf6 61. Ng1 Ng8 1/2-1/2""", s);
+	}
 }

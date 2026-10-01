@@ -96,7 +96,7 @@ public final class DefaultGameController implements GameController {
         return PGNConverter.convertToPGN(
             startConfiguration.getWhite().getName(),
             startConfiguration.getBlack().getName(),
-            getFEN(), 
+            getStartFEN(), 
             gameManager.getMoves(), 
             gameManager.getResult());
     }

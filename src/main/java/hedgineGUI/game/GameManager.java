@@ -203,6 +203,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
         if (checkThreeFoldRepetition()) {
             gameEnded = true;
             running = false;
+            result = Result.DRAW;
             setBoardTermination();
         }
 

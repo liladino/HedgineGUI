@@ -14,7 +14,7 @@ import hedgineGUI.graphics.chessBoard.SvgPieceImageSource;
 class SvgPieceImageSourceTest {
     @Test
     void rendersAvailableSvgAtRequestedPixelSize() {
-        SvgPieceImageSource source = new SvgPieceImageSource("/test-pieces");
+        SvgPieceImageSource source = new SvgPieceImageSource();
 
         assertTrue(source.hasImage('K'));
         assertTrue(source.hasImage('Q'));

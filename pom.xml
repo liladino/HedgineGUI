@@ -5,6 +5,7 @@
 	<groupId>hedgineGUI</groupId>
 	<artifactId>HedgineGUI</artifactId>
 	<version>3.0.0</version>
+	<name>HedgineGUI</name>
 
 	<properties>
 		<maven.compiler.release>25</maven.compiler.release>
@@ -28,6 +29,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
@@ -42,8 +44,7 @@
 							<Built-By>${user.name}</Built-By>
 							<Implementation-Title>${project.name}</Implementation-Title>
 							<Implementation-Version>${project.version}</Implementation-Version>
-							<Implementation-Build>${buildNumber}</Implementation-Build>
-							<Build-Time>${timestamp}</Build-Time>
+							<Build-Time>${maven.build.timestamp}</Build-Time>
 						</manifestEntries>
 					</archive>
 				</configuration>

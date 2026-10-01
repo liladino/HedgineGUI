@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
@@ -22,9 +21,16 @@ import hedgineGUI.utility.Sides;
  */
 public class PromotionDialog extends JDialog{
 	private static final long serialVersionUID = 1687874164L;
+	/** Logical size (in pixels) of the piece icons; images are shown at this size unscaled. */
+	public static final int ICON_SIZE = 80;
 	private char selectedPiece;
-	private transient Map<Character, BufferedImage> images;
-	public PromotionDialog(JFrame parent, Map<Character, BufferedImage> images, Sides tomove) {
+	private transient Map<Character, Image> images;
+
+	/**
+	 * @param images piece icons, already rendered at {@link #ICON_SIZE}; pieces without
+	 *               an entry are shown as their letter
+	 */
+	public PromotionDialog(JFrame parent, Map<Character, Image> images, Sides tomove) {
 		super(parent, "Pawn promotion", true);
 		this.images = images;
 		selectedPiece = ' '; //this space works as a cancel operation too (on exit)
@@ -54,15 +60,14 @@ public class PromotionDialog extends JDialog{
 	
 	private void addPieceButton(char piece) {
 		JButton button = new JButton();
-		ImageIcon icon = null;
-		if (images.containsKey(piece)) {
-			icon = new ImageIcon(images.get(piece).getScaledInstance(80, 80, Image.SCALE_SMOOTH));
-			button.setIcon(icon);
+		Image image = images.get(piece);
+		if (image != null) {
+			button.setIcon(new ImageIcon(image));
 		}
 		else {
 			button.setText(Character.toString(piece));
 		}
-		button.setPreferredSize(new Dimension(80, 80));
+		button.setPreferredSize(new Dimension(ICON_SIZE, ICON_SIZE));
 		button.setHorizontalTextPosition(SwingConstants.CENTER);
 		button.addActionListener(
 			(ActionEvent e) -> {

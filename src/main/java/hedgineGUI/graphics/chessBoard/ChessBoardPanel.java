@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.dnd.DragSource;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BaseMultiResolutionImage;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +32,6 @@ public final class ChessBoardPanel extends JPanel {
     private static final Logger LOGGER = Logger.getLogger(ChessBoardPanel.class.getName());
 
     private final transient GameController controller;
-    private final transient Map<Character, BufferedImage> images = new HashMap<>();
     private final transient PieceImageCache imageCache;
 
     private transient GameState state;
@@ -52,8 +52,7 @@ public final class ChessBoardPanel extends JPanel {
     public ChessBoardPanel(GameController controller, MenuManager menuManager) {
         this.controller = controller;
         this.state = controller.getState();
-        loadImages();
-        this.imageCache = new PieceImageCache(images, new SvgPieceImageSource());
+        this.imageCache = new PieceImageCache(this::loadRasterImage, new SvgPieceImageSource());
 
         setPreferredSize(new Dimension(720, 720));
 
@@ -265,10 +264,39 @@ public final class ChessBoardPanel extends JPanel {
 
         PromotionDialog dialog = new PromotionDialog(
                 (JFrame) SwingUtilities.getWindowAncestor(this),
-                new HashMap<>(images),
+                promotionIcons(state.getSideToMove()),
                 state.getSideToMove());
         dialog.setVisible(true);
         return new Move(from, to, dialog.getSelectedPiece());
+    }
+
+    /**
+     * Renders the promotion choices at the dialog's icon size. Each icon also carries
+     * a variant at the screen's scale factor so it stays sharp on HiDPI displays.
+     */
+    private Map<Character, Image> promotionIcons(Sides side) {
+        int size = PromotionDialog.ICON_SIZE;
+        GraphicsConfiguration configuration = getGraphicsConfiguration();
+        double scale = configuration == null
+                ? 1.0
+                : Math.max(1.0, configuration.getDefaultTransform().getScaleX());
+        int scaledSize = (int) Math.ceil(size * scale);
+
+        Map<Character, Image> icons = new HashMap<>();
+        for (char piece : new char[] {'q', 'r', 'b', 'n'}) {
+            char key = side == Sides.WHITE ? Character.toUpperCase(piece) : piece;
+            BufferedImage base = imageCache.render(key, size, size);
+            if (base == null) {
+                continue;
+            }
+            if (scaledSize == size) {
+                icons.put(key, base);
+                continue;
+            }
+            BufferedImage scaled = imageCache.render(key, scaledSize, scaledSize);
+            icons.put(key, scaled == null ? base : new BaseMultiResolutionImage(base, scaled));
+        }
+        return icons;
     }
 
     @Override
@@ -371,18 +399,25 @@ public final class ChessBoardPanel extends JPanel {
         return Character.isUpperCase(piece) ? Sides.WHITE : Sides.BLACK;
     }
 
-    private void loadImages() {
-        for (char piece : "PRBNQKprbnqk".toCharArray()) {
-            String color = Character.isUpperCase(piece) ? "w" : "b";
-            loadImage(piece, "/pieces/" + color
-                    + Character.toLowerCase(piece) + ".png");
-        }
-        loadImage('S', "/select/blue.png");
-        loadImage('L', "/select/lastmove.png");
-        loadImage('C', "/select/magenta.png");
+    /**
+     * Raster resource for an image key: highlight overlays exist only as PNGs, piece
+     * PNGs are optional fallbacks for when the SVG is missing or fails to render.
+     */
+    private static String rasterPath(char key) {
+        return switch (key) {
+            case 'S' -> "/select/blue.png";
+            case 'L' -> "/select/lastmove.png";
+            case 'C' -> "/select/magenta.png";
+            default -> {
+                String color = Character.isUpperCase(key) ? "w" : "b";
+                yield "/pieces/" + color + Character.toLowerCase(key) + ".png";
+            }
+        };
     }
 
-    private void loadImage(char key, String path) {
+    /** Called by the image cache at most once per key, only when a raster is needed. */
+    private BufferedImage loadRasterImage(char key) {
+        String path = rasterPath(key);
         try (InputStream stream = getClass().getResourceAsStream(path)) {
             if (stream == null) {
                 throw new IOException("Resource not found: " + path);
@@ -391,9 +426,10 @@ public final class ChessBoardPanel extends JPanel {
             if (image == null) {
                 throw new IOException("Unsupported image format: " + path);
             }
-            images.put(key, image);
+            return image;
         } catch (IOException error) {
             LOGGER.warning("Could not load " + path + ": " + error.getMessage());
+            return null;
         }
     }
 }
