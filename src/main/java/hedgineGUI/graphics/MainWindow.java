@@ -1,4 +1,4 @@
-package hedgineGUI.graphics;
+package graphics;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

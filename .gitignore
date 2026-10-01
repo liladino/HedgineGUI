@@ -70,7 +70,6 @@ lib/
 
 ## Miscellaneous
 *.log
-*.svg
 *.odt
 *.pdf
 log.txt

@@ -5,13 +5,23 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
+
+
 public final class PieceImageCache {
     private final Map<Character, BufferedImage> originals;
     private final Map<Character, BufferedImage> scaled = new HashMap<>();
     private int cachedSize = -1;
+    private final PieceImageSource source = new SvgPieceImageSource();
 
     public PieceImageCache(Map<Character, BufferedImage> originals) {
         this.originals = Map.copyOf(originals);
+    }
+
+    public BufferedImage get(
+            char piece,
+            int pixelWidth,
+            int pixelHeight) {
+        // Cache or render.
     }
 
     public BufferedImage get(char key, int size) {

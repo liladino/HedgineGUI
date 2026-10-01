@@ -11,13 +11,13 @@ import game.GameException;
 import game.GameManager;
 import game.HumanPlayer;
 import graphics.SwingTicker;
-import main.hedgineGUI.graphics.MainWindow;
+import graphics.MainWindow;
 import utility.Sides;
 
 public final class Main {
     private Main() {}
 
-    static void main() {
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(Main::startApplication);
     }
 

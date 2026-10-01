@@ -20,8 +20,8 @@ import control.GameController;
 import control.GameState;
 import core.chess.Move;
 import core.chess.Square;
-import main.hedgineGUI.graphics.GraphicSettings;
-import main.hedgineGUI.graphics.MenuManager;
+import graphics.GraphicSettings;
+import graphics.MenuManager;
 import graphics.dialogs.PromotionDialog;
 import utility.Sides;
 
