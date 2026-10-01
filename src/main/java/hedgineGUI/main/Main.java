@@ -10,8 +10,8 @@ import game.GameConfiguration;
 import game.GameException;
 import game.GameManager;
 import game.HumanPlayer;
-import graphics.MainWindow;
 import graphics.SwingTicker;
+import main.hedgineGUI.graphics.MainWindow;
 import utility.Sides;
 
 public final class Main {

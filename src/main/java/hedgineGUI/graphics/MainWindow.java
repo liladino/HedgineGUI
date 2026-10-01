@@ -1,4 +1,4 @@
-package graphics;
+package hedgineGUI.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -14,6 +14,7 @@ import graphics.dialogs.GameEndDialogs;
 import graphics.dialogs.InformationDialogs;
 import graphics.chessBoard.ChessBoardPanel;
 import graphics.panels.RightPanel;
+
 
 /** Top-level Swing composition root for the UI layer. */
 public final class MainWindow extends JFrame {

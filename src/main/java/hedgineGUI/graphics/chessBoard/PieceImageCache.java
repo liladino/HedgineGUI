@@ -37,7 +37,7 @@ public final class PieceImageCache {
             try {
                 graphics.setRenderingHint(
                         RenderingHints.KEY_INTERPOLATION,
-                        RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                        RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
                 graphics.drawImage(entry.getValue(), 0, 0, size, size, null);
             } finally {
