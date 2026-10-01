@@ -1,4 +1,4 @@
-package game;
+package hedgineGUI.game;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,10 +15,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import core.chess.Move;
-import game.clock.ClockSnapshot;
-import utility.Sides;
-import utility.TimeControl;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.game.clock.ClockSnapshot;
+import hedgineGUI.utility.Sides;
+import hedgineGUI.utility.TimeControl;
 
 /** A Player backed by a UCI-compatible engine process. */
 public final class EnginePlayer extends Player {

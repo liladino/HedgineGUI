@@ -1,4 +1,4 @@
-package core.chess;
+package hedgineGUI.core.chess;
 
 import java.io.PrintStream;
 

@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import game.clock.Clock;
-import game.clock.ClockBuilder;
-import game.clock.ClockController;
-import game.clock.ClockListener;
-import game.clock.ClockSnapshot;
-import game.clock.HeadlessTicker;
-import utility.Sides;
+import hedgineGUI.game.clock.Clock;
+import hedgineGUI.game.clock.ClockBuilder;
+import hedgineGUI.game.clock.ClockController;
+import hedgineGUI.game.clock.ClockListener;
+import hedgineGUI.game.clock.ClockSnapshot;
+import hedgineGUI.game.clock.HeadlessTicker;
+import hedgineGUI.utility.Sides;
 
 class ClockControllerTest implements ClockListener {
 	ClockController controller;

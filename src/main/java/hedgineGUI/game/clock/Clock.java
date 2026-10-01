@@ -1,9 +1,9 @@
-package game.clock;
+package hedgineGUI.game.clock;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import utility.*;
+import hedgineGUI.utility.*;
 
 /**
  * Represents an abstract chess clock.

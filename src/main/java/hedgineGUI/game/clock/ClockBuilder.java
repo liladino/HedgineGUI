@@ -1,7 +1,7 @@
-package game.clock;
+package hedgineGUI.game.clock;
 
-import utility.Second;
-import utility.TimeControl;
+import hedgineGUI.utility.Second;
+import hedgineGUI.utility.TimeControl;
 
 import java.util.regex.Pattern;
 

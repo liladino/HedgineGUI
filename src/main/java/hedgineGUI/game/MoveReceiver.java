@@ -1,6 +1,6 @@
-package game;
+package hedgineGUI.game;
 
-import core.chess.Move;
+import hedgineGUI.core.chess.Move;
 
 /** Receives the one result of a Player.requestMove call. */
 public interface MoveReceiver {

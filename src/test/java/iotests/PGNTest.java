@@ -5,18 +5,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import control.DefaultGameController;
-import control.GameController;
-import core.IO.PGNConverter;
-import core.chess.Board;
-import core.chess.Move;
-import core.chess.Square;
-import game.GameConfiguration;
-import game.GameManager;
-import game.HumanPlayer;
-import game.Player;
-import game.clock.HeadlessTicker;
-import utility.Sides;
+import hedgineGUI.control.DefaultGameController;
+import hedgineGUI.control.GameController;
+import hedgineGUI.core.IO.PGNConverter;
+import hedgineGUI.core.chess.Board;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.core.chess.Square;
+import hedgineGUI.game.GameConfiguration;
+import hedgineGUI.game.GameManager;
+import hedgineGUI.game.HumanPlayer;
+import hedgineGUI.game.Player;
+import hedgineGUI.game.clock.HeadlessTicker;
+import hedgineGUI.utility.Sides;
 
 public class PGNTest {
 	Board startBoard;

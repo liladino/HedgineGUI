@@ -1,4 +1,4 @@
-package utility;
+package hedgineGUI.utility;
 
 public class Pair<K, V> {
 	public K first;

@@ -1,4 +1,4 @@
-package core.IO;
+package hedgineGUI.core.IO;
 
 import java.io.IOException;
 

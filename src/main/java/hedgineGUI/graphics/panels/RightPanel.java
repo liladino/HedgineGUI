@@ -1,4 +1,4 @@
-package graphics.panels;
+package hedgineGUI.graphics.panels;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -11,9 +11,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import control.GameController;
-import control.GameState;
-import utility.Sides;
+import hedgineGUI.control.GameController;
+import hedgineGUI.control.GameState;
+import hedgineGUI.utility.Sides;
 
 /** Player names, clocks and move text rendered solely from GameState. */
 public final class RightPanel extends JPanel {

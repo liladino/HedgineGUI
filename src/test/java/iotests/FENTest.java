@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import core.chess.Move;
-import core.chess.Square;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.core.chess.Square;
 import org.junit.jupiter.api.Test;
 
-import core.IO.FENException;
-import core.chess.Board;
+import hedgineGUI.core.IO.FENException;
+import hedgineGUI.core.chess.Board;
 
 class FENTest {
 	Board start;

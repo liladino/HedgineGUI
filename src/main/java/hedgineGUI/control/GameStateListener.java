@@ -1,4 +1,4 @@
-package control;
+package hedgineGUI.control;
 
 @FunctionalInterface
 public interface GameStateListener {

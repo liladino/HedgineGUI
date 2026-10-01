@@ -1,9 +1,9 @@
-package graphics.dialogs;
+package hedgineGUI.graphics.dialogs;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import utility.Sides;
+import hedgineGUI.utility.Sides;
 
 /**
  * Shows a message upon game end.

@@ -1,6 +1,6 @@
-package game;
+package hedgineGUI.game;
 
-import utility.Sides;
+import hedgineGUI.utility.Sides;
 
 public interface GameEventListener {
 	void onCheckmate(Sides won);

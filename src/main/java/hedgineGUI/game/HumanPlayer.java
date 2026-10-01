@@ -1,7 +1,7 @@
-package game;
+package hedgineGUI.game;
 
-import core.chess.Move;
-import utility.Sides;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.utility.Sides;
 
 /** A player whose move is supplied by an external adapter such as a GUI or CLI. */
 public final class HumanPlayer extends Player {

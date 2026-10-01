@@ -1,8 +1,8 @@
-package core.chess;
+package hedgineGUI.core.chess;
 
 import java.util.ArrayList;
 
-import utility.Sides;
+import hedgineGUI.utility.Sides;
 
 /**
  * An extension on ArrayList, to store the legal moves in a position.

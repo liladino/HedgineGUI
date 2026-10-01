@@ -1,7 +1,7 @@
-package game.clock;
+package hedgineGUI.game.clock;
 
-import utility.Sides;
-import utility.TimeControl;
+import hedgineGUI.utility.Sides;
+import hedgineGUI.utility.TimeControl;
 	
 public final class ClockSnapshot {
 	private final TimeControl timeControl;

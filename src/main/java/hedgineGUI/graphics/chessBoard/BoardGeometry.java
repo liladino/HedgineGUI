@@ -1,9 +1,9 @@
-package graphics.chessBoard;
+package hedgineGUI.graphics.chessBoard;
 
 import java.awt.Rectangle;
 import java.awt.Dimension;
 import java.awt.Point;
-import core.chess.Square;
+import hedgineGUI.core.chess.Square;
 
 public final class BoardGeometry {
     private final Rectangle bounds;

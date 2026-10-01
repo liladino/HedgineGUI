@@ -1,6 +1,6 @@
-package game;
+package hedgineGUI.game;
 
-import utility.Sides;
+import hedgineGUI.utility.Sides;
 
 /**
  * The Clock signals to the GameManager if the time is up

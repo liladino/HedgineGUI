@@ -1,13 +1,13 @@
-package game;
+package hedgineGUI.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import core.chess.Move;
-import game.clock.ClockSnapshot;
-import utility.Sides;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.game.clock.ClockSnapshot;
+import hedgineGUI.utility.Sides;
 
 /** Immutable information a player may use to choose its next move. */
 public final class Position {

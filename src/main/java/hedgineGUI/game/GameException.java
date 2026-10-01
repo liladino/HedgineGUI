@@ -1,4 +1,4 @@
-package game;
+package hedgineGUI.game;
 
 /** Checked failure while configuring or starting a game. */
 public final class GameException extends Exception {

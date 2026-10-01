@@ -1,4 +1,4 @@
-package game;
+package hedgineGUI.game;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,16 +8,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import control.GameState;
-import core.IO.FENException;
-import core.chess.Board;
-import core.chess.Move;
-import game.clock.ClockController;
-import game.clock.ClockListener;
-import game.clock.ClockSnapshot;
-import game.clock.TimeInputException;
-import utility.Result;
-import utility.Sides;
+import hedgineGUI.control.GameState;
+import hedgineGUI.core.IO.FENException;
+import hedgineGUI.core.chess.Board;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.game.clock.ClockController;
+import hedgineGUI.game.clock.ClockListener;
+import hedgineGUI.game.clock.ClockSnapshot;
+import hedgineGUI.game.clock.TimeInputException;
+import hedgineGUI.utility.Result;
+import hedgineGUI.utility.Sides;
 
 /**
  * Event-driven game loop. It coordinates Player objects without knowing how

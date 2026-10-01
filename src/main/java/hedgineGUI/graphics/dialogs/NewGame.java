@@ -1,4 +1,4 @@
-package graphics.dialogs;
+package hedgineGUI.graphics.dialogs;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -31,14 +31,14 @@ import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import control.GameController;
-import game.EnginePlayer;
-import game.GameConfiguration;
-import game.GameException;
-import game.HumanPlayer;
-import game.Player;
-import graphics.SwingTicker;
-import utility.Sides;
+import hedgineGUI.control.GameController;
+import hedgineGUI.game.EnginePlayer;
+import hedgineGUI.game.GameConfiguration;
+import hedgineGUI.game.GameException;
+import hedgineGUI.game.HumanPlayer;
+import hedgineGUI.game.Player;
+import hedgineGUI.graphics.SwingTicker;
+import hedgineGUI.utility.Sides;
 
 /**
  * Settings for a new game. 
@@ -68,7 +68,7 @@ public class NewGame extends JFrame {
 
 	private static final String PERS_WHITE_ENGINE_PATH = System.getProperty("user.dir") + "/saves/.wep";
 	private static final String PERS_BLACK_ENGINE_PATH = System.getProperty("user.dir") + "/saves/.bep";
-	
+
 	private final transient GameController controller;
 
 	public NewGame(GameController controller){
@@ -104,15 +104,15 @@ public class NewGame extends JFrame {
 
 	void initializeWindow(){
 		setTitle("New game");
-		
+
 		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		
+
 		setLayout(new GridBagLayout());
 	}
 
 	void initialize(){
-  		GridBagConstraints gbc = new GridBagConstraints();
+		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(10, 10, 10, 10);
 
 		initRightPanel(gbc);
@@ -137,15 +137,15 @@ public class NewGame extends JFrame {
 			gbc.gridy = 0;
 			gbc.gridheight = 13;
 			gbc.fill = GridBagConstraints.BOTH;
-			
-			String imagePath = "/resources/menu/newgame1.png";
-		    InputStream imageStream = getClass().getResourceAsStream(imagePath);
-		    
-		    if (imageStream == null) {
-		        throw new IOException("Resource not found: " + imagePath);
-		    }
-		    
-		    ImageIcon menu = new ImageIcon(ImageIO.read(imageStream));
+
+			String imagePath = "/menu/newgame1.png";
+			InputStream imageStream = getClass().getResourceAsStream(imagePath);
+
+			if (imageStream == null) {
+				throw new IOException("Resource not found: " + imagePath);
+			}
+
+			ImageIcon menu = new ImageIcon(ImageIO.read(imageStream));
 			JLabel picLabel = new JLabel(menu);
 			add(picLabel, gbc);
 		}
@@ -166,8 +166,8 @@ public class NewGame extends JFrame {
 		/* * * * * * * * *
 		 * Player white  *
 		 * * * * * * * * */
-		gbc.gridheight = 1;	
- 		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.gridheight = 1;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		add(new JLabel("Players:"), gbc);
@@ -253,7 +253,7 @@ public class NewGame extends JFrame {
 				blackEngineFromFile.setVisible(false);
 			}
 		});
-		
+
 	}
 
 	void addSeparator(GridBagConstraints gbc){
@@ -278,7 +278,7 @@ public class NewGame extends JFrame {
 		add(new JLabel("FEN:"), gbc);
 		gbc.gridx = 1;
 		add(startPos, gbc);
-		
+
 	}
 
 	void initTimeSettings(GridBagConstraints gbc){
@@ -286,7 +286,7 @@ public class NewGame extends JFrame {
 		 * Time control  *
 		 * * * * * * * * */
 		ButtonGroup timeControlSelectionGroup = new ButtonGroup();
-		
+
 		JRadioButton radioNoControl = new JRadioButton("No time control");
 		radioNoControl.setSelected(true);
 		radioFischer = new JRadioButton("Fischer");
@@ -296,7 +296,7 @@ public class NewGame extends JFrame {
 		timeControlSelectionGroup.add(radioNoControl);
 		timeControlSelectionGroup.add(radioFischer);
 		timeControlSelectionGroup.add(radioFixTime);
-		
+
 		String[] presets = {"No preset", "Bullet 1+0", "Blitz 3+2", "Blitz 5+0", "Rapid 5+3", "Rapid 10+10", "Tournament", "WCC"};
 		fischerPresets = new JComboBox<>(presets);
 		fischerPresets.setSelectedIndex(2);
@@ -308,53 +308,53 @@ public class NewGame extends JFrame {
 			}
 			else if (fischerPresets.getSelectedItem().equals(presets[2])){
 				fischerControl.setText("S 180 0 2");
-			} 
+			}
 			else if (fischerPresets.getSelectedItem().equals(presets[3])){
 				fischerControl.setText("S 300");
-			} 
+			}
 			else if (fischerPresets.getSelectedItem().equals(presets[4])){
 				fischerControl.setText("S 300 0 3");
-			} 
+			}
 			else if (fischerPresets.getSelectedItem().equals(presets[5])){
 				fischerControl.setText("S 600 0 10");
-			} 
+			}
 			else if (fischerPresets.getSelectedItem().equals(presets[6])){
 				fischerControl.setText("S 5400 0 30 40 1800");
-			} 
+			}
 			else if (fischerPresets.getSelectedItem().equals(presets[7])){
 				fischerControl.setText("S 7200 40 30 40 1800 60 900");
 			}
-			updatingFromPreset = false; 
+			updatingFromPreset = false;
 		});
 
 		fischerControl = new JTextField("S 180 0 2");
 		fischerControl.setVisible(false);
 		fischerControl.getDocument().addDocumentListener(
-			new DocumentListener() {
-				@Override
-				public void insertUpdate(DocumentEvent e) {
-					if (!updatingFromPreset) fischerPresets.setSelectedIndex(0);
-				}
-				@Override
-				public void removeUpdate(DocumentEvent e) {
-					if (!updatingFromPreset) fischerPresets.setSelectedIndex(0);
-				}
-				@Override
-				public void changedUpdate(DocumentEvent e) {
-					if (!updatingFromPreset) fischerPresets.setSelectedIndex(0);
-				}
-			});
+				new DocumentListener() {
+					@Override
+					public void insertUpdate(DocumentEvent e) {
+						if (!updatingFromPreset) fischerPresets.setSelectedIndex(0);
+					}
+					@Override
+					public void removeUpdate(DocumentEvent e) {
+						if (!updatingFromPreset) fischerPresets.setSelectedIndex(0);
+					}
+					@Override
+					public void changedUpdate(DocumentEvent e) {
+						if (!updatingFromPreset) fischerPresets.setSelectedIndex(0);
+					}
+				});
 
 		fixTimeControl = new JTextField("X 60");
 		fixTimeControl.setVisible(false);
-		
+
 		radioFixTime.addActionListener(e -> {
 			fixTimeControl.setVisible(true);
 
 			fischerPresets.setVisible(false);
 			fischerControl.setVisible(false);
-			
-			
+
+
 			NewGame.this.revalidate();
 			NewGame.this.repaint();
 		});
@@ -364,7 +364,7 @@ public class NewGame extends JFrame {
 			fischerPresets.setVisible(false);
 			fischerControl.setVisible(false);
 
-			
+
 			NewGame.this.revalidate();
 			NewGame.this.repaint();
 		});
@@ -374,11 +374,11 @@ public class NewGame extends JFrame {
 			fischerPresets.setVisible(true);
 			fischerControl.setVisible(true);
 
-			
+
 			NewGame.this.revalidate();
 			NewGame.this.repaint();
 		});
-		
+
 		gbc.weighty = 0.05;
 		gbc.gridx = 0;
 		gbc.gridy++;
@@ -422,7 +422,7 @@ public class NewGame extends JFrame {
 		}
 
 		@Override
-		public void actionPerformed(ActionEvent e) {			
+		public void actionPerformed(ActionEvent e) {
 			Player w = null;
 			Player b = null;
 			if (comboWhitePlayer.getSelectedItem().equals(HUMAN)){
@@ -437,9 +437,9 @@ public class NewGame extends JFrame {
 			}
 			else {
 				if (blackEngine == null) return;
-				b = new EnginePlayer(Sides.BLACK, blackName.getText(), blackEngine);	
+				b = new EnginePlayer(Sides.BLACK, blackName.getText(), blackEngine);
 			}
-			
+
 			if (radioFischer.isSelected()){
 				timeControl = fischerControl.getText();
 			}
@@ -449,22 +449,22 @@ public class NewGame extends JFrame {
 			else {
 				timeControl = "N";
 			}
-			
+
 			try {
 				controller.startGame(new GameConfiguration(
-                    startPos.getText(),
-                    w, b,
-                    timeControl,
-                    new SwingTicker()));
-			
-					dispose();
-				}
+						startPos.getText(),
+						w, b,
+						timeControl,
+						new SwingTicker()));
+
+				dispose();
+			}
 			catch (GameException g)
 			{
 				InformationDialogs.errorDialog(window, "Error with starting the game:\n" + g.getMessage());
 			}
 		}
-	} 
+	}
 
 	private class EngineChooserButton implements ActionListener{
 		JLabel path;
@@ -476,7 +476,7 @@ public class NewGame extends JFrame {
 			chooser = new JFileChooser();
 			this.side = side;
 			this.name = name;
-			
+
 			if (whiteEngine != null && side == Sides.WHITE) {
 				setTextAndLabel(whiteEngine);
 			}
@@ -508,7 +508,7 @@ public class NewGame extends JFrame {
 				setTextAndLabel(chooser.getSelectedFile());
 			}
 		}
-		
+
 		private void setTextAndLabel(File f) {
 			String s = f.getPath();
 			int m = 33;
@@ -516,9 +516,9 @@ public class NewGame extends JFrame {
 				path.setText(s);
 			else
 				path.setText("... " + s.substring(s.length() - m + 4, s.length()));
-	
+
 			if ((side == Sides.WHITE && comboWhitePlayer.getSelectedIndex() == 1)
-				|| (side == Sides.BLACK && comboBlackPlayer.getSelectedIndex() == 1)) {
+					|| (side == Sides.BLACK && comboBlackPlayer.getSelectedIndex() == 1)) {
 				name.setText(f.getName());
 			}
 		}

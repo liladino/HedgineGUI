@@ -1,15 +1,15 @@
-package game;
+package hedgineGUI.game;
 
 import java.util.Objects;
 
-import core.IO.FENException;
-import core.chess.Board;
-import game.clock.Clock;
-import game.clock.ClockBuilder;
-import game.clock.ClockController;
-import game.clock.Ticker;
-import game.clock.TimeInputException;
-import utility.Sides;
+import hedgineGUI.core.IO.FENException;
+import hedgineGUI.core.chess.Board;
+import hedgineGUI.game.clock.Clock;
+import hedgineGUI.game.clock.ClockBuilder;
+import hedgineGUI.game.clock.ClockController;
+import hedgineGUI.game.clock.Ticker;
+import hedgineGUI.game.clock.TimeInputException;
+import hedgineGUI.utility.Sides;
 
 /** Immutable dependencies and starting values for one game. */
 public final class GameConfiguration {

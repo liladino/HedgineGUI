@@ -1,4 +1,4 @@
-package game.clock;
+package hedgineGUI.game.clock;
 
 public class HeadlessTicker implements Ticker {
 	private Runnable tick;

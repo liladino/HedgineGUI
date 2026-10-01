@@ -1,13 +1,13 @@
-package control;
+package hedgineGUI.control;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import core.IO.PGNConverter;
-import core.chess.Move;
-import game.GameConfiguration;
-import game.GameException;
-import game.GameManager;
-import game.Player;
+import hedgineGUI.core.IO.PGNConverter;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.game.GameConfiguration;
+import hedgineGUI.game.GameException;
+import hedgineGUI.game.GameManager;
+import hedgineGUI.game.Player;
 
 /** Translates GameManager snapshots and commands into the UI-facing API. */
 public final class DefaultGameController implements GameController {

@@ -1,4 +1,4 @@
-package graphics.dialogs;
+package hedgineGUI.graphics.dialogs;
 
 import java.awt.Dimension;
 import java.awt.Font;

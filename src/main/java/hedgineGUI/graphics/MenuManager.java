@@ -1,4 +1,4 @@
-package graphics;
+package hedgineGUI.graphics;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,14 +18,14 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import control.GameController;
-import core.chess.Board;
-import game.EnginePlayer;
-import game.GameEventListener;
-import game.Player;
-import graphics.dialogs.InformationDialogs;
-import graphics.dialogs.NewGame;
-import utility.Result;
+import hedgineGUI.control.GameController;
+import hedgineGUI.core.chess.Board;
+import hedgineGUI.game.EnginePlayer;
+import hedgineGUI.game.GameEventListener;
+import hedgineGUI.game.Player;
+import hedgineGUI.graphics.dialogs.InformationDialogs;
+import hedgineGUI.graphics.dialogs.NewGame;
+import hedgineGUI.utility.Result;
 
 /**
  * Initializes the menubar, and handles the interactions.

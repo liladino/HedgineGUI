@@ -1,4 +1,4 @@
-package game;
+package hedgineGUI.game;
 
 /** Why a game stopped; independent from who won. */
 public enum GameTermination {

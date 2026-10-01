@@ -1,11 +1,11 @@
-package graphics;
+package hedgineGUI.graphics;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Timer;
 
-import game.clock.Ticker;
+import hedgineGUI.game.clock.Ticker;
 
 /** Swing/EDT adapter for the game-layer Ticker port. */
 public final class SwingTicker implements Ticker, ActionListener {

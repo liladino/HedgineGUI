@@ -1,13 +1,13 @@
-package core.IO;
+package hedgineGUI.core.IO;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import core.chess.Board;
-import core.chess.Move;
-import core.chess.Square;
-import utility.Result;
-import utility.Sides;
+import hedgineGUI.core.chess.Board;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.core.chess.Square;
+import hedgineGUI.utility.Result;
+import hedgineGUI.utility.Sides;
 
 /**
  * A class that converts a game and list of moves into a PGN string,

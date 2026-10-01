@@ -1,19 +1,19 @@
-package control;
+package hedgineGUI.control;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import core.IO.PGNConverter;
-import core.chess.Board;
-import core.chess.Move;
-import core.chess.Square;
-import game.GameConfiguration;
-import game.GameTermination;
-import game.clock.ClockSnapshot;
-import utility.Result;
-import utility.Sides;
-import utility.TimeControl;
+import hedgineGUI.core.IO.PGNConverter;
+import hedgineGUI.core.chess.Board;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.core.chess.Square;
+import hedgineGUI.game.GameConfiguration;
+import hedgineGUI.game.GameTermination;
+import hedgineGUI.game.clock.ClockSnapshot;
+import hedgineGUI.utility.Result;
+import hedgineGUI.utility.Sides;
+import hedgineGUI.utility.TimeControl;
 
 /** Immutable, game-layer snapshot. It never exposes the mutable Board. */
 public final class GameState {

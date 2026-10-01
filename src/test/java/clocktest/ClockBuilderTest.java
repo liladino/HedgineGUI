@@ -7,12 +7,12 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import game.clock.Clock;
-import game.clock.ClockBuilder;
-import game.clock.TimeInputException;
-import utility.Pair;
-import utility.Second;
-import utility.TimeControl;
+import hedgineGUI.game.clock.Clock;
+import hedgineGUI.game.clock.ClockBuilder;
+import hedgineGUI.game.clock.TimeInputException;
+import hedgineGUI.utility.Pair;
+import hedgineGUI.utility.Second;
+import hedgineGUI.utility.TimeControl;
 
 class ClockBuilderTest {
 	Clock clock;

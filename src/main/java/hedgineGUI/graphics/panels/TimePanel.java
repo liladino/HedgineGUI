@@ -1,14 +1,14 @@
-package graphics.panels;
+package hedgineGUI.graphics.panels;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import game.clock.ClockSnapshot;
+import hedgineGUI.game.clock.ClockSnapshot;
 
 import java.awt.Color;
 import java.awt.Font;
 
-import utility.Sides;
+import hedgineGUI.utility.Sides;
 
 /**
  * Shows the remaining time for one side. 

@@ -1,8 +1,8 @@
-package core.IO;
+package hedgineGUI.core.IO;
 
-import core.chess.Board;
-import core.chess.Square;
-import utility.Sides;
+import hedgineGUI.core.chess.Board;
+import hedgineGUI.core.chess.Square;
+import hedgineGUI.utility.Sides;
 
 /**
  * Class that converts the Board into a FEN string, or a FEN string into a Board.

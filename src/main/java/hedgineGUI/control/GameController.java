@@ -1,9 +1,9 @@
-package control;
+package hedgineGUI.control;
 
-import core.chess.Move;
-import game.GameConfiguration;
-import game.GameException;
-import game.Player;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.game.GameConfiguration;
+import hedgineGUI.game.GameException;
+import hedgineGUI.game.Player;
 
 /** The only game-facing API the UI layer needs. */
 public interface GameController {

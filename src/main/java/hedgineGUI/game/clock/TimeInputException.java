@@ -1,4 +1,4 @@
-package game.clock;
+package hedgineGUI.game.clock;
 
 import java.io.IOException;
 

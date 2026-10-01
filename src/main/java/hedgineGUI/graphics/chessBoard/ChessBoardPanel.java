@@ -1,4 +1,4 @@
-package graphics.chessBoard;
+package hedgineGUI.graphics.chessBoard;
 
 import java.awt.*;
 import java.awt.dnd.DragSource;
@@ -16,14 +16,14 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import control.GameController;
-import control.GameState;
-import core.chess.Move;
-import core.chess.Square;
-import graphics.GraphicSettings;
-import graphics.MenuManager;
-import graphics.dialogs.PromotionDialog;
-import utility.Sides;
+import hedgineGUI.control.GameController;
+import hedgineGUI.control.GameState;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.core.chess.Square;
+import hedgineGUI.graphics.GraphicSettings;
+import hedgineGUI.graphics.MenuManager;
+import hedgineGUI.graphics.dialogs.PromotionDialog;
+import hedgineGUI.utility.Sides;
 
 /** Renders a GameState and translates pointer gestures into controller commands. */
 public final class ChessBoardPanel extends JPanel {
@@ -53,7 +53,7 @@ public final class ChessBoardPanel extends JPanel {
         this.controller = controller;
         this.state = controller.getState();
         loadImages();
-        this.imageCache = new PieceImageCache(images);
+        this.imageCache = new PieceImageCache(images, new SvgPieceImageSource());
 
         setPreferredSize(new Dimension(720, 720));
 
@@ -323,7 +323,7 @@ public final class ChessBoardPanel extends JPanel {
                 char piece = state.pieceAt(square);
                 boolean checkedKing = state.isInCheck()
                         && ((piece == 'K' && state.getSideToMove() == Sides.WHITE)
-                                || (piece == 'k' && state.getSideToMove() == Sides.BLACK));
+                        || (piece == 'k' && state.getSideToMove() == Sides.BLACK));
                 if (checkedKing) {
                     drawImage(graphics, 'C', bounds.x, bounds.y, size);
                 }
@@ -339,9 +339,15 @@ public final class ChessBoardPanel extends JPanel {
     }
 
     private void drawImage(Graphics graphics, char key, int x, int y, int size) {
-        BufferedImage image = imageCache.get(key, size);
+        Graphics2D graphics2D = (Graphics2D) graphics;
+        double scaleX = Math.abs(graphics2D.getTransform().getScaleX());
+        double scaleY = Math.abs(graphics2D.getTransform().getScaleY());
+        int pixelWidth = Math.max(1, (int) Math.ceil(size * scaleX));
+        int pixelHeight = Math.max(1, (int) Math.ceil(size * scaleY));
+
+        BufferedImage image = imageCache.get(key, pixelWidth, pixelHeight);
         if (image != null) {
-            graphics.drawImage(image, x, y, this);
+            graphics2D.drawImage(image, x, y, size, size, this);
             return;
         }
 
@@ -368,12 +374,12 @@ public final class ChessBoardPanel extends JPanel {
     private void loadImages() {
         for (char piece : "PRBNQKprbnqk".toCharArray()) {
             String color = Character.isUpperCase(piece) ? "w" : "b";
-            loadImage(piece, "/resources/pieces/" + color
+            loadImage(piece, "/pieces/" + color
                     + Character.toLowerCase(piece) + ".png");
         }
-        loadImage('S', "/resources/select/blue.png");
-        loadImage('L', "/resources/select/lastmove.png");
-        loadImage('C', "/resources/select/magenta.png");
+        loadImage('S', "/select/blue.png");
+        loadImage('L', "/select/lastmove.png");
+        loadImage('C', "/select/magenta.png");
     }
 
     private void loadImage(char key, String path) {
@@ -381,7 +387,11 @@ public final class ChessBoardPanel extends JPanel {
             if (stream == null) {
                 throw new IOException("Resource not found: " + path);
             }
-            images.put(key, ImageIO.read(stream));
+            BufferedImage image = ImageIO.read(stream);
+            if (image == null) {
+                throw new IOException("Unsupported image format: " + path);
+            }
+            images.put(key, image);
         } catch (IOException error) {
             LOGGER.warning("Could not load " + path + ": " + error.getMessage());
         }

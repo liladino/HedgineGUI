@@ -1,4 +1,4 @@
-package graphics;
+package hedgineGUI.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -7,13 +7,13 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.*;
 
-import control.GameController;
-import control.GameState;
-import game.GameTermination;
-import graphics.dialogs.GameEndDialogs;
-import graphics.dialogs.InformationDialogs;
-import graphics.chessBoard.ChessBoardPanel;
-import graphics.panels.RightPanel;
+import hedgineGUI.control.GameController;
+import hedgineGUI.control.GameState;
+import hedgineGUI.game.GameTermination;
+import hedgineGUI.graphics.dialogs.GameEndDialogs;
+import hedgineGUI.graphics.dialogs.InformationDialogs;
+import hedgineGUI.graphics.chessBoard.ChessBoardPanel;
+import hedgineGUI.graphics.panels.RightPanel;
 
 
 /** Top-level Swing composition root for the UI layer. */

@@ -1,4 +1,4 @@
-package utility;
+package hedgineGUI.utility;
 
 public class Second {
 	public int time;

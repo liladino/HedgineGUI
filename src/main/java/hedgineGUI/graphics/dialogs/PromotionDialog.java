@@ -1,4 +1,4 @@
-package graphics.dialogs;
+package hedgineGUI.graphics.dialogs;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -14,7 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-import utility.Sides;
+import hedgineGUI.utility.Sides;
 
 /**
  * Shows the promotion options if a pawn reaches the 1st or 8th rank.

@@ -1,10 +1,10 @@
-package game;
+package hedgineGUI.game;
 
 import java.io.IOException;
 import java.util.Objects;
 
-import core.chess.Move;
-import utility.Sides;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.utility.Sides;
 
 /**
  * A participant in a game.

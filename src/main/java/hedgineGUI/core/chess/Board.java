@@ -1,14 +1,14 @@
-package core.chess;
+package hedgineGUI.core.chess;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import core.IO.FENException;
-import core.IO.FENManager;
-import utility.Result;
-import utility.Sides;
+import hedgineGUI.core.IO.FENException;
+import hedgineGUI.core.IO.FENManager;
+import hedgineGUI.utility.Result;
+import hedgineGUI.utility.Sides;
 
 /**
  * This class represents a chessboard, and all the information regarding it.

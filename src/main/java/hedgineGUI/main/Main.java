@@ -1,18 +1,18 @@
-package main;
+package hedgineGUI.main;
 
 import java.io.File;
 
 import javax.swing.SwingUtilities;
 
-import control.DefaultGameController;
-import control.GameController;
-import game.GameConfiguration;
-import game.GameException;
-import game.GameManager;
-import game.HumanPlayer;
-import graphics.SwingTicker;
-import graphics.MainWindow;
-import utility.Sides;
+import hedgineGUI.control.DefaultGameController;
+import hedgineGUI.control.GameController;
+import hedgineGUI.game.GameConfiguration;
+import hedgineGUI.game.GameException;
+import hedgineGUI.game.GameManager;
+import hedgineGUI.game.HumanPlayer;
+import hedgineGUI.graphics.SwingTicker;
+import hedgineGUI.graphics.MainWindow;
+import hedgineGUI.utility.Sides;
 
 public final class Main {
     private Main() {}

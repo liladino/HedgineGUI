@@ -1,4 +1,4 @@
-package game.clock;
+package hedgineGUI.game.clock;
 
 public interface ClockListener {
 	void onTick(ClockSnapshot snapshot);

@@ -1,9 +1,9 @@
-package graphics;
+package hedgineGUI.graphics;
 
 import java.util.Map;
 import java.util.TreeMap;
 
-import utility.Pair;
+import hedgineGUI.utility.Pair;
 import java.awt.Color;
 
 /**

@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import core.IO.FENException;
-import core.chess.Board;
+import hedgineGUI.core.IO.FENException;
+import hedgineGUI.core.chess.Board;
 
 class LegalMovesTest {
 	Board b = null;

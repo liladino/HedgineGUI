@@ -1,6 +1,6 @@
-package game;
+package hedgineGUI.game;
 
-import core.chess.Move;
+import hedgineGUI.core.chess.Move;
 
 /**
  * Players noitfy the GameManager 
