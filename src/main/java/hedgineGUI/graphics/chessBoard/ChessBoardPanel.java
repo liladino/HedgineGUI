@@ -286,15 +286,15 @@ public final class ChessBoardPanel extends JPanel {
         for (char piece : new char[] {'q', 'r', 'b', 'n'}) {
             char key = side == Sides.WHITE ? Character.toUpperCase(piece) : piece;
             BufferedImage base = imageCache.render(key, size, size);
-            if (base == null) {
-                continue;
+            if (base != null) {
+                if (scaledSize == size) {
+                    icons.put(key, base);
+                }
+                else {
+                    BufferedImage scaled = imageCache.render(key, scaledSize, scaledSize);
+                    icons.put(key, scaled == null ? base : new BaseMultiResolutionImage(base, scaled));
+                }
             }
-            if (scaledSize == size) {
-                icons.put(key, base);
-                continue;
-            }
-            BufferedImage scaled = imageCache.render(key, scaledSize, scaledSize);
-            icons.put(key, scaled == null ? base : new BaseMultiResolutionImage(base, scaled));
         }
         return icons;
     }

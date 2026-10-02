@@ -22,31 +22,43 @@ Supports both drag and drop and clicking modes for move input.
 
 ## Build & run
 
-### Bash
+### Requirements
 
-To create a runnable jar file, cd to the projectfolder and use
+* JDK 25 or newer
+* Maven 3.9+
+
+### Command line
+
+To create a runnable jar file (dependencies included), cd to the project folder and use
 ```
-make jar
+mvn package
 ```
 You can then run the jar file with
 ```
-java -jar HedgineGUI.jar 
+java -jar target/HedgineGUI-3.0.0.jar
 ```
 
-To run the project from the source: 
+**Recommended**: Build without running the tests:
 ```
-make build
-make run
+mvn package -DskipTests
 ```
-The two in one:
+
+To run the project from the source:
 ```
-make all
+mvn compile exec:java -Dexec.mainClass=hedgineGUI.main.Main
 ```
+
+To run the tests only:
+```
+mvn test
+```
+
+The app stores its saves in a `saves` folder in the working directory, and creates it on first start.
+
+### IntelliJ IDEA
+
+Open the project folder, and IntelliJ imports it as a Maven project. Run `hedgineGUI.main.Main`.
 
 ### VSCode
 
-After using git clone and opening the clone folder, the default Run option should launch the app correctly.
-
-### Eclipse
-
-Import the folder HedgineGUI, and the default run configuration should launch the app correctly.
+Install the Extension Pack for Java, then open the project folder. The project is imported from `pom.xml`, and the default Run option on `hedgineGUI.main.Main` launches the app.
