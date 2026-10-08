@@ -4,6 +4,8 @@ import java.io.File;
 
 import javax.swing.SwingUtilities;
 
+import com.formdev.flatlaf.FlatLightLaf;
+
 import hedgineGUI.control.DefaultGameController;
 import hedgineGUI.control.GameController;
 import hedgineGUI.game.GameConfiguration;
@@ -18,6 +20,7 @@ public final class Main {
     private Main() {}
 
     public static void main(String[] args) {
+        FlatLightLaf.setup();
         SwingUtilities.invokeLater(Main::startApplication);
     }
 
