@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -15,6 +16,7 @@ import hedgineGUI.game.*;
 import hedgineGUI.graphics.chessBoard.ChessBoardPanel;
 import hedgineGUI.graphics.dialogs.EngineFileChooser;
 import hedgineGUI.tournament.Standings;
+import hedgineGUI.tournament.FenSequence;
 import hedgineGUI.utility.Sides;
 
 /** Manual pairings, concurrent games per round, and a persistent tournament history. */
@@ -69,8 +71,10 @@ public final class TournamentWindow extends JFrame {
         JDialog dialog = new JDialog(this, "Configure round " + (roundNumber + 1), true);
         JTabbedPane tabs = new JTabbedPane();
         List<PairingForm> forms = new ArrayList<>();
+        JCheckBox randomFen = new JCheckBox("Random FEN from py/fens.txt (seed 0)");
         Runnable addGame = () -> {
             PairingForm form = new PairingForm();
+            form.fen.setEnabled(!randomFen.isSelected());
             forms.add(form);
             tabs.addTab("Game " + forms.size(), form);
             tabs.setSelectedComponent(form);
@@ -82,6 +86,12 @@ public final class TournamentWindow extends JFrame {
         buttons.add(repeat);
         JCheckBox alternate = new JCheckBox("Reverse colors every second round");
         buttons.add(alternate);
+        randomFen.setToolTipText("Reversed rounds reuse the preceding round's positions.");
+        JPanel options = new JPanel(new GridLayout(0, 1));
+        options.add(randomFen);
+        randomFen.addActionListener(e -> {
+            for (PairingForm form : forms) form.fen.setEnabled(!randomFen.isSelected());
+        });
         JButton add = new JButton("Add game");
         add.addActionListener(e -> addGame.run());
         JButton remove = new JButton("Remove game");
@@ -92,10 +102,13 @@ public final class TournamentWindow extends JFrame {
         JButton start = new JButton("Start round");
         start.addActionListener(e -> {
             List<GameConfiguration> configurations = new ArrayList<>();
+            FenSequence selectedPositions;
             try {
+                selectedPositions = randomFen.isSelected()
+                        ? new FenSequence(Path.of("py", "fens.txt")) : null;
                 // A name identifies a participant across every board and round.
                 Map<String, File> identities = new HashMap<>(participants);
-                for (PairingForm form : forms) configurations.add(form.configuration(identities));
+                for (PairingForm form : forms) configurations.add(form.configuration(identities, selectedPositions != null));
                 participants.clear();
                 participants.putAll(identities);
             } catch (Exception error) {
@@ -108,6 +121,7 @@ public final class TournamentWindow extends JFrame {
                 automaticGames.add(new ScheduledGame(configurations.get(i), form.whiteFile,
                         form.blackFile, form.time.getText().trim()));
             }
+            randomPositions = selectedPositions;
             alternateColors = alternate.isSelected();
             scheduledRoundIndex = 0;
             roundsRemaining = (Integer) repeat.getValue() - 1;
@@ -116,7 +130,8 @@ public final class TournamentWindow extends JFrame {
         });
         buttons.add(add); buttons.add(remove); buttons.add(start);
         dialog.add(tabs);
-        dialog.add(buttons, BorderLayout.SOUTH);
+        options.add(buttons);
+        dialog.add(options, BorderLayout.SOUTH);
         dialog.pack();
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
@@ -126,6 +141,17 @@ public final class TournamentWindow extends JFrame {
     private final Map<String, File> participants = new HashMap<>();
 
     private void startRound(List<GameConfiguration> configurations) {
+        if (randomPositions != null) {
+            List<String> positions = randomPositions.nextRound(configurations.size(),
+                    alternateColors && scheduledRoundIndex % 2 == 1);
+            List<GameConfiguration> selected = new ArrayList<>();
+            for (int i = 0; i < configurations.size(); i++) {
+                GameConfiguration game = configurations.get(i);
+                selected.add(new GameConfiguration(positions.get(i), game.getWhite(), game.getBlack(),
+                        automaticGames.get(i).time(), new SwingTicker()));
+            }
+            configurations = selected;
+        }
         starting = true;
         next.setEnabled(false);
         currentRound.clear();
@@ -187,6 +213,7 @@ public final class TournamentWindow extends JFrame {
         grid.revalidate();
     }
 
+    private FenSequence randomPositions;
     private boolean alternateColors;
     private int scheduledRoundIndex;
     private int roundsRemaining;
@@ -297,13 +324,13 @@ public final class TournamentWindow extends JFrame {
             return EngineFileChooser.choose(this);
         }
 
-        GameConfiguration configuration(Map<String, File> identities) throws Exception {
+        GameConfiguration configuration(Map<String, File> identities, boolean randomPosition) throws Exception {
             String w = whiteName.getText().trim(), b = blackName.getText().trim();
             if (w.isEmpty() || b.isEmpty() || w.equals(b))
                 throw new IllegalArgumentException("Use distinct, nonempty participant names.");
             register(identities, w, whiteFile);
             register(identities, b, blackFile);
-            String position = fen.getText().trim();
+            String position = randomPosition ? "startpos" : fen.getText().trim();
             new hedgineGUI.core.chess.Board(position.isEmpty() || position.equals("startpos")
                     ? GameConfiguration.STANDARD_START_FEN : position);
             hedgineGUI.game.clock.ClockBuilder.setClock(new hedgineGUI.game.clock.Clock(), time.getText().trim());
