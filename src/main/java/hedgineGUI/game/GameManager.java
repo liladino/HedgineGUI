@@ -333,7 +333,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
             if (termination == GameTermination.NONE) {
                 termination = GameTermination.ABORTED;
             }
-            result = opposite(currentPlayer.getSide()) == Sides.WHITE ? Result.WHITE_WON : Result.BLACK_WON;
+            if (termination == GameTermination.ABORTED) result = Result.ONGOING;
         }
         stopResources();
         publishCurrentState();

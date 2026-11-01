@@ -49,6 +49,10 @@ public final class ChessBoardPanel extends JPanel {
     private boolean dragCandidate;
     private boolean dragging;
 
+    public ChessBoardPanel(GameController controller) {
+        this(controller, null);
+    }
+
     public ChessBoardPanel(GameController controller, MenuManager menuManager) {
         this.controller = controller;
         this.state = controller.getState();
@@ -57,7 +61,7 @@ public final class ChessBoardPanel extends JPanel {
         setPreferredSize(new Dimension(720, 720));
 
         controller.addStateListener(this::receiveState);
-        menuManager.addAppearanceListener(this::appearanceChanged);
+        if (menuManager != null) menuManager.addAppearanceListener(this::appearanceChanged);
         installMouseInput();
     }
 

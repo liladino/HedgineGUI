@@ -62,3 +62,23 @@ Open the project folder, and IntelliJ imports it as a Maven project. Run `hedgin
 ### VSCode
 
 Install the Extension Pack for Java, then open the project folder. The project is imported from `pom.xml`, and the default Run option on `hedgineGUI.main.Main` launches the app.
+
+### Bot tournaments
+
+The start screen offers **Play** and **Bot tournament**. In tournament setup,
+add one tab per simultaneous game and select a white and black engine executable,
+participant names, starting FEN, and time control. Supported time control examples:
+`N` (no clock, engines get two seconds per move), `X 60` (seconds per move),
+and `S 180 0 2` (three minutes plus two seconds per move).
+
+Use the same participant name and executable across games to combine its standings.
+Give different versions distinct names, even when their executable filenames match.
+Every game uses separate engine processes; engine objects are never shared.
+Wins score 1, draws 0.5, and losses 0. Aborts and errors award no points.
+
+Each round appears in a tab containing a scrollable two-column board grid.
+Individual games have Abort and Export buttons. The sidebar can abort the current
+round, end the tournament, or export all successfully started games from every
+round into a single PGN file, including unfinished games. Once all current games
+finish or are aborted, **Next round** opens a new set of manual pairing tabs.
+Closing the tournament stops its engines.

@@ -93,12 +93,10 @@ public final class DefaultGameController implements GameController {
 
     @Override
     public String getPGN(){
+        GameState snapshot = state;
         return PGNConverter.convertToPGN(
-            startConfiguration.getWhite().getName(),
-            startConfiguration.getBlack().getName(),
-            getStartFEN(), 
-            gameManager.getMoves(), 
-            gameManager.getResult());
+            snapshot.getWhiteName(), snapshot.getBlackName(),
+            snapshot.getInitialFen(), snapshot.getMoveHistory(), snapshot.getResult());
     }
 
     private void receiveSnapshot(GameState newState) 

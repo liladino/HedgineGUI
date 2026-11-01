@@ -30,6 +30,10 @@ public final class Main {
             savesDirectory.mkdirs();
         }
 
+        new hedgineGUI.graphics.StartWindow(Main::startPlay);
+    }
+
+    private static void startPlay() {
         GameController controller = new DefaultGameController(new GameManager());
         new MainWindow(controller);
         try {
