@@ -99,4 +99,38 @@ class ClockBuilderTest {
 		assertEquals(15, extraTimes.get(0).first);
 		assertEquals(15 * 1000, extraTimes.get(0).second);
 	}
+
+    @Test
+    void acceptsDecimalSecondsAndMillisecondsEverywhere() throws Exception {
+        ClockBuilder.setClock(clock, "  S  1.5  0  ms500  40  2.125  ");
+        assertEquals(1500, clock.getWhiteTime());
+        assertEquals(500, clock.getIncrement());
+        assertEquals(40, clock.getExtraTime().get(0).first);
+        assertEquals(2125, clock.getExtraTime().get(0).second);
+        Clock other = new Clock();
+        ClockBuilder.setClock(other, "S ms1500 0 0.5 40 ms2125");
+        assertEquals(clock.getWhiteTime(), other.getWhiteTime());
+        assertEquals(clock.getIncrement(), other.getIncrement());
+        assertEquals(clock.getExtraTime().get(0).second, other.getExtraTime().get(0).second);
+    }
+
+    @Test
+    void acceptsFractionalFixedMoveTime() throws Exception {
+        ClockBuilder.setClock(clock, "X 0.5");
+        assertEquals(500, clock.getWhiteTime());
+        ClockBuilder.setClock(clock, "X ms500");
+        assertEquals(500, clock.getBlackTime());
+    }
+
+    @Test
+    void rejectsInvalidDurationsAndFractionalMoveNumbersWithoutChangingClock() throws Exception {
+        ClockBuilder.setClock(clock, "X 2");
+        for (String input : List.of("X -1", "X NaN", "X Infinity", "X ms",
+                "X ms1.5", "X 0.0001", "X 999999999999999999999", "X 1,5",
+                "S 1 0.5 1", "S 1 ms2 1", "S 1 0 1 40.5 2")) {
+            assertThrows(TimeInputException.class, () -> ClockBuilder.setClock(clock, input), input);
+            assertEquals(2000, clock.getWhiteTime());
+            assertEquals(TimeControl.FIX_TIME_PER_MOVE, clock.getTimeControl());
+        }
+    }
 }

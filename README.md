@@ -82,3 +82,15 @@ round, end the tournament, or export all successfully started games from every
 round into a single PGN file, including unfinished games. Once all current games
 finish or are aborted, **Next round** opens a new set of manual pairing tabs.
 Closing the tournament stops its engines.
+
+Automatic rounds: set **Rounds (repeat these pairings)** in the round setup dialog.
+The count includes the round being configured. All games in a round run concurrently;
+the next round starts after every game has stopped. Each game in every round gets
+fresh engine processes. The same colors, FEN, and time controls are repeated.
+Aborting a round or the tournament cancels queued rounds. A startup failure also
+cancels queued rounds. Individual game aborts do not cancel the schedule.
+
+Clock duration fields accept decimal seconds or integer milliseconds with an
+`ms` prefix: `X 1.5`, `X ms500`, and `S 10.5 0 ms100 40 2.5`.
+Move indices (such as 0 and 40) must remain integers. Durations must be
+nonnegative exact milliseconds, up to 2,147,483,647 ms; finer precision is rejected.

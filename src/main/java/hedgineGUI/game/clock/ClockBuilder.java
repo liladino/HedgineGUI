@@ -3,7 +3,7 @@ package hedgineGUI.game.clock;
 import hedgineGUI.utility.Second;
 import hedgineGUI.utility.TimeControl;
 
-import java.util.regex.Pattern;
+import java.math.BigDecimal;
 
 
 /**
@@ -59,58 +59,59 @@ public class ClockBuilder {
 		setClock(c, getTimeInformation());
 	}
 
-	public static void setClock(Clock c, String timeInformation) throws TimeInputException{
-		String[] tokens = timeInformation.split(" ");
-		if (tokens.length < 1){
-			throw new TimeInputException("No time information");
-		}
-		if (!tokens[0].equals("N") && tokens.length < 2){
-			throw new TimeInputException("No starttime specified");
-		}
+    /**
+     * Durations accept seconds (1, 1.5) or whole milliseconds (ms500).
+     * Values must be nonnegative, exact milliseconds and fit in a signed int.
+     * Move indices always remain nonnegative integers.
+     */
+    private static int durationMs(String token) throws TimeInputException {
+        try {
+            if (token.matches("ms[0-9]+")) return Integer.parseInt(token.substring(2));
+            if (!token.matches("[0-9]+(\\.[0-9]+)?"))
+                throw new NumberFormatException();
+            return new BigDecimal(token).movePointRight(3).intValueExact();
+        } catch (ArithmeticException | NumberFormatException error) {
+            throw new TimeInputException("Invalid duration: " + token
+                    + " (use seconds such as 1.5, or milliseconds such as ms500)");
+        }
+    }
 
-		Pattern validTokenPattern = Pattern.compile("^[0-9 ]*$");
-		for (int i = 1; i < tokens.length; i++) {
-			if (!validTokenPattern.matcher(tokens[i]).matches()) {
-				throw new TimeInputException("Invalid String format");
-			}
-		}
-		
-		if (tokens[0].equals("N")){
-			c.setControlType(TimeControl.NO_CONTROL);
-		}
-		else if (tokens[0].equals("X")) {
-			c.setControlType(TimeControl.FIX_TIME_PER_MOVE);
-			
-			int seconds = Integer.parseInt(tokens[1]);
-			c.setMoveTime(new Second(seconds));
-		}
-		else if (tokens[0].equals("S")){
-			c.setControlType(TimeControl.FISCHER);
-			
-			int startTime = Integer.parseInt(tokens[1]);
+    private static int moveNumber(String token) throws TimeInputException {
+        try {
+            if (!token.matches("[0-9]+")) throw new NumberFormatException();
+            return Integer.parseInt(token);
+        } catch (NumberFormatException error) {
+            throw new TimeInputException("Invalid move number: " + token);
+        }
+    }
 
-			c.setStartTime(new Second(startTime));
+    public static void setClock(Clock c, String timeInformation) throws TimeInputException {
+        if (timeInformation == null || timeInformation.isBlank())
+            throw new TimeInputException("No time information");
+        String[] tokens = timeInformation.trim().split("\\s+");
+        String mode = tokens[0];
+        if (!mode.equals("N") && !mode.equals("X") && !mode.equals("S"))
+            throw new TimeInputException("Unknown format specifier (valid: N, X, S)");
+        if (!mode.equals("N") && tokens.length < 2)
+            throw new TimeInputException("No start time specified");
 
-			if (tokens.length >= 4){
-				int incrementStartMove = Integer.parseInt(tokens[2]);
-				int increment = Integer.parseInt(tokens[3]);
-
-				c.setIncrement(new Second(increment), incrementStartMove);
-			}
-			else {
-				c.setIncrement(new Second(0), 0);
-			}
-
-			for (int len = 4; len+1 < tokens.length; len += 2){
-				int atMove = Integer.parseInt(tokens[len]);
-				int extraTime = Integer.parseInt(tokens[len+1]);
-
-				c.addExtraTime(atMove, new Second(extraTime));
-			}
-
-		}
-		else {
-			throw new TimeInputException("Unknown format specifier (valid: N - no control, X - fix time per move, S - Fischer)");
-		}
-	}
+        // Validate before modifying the clock. Keep accepting legacy trailing tokens.
+        int[] values = new int[tokens.length];
+        for (int i = 1; i < tokens.length; i++)
+            values[i] = mode.equals("S") && i >= 2 && i % 2 == 0
+                    ? moveNumber(tokens[i]) : durationMs(tokens[i]);
+        if (mode.equals("N")) {
+            c.setControlType(TimeControl.NO_CONTROL);
+        } else if (mode.equals("X")) {
+            c.setControlType(TimeControl.FIX_TIME_PER_MOVE);
+            c.setMoveTimeMs(values[1]);
+        } else {
+            c.setControlType(TimeControl.FISCHER);
+            c.setStartTimeMs(values[1]);
+            c.setIncrementMs(tokens.length >= 4 ? values[3] : 0,
+                    tokens.length >= 4 ? values[2] : 0);
+            for (int i = 4; i + 1 < tokens.length; i += 2)
+                c.addExtraTimeMs(values[i], values[i + 1]);
+        }
+    }
 }

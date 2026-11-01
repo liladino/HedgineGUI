@@ -28,7 +28,11 @@ public final class Clock {
 	private Sides flaggedSide; // null if nobody flagged
 
 	public synchronized void setStartTime(Second startTime) {
-		whiteTimeMs = blackTimeMs = 1000L * startTime.time;
+		setStartTimeMs(1000L * startTime.time);
+	}
+
+	public synchronized void setStartTimeMs(long milliseconds) {
+		whiteTimeMs = blackTimeMs = milliseconds;
 		if (controlType == TimeControl.FIX_TIME_PER_MOVE) {
 			moveTimeMs = whiteTimeMs;
 		}
@@ -39,18 +43,30 @@ public final class Clock {
 	}
 
 	public synchronized void setMoveTime(Second moveTime) {
-		this.moveTimeMs = 1000L * moveTime.time;
+		setMoveTimeMs(1000L * moveTime.time);
+	}
+
+	public synchronized void setMoveTimeMs(long milliseconds) {
+		this.moveTimeMs = milliseconds;
 		this.whiteTimeMs = moveTimeMs;
 		this.blackTimeMs = moveTimeMs;
 	}
 
 	public synchronized void setIncrement(Second increment, int incrementStartMove) {
-		this.incrementMs = 1000L * increment.time;
+		setIncrementMs(1000L * increment.time, incrementStartMove);
+	}
+
+	public synchronized void setIncrementMs(long milliseconds, int incrementStartMove) {
+		this.incrementMs = milliseconds;
 		this.incrementStartMove = incrementStartMove;
 	}
 
 	public synchronized void addExtraTime(int afterMove, Second addTime) {
-		extraTimes.add(new Pair<>(afterMove, 1000 * addTime.time));
+		addExtraTimeMs(afterMove, Math.toIntExact(1000L * addTime.time));
+	}
+
+	public synchronized void addExtraTimeMs(int afterMove, int milliseconds) {
+		extraTimes.add(new Pair<>(afterMove, milliseconds));
 	}
 
 	public synchronized void setPlyCount(int plies) {

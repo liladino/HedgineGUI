@@ -48,7 +48,7 @@ public final class TournamentWindow extends JFrame {
         next.addActionListener(e -> configureRound());
         actions.add(next);
         JButton abortRound = new JButton("Abort games in this round");
-        abortRound.addActionListener(e -> abort(currentRound));
+        abortRound.addActionListener(e -> { roundsRemaining = 0; abort(currentRound); });
         actions.add(abortRound);
         JButton abortAll = new JButton("Abort tournament");
         abortAll.addActionListener(e -> abortTournament());
@@ -76,6 +76,9 @@ public final class TournamentWindow extends JFrame {
         };
         addGame.run();
         JPanel buttons = new JPanel();
+        JSpinner repeat = new JSpinner(new SpinnerNumberModel(1, 1, 10000, 1));
+        buttons.add(new JLabel("Rounds (repeat these pairings):"));
+        buttons.add(repeat);
         JButton add = new JButton("Add game");
         add.addActionListener(e -> addGame.run());
         JButton remove = new JButton("Remove game");
@@ -96,6 +99,13 @@ public final class TournamentWindow extends JFrame {
                 JOptionPane.showMessageDialog(dialog, error.getMessage(), "Invalid game", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            automaticGames = new ArrayList<>();
+            for (int i = 0; i < forms.size(); i++) {
+                PairingForm form = forms.get(i);
+                automaticGames.add(new ScheduledGame(configurations.get(i), form.whiteFile,
+                        form.blackFile, form.time.getText().trim()));
+            }
+            roundsRemaining = (Integer) repeat.getValue() - 1;
             dialog.dispose();
             startRound(configurations);
         });
@@ -157,6 +167,7 @@ public final class TournamentWindow extends JFrame {
                         export.setEnabled(true);
                         if (ended || abortRequested.contains(controller)) controller.stopGame();
                     } catch (Exception error) {
+                        roundsRemaining = 0;
                         controller.stopGame();
                         label.setText("Failed: " + error.getMessage());
                     }
@@ -169,6 +180,19 @@ public final class TournamentWindow extends JFrame {
         // done() runs on the EDT after this method returns.
         pending = configurations.size();
         grid.revalidate();
+    }
+
+    private int roundsRemaining;
+    private boolean advancementQueued;
+    private List<ScheduledGame> automaticGames = List.of();
+
+    private record ScheduledGame(GameConfiguration configuration, File white, File black, String time) {
+        GameConfiguration create() {
+            return new GameConfiguration(configuration.getFen(),
+                    new EnginePlayer(Sides.WHITE, configuration.getWhite().getName(), white),
+                    new EnginePlayer(Sides.BLACK, configuration.getBlack().getName(), black),
+                    time, new SwingTicker());
+        }
     }
 
     private int pending;
@@ -184,8 +208,17 @@ public final class TournamentWindow extends JFrame {
                     scores.addRow(new Object[]{entry.getKey(), (int)s[0], (int)s[1], (int)s[2], s[3]});
                 });
         long running = currentRound.stream().filter(g -> g.getState().isRunning()).count();
-        status.setText((ended ? "Tournament aborted" : "Round " + roundNumber) + " · " + running + " active games");
-        next.setEnabled(!ended && !starting && running == 0);
+        status.setText((ended ? "Tournament aborted" : "Round " + roundNumber) + " · " + running + " active games · " + roundsRemaining + " rounds queued");
+        next.setEnabled(!ended && !starting && running == 0 && roundsRemaining == 0);
+        if (!ended && !starting && running == 0 && roundsRemaining > 0 && !advancementQueued) {
+            advancementQueued = true;
+            SwingUtilities.invokeLater(() -> {
+                advancementQueued = false;
+                if (ended || roundsRemaining == 0) return;
+                roundsRemaining--;
+                startRound(automaticGames.stream().map(ScheduledGame::create).toList());
+            });
+        }
     }
 
     private void abort(List<GameController> targets) {
@@ -196,6 +229,7 @@ public final class TournamentWindow extends JFrame {
 
     private void abortTournament() {
         ended = true;
+        roundsRemaining = 0;
         abort(currentRound);
     }
 
@@ -243,7 +277,7 @@ public final class TournamentWindow extends JFrame {
             });
             add(black); add(bp);
             add(new JLabel("Starting FEN")); add(fen);
-            add(new JLabel("Time control (N / X 60 / S 180 0 2)")); add(time);
+            add(new JLabel("Time control (N / X 1.5 / S 180 0 ms500)")); add(time);
             add(new JLabel("Reuse the same name for the same participant."));
             add(new JLabel("Each game starts separate engine processes."));
         }
