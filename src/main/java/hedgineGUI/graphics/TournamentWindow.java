@@ -13,6 +13,7 @@ import javax.swing.table.DefaultTableModel;
 import hedgineGUI.control.*;
 import hedgineGUI.game.*;
 import hedgineGUI.graphics.chessBoard.ChessBoardPanel;
+import hedgineGUI.graphics.dialogs.EngineFileChooser;
 import hedgineGUI.tournament.Standings;
 import hedgineGUI.utility.Sides;
 
@@ -79,6 +80,8 @@ public final class TournamentWindow extends JFrame {
         JSpinner repeat = new JSpinner(new SpinnerNumberModel(1, 1, 10000, 1));
         buttons.add(new JLabel("Rounds (repeat these pairings):"));
         buttons.add(repeat);
+        JCheckBox alternate = new JCheckBox("Reverse colors every second round");
+        buttons.add(alternate);
         JButton add = new JButton("Add game");
         add.addActionListener(e -> addGame.run());
         JButton remove = new JButton("Remove game");
@@ -105,6 +108,8 @@ public final class TournamentWindow extends JFrame {
                 automaticGames.add(new ScheduledGame(configurations.get(i), form.whiteFile,
                         form.blackFile, form.time.getText().trim()));
             }
+            alternateColors = alternate.isSelected();
+            scheduledRoundIndex = 0;
             roundsRemaining = (Integer) repeat.getValue() - 1;
             dialog.dispose();
             startRound(configurations);
@@ -182,15 +187,19 @@ public final class TournamentWindow extends JFrame {
         grid.revalidate();
     }
 
+    private boolean alternateColors;
+    private int scheduledRoundIndex;
     private int roundsRemaining;
     private boolean advancementQueued;
     private List<ScheduledGame> automaticGames = List.of();
 
-    private record ScheduledGame(GameConfiguration configuration, File white, File black, String time) {
-        GameConfiguration create() {
+    record ScheduledGame(GameConfiguration configuration, File white, File black, String time) {
+        GameConfiguration create(boolean reverse) {
             return new GameConfiguration(configuration.getFen(),
-                    new EnginePlayer(Sides.WHITE, configuration.getWhite().getName(), white),
-                    new EnginePlayer(Sides.BLACK, configuration.getBlack().getName(), black),
+                    new EnginePlayer(Sides.WHITE, reverse ? configuration.getBlack().getName() : configuration.getWhite().getName(),
+                            reverse ? black : white),
+                    new EnginePlayer(Sides.BLACK, reverse ? configuration.getWhite().getName() : configuration.getBlack().getName(),
+                            reverse ? white : black),
                     time, new SwingTicker());
         }
     }
@@ -216,7 +225,9 @@ public final class TournamentWindow extends JFrame {
                 advancementQueued = false;
                 if (ended || roundsRemaining == 0) return;
                 roundsRemaining--;
-                startRound(automaticGames.stream().map(ScheduledGame::create).toList());
+                scheduledRoundIndex++;
+                boolean reverse = alternateColors && scheduledRoundIndex % 2 == 1;
+                startRound(automaticGames.stream().map(game -> game.create(reverse)).toList());
             });
         }
     }
@@ -283,8 +294,7 @@ public final class TournamentWindow extends JFrame {
         }
 
         private File choose() {
-            JFileChooser chooser = new JFileChooser();
-            return chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION ? chooser.getSelectedFile() : null;
+            return EngineFileChooser.choose(this);
         }
 
         GameConfiguration configuration(Map<String, File> identities) throws Exception {

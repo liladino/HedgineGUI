@@ -19,7 +19,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -468,12 +467,10 @@ public class NewGame extends JFrame {
 
 	private class EngineChooserButton implements ActionListener{
 		JLabel path;
-		JFileChooser chooser;
 		JTextField name;
 		Sides side;
 		public EngineChooserButton(JTextField name, JLabel pathShower, Sides side){
 			path = pathShower;
-			chooser = new JFileChooser();
 			this.side = side;
 			this.name = name;
 
@@ -487,10 +484,10 @@ public class NewGame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			int returnVal = chooser.showOpenDialog(NewGame.this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File selected = EngineFileChooser.choose(NewGame.this);
+			if (selected != null) {
 				if (side == Sides.WHITE){
-					whiteEngine = chooser.getSelectedFile();
+					whiteEngine = selected;
 
 					try (FileWriter fw = new FileWriter(PERS_WHITE_ENGINE_PATH)) {
 						fw.write(whiteEngine.toString());
@@ -498,14 +495,14 @@ public class NewGame extends JFrame {
 						logger.warning(exc.getMessage());
 					}
 				} else {
-					blackEngine = chooser.getSelectedFile();
+					blackEngine = selected;
 					try (FileWriter fw = new FileWriter(PERS_BLACK_ENGINE_PATH)) {
 						fw.write(blackEngine.toString());
 					} catch (Exception exc) {
 						logger.warning(exc.getMessage());
 					}
 				}
-				setTextAndLabel(chooser.getSelectedFile());
+				setTextAndLabel(selected);
 			}
 		}
 

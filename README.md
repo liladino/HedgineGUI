@@ -86,7 +86,10 @@ Closing the tournament stops its engines.
 Automatic rounds: set **Rounds (repeat these pairings)** in the round setup dialog.
 The count includes the round being configured. All games in a round run concurrently;
 the next round starts after every game has stopped. Each game in every round gets
-fresh engine processes. The same colors, FEN, and time controls are repeated.
+fresh engine processes. The same FEN and time controls are repeated. Enable **Reverse colors every second round**
+to swap the engines and participant names in rounds 2, 4, etc. of that batch;
+rounds 1, 3, etc. use the configured colors. The FEN, including the side to move,
+is preserved exactly. Without this option, the configured colors are repeated.
 Aborting a round or the tournament cancels queued rounds. A startup failure also
 cancels queued rounds. Individual game aborts do not cancel the schedule.
 
@@ -94,3 +97,7 @@ Clock duration fields accept decimal seconds or integer milliseconds with an
 `ms` prefix: `X 1.5`, `X ms500`, and `S 10.5 0 ms100 40 2.5`.
 Move indices (such as 0 and 40) must remain integers. Durations must be
 nonnegative exact milliseconds, up to 2,147,483,647 ms; finer precision is rejected.
+
+Engine executable pickers in both Play and Bot tournament remember the last
+folder used for an approved selection, shared across pickers and app launches.
+If the saved folder no longer exists, the picker uses its default folder.
