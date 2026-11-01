@@ -219,7 +219,7 @@ public final class TournamentWindow extends JFrame {
         private final JTextField whiteName = new JTextField("White", 20);
         private final JTextField blackName = new JTextField("Black", 20);
         private final JTextField fen = new JTextField("startpos", 30);
-        private final JTextField time = new JTextField("S 180 0 2", 20);
+        private final JTextField time = new JTextField("X 2", 20);
         private File whiteFile;
         private File blackFile;
 
