@@ -24,6 +24,9 @@ import hedgineGUI.utility.TimeControl;
 public final class EnginePlayer extends Player {
     private static final Logger LOGGER = Logger.getLogger(EnginePlayer.class.getName());
     private static final long UCI_HANDSHAKE_TIMEOUT_MS = 2_000;
+    private static final long READY_TIMEOUT_MS = 5_000;
+    /** Time kept back from a fixed move time to cover I/O and process overhead. */
+    private static final long MOVE_OVERHEAD_MS = 20;
 
     private final File enginePath;
     private final List<String> engineInfo = new ArrayList<>();
@@ -33,6 +36,7 @@ public final class EnginePlayer extends Player {
     private BufferedReader engineOutput;
     private ExecutorService outputReader;
     private CountDownLatch uciReady;
+    private volatile CountDownLatch engineReady;
     private volatile boolean running;
 
     public EnginePlayer(Sides side, String name, File enginePath) {
@@ -46,6 +50,25 @@ public final class EnginePlayer extends Player {
             startEngine();
         }
         sendCommand("ucinewgame");
+        waitUntilReady();
+    }
+
+    /** Blocks until the engine answers isready, so setup work (e.g. hash clearing) is not charged to the clock. */
+    private void waitUntilReady() throws IOException {
+        CountDownLatch ready = new CountDownLatch(1);
+        engineReady = ready;
+        sendCommand("isready");
+        try {
+            if (!ready.await(READY_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                endGame();
+                throw new IOException("Engine did not answer 'readyok' within "
+                        + READY_TIMEOUT_MS + " ms");
+            }
+        } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+            endGame();
+            throw new IOException("Interrupted while waiting for readyok", error);
+        }
     }
 
     @Override
@@ -158,6 +181,13 @@ public final class EnginePlayer extends Player {
             uciReady.countDown();
             return;
         }
+        if ("readyok".equals(tokens[0])) {
+            CountDownLatch ready = engineReady;
+            if (ready != null) {
+                ready.countDown();
+            }
+            return;
+        }
         if ("bestmove".equals(tokens[0]) && tokens.length >= 2
                 && !"(none)".equals(tokens[1])) {
             Move move = new Move(tokens[1]);
@@ -194,7 +224,8 @@ public final class EnginePlayer extends Player {
             long available = getSide() == Sides.WHITE
                     ? clock.getWhiteTimeMs()
                     : clock.getBlackTimeMs();
-            return "go movetime " + Math.max(1, (long) (available * 0.9));
+            long movetime = Math.min((long) (available * 0.9), available - MOVE_OVERHEAD_MS);
+            return "go movetime " + Math.max(1, movetime);
         }
 
         return new StringBuilder("go wtime ")

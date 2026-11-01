@@ -9,6 +9,9 @@ import hedgineGUI.utility.*;
  * Represents an abstract chess clock.
  */
 public final class Clock {
+	/** A side may overrun its time by this much before being flagged, absorbing I/O latency. */
+	public static final long FLAG_GRACE_MS = 50;
+
 	private TimeControl controlType = TimeControl.NO_CONTROL;
 
 	private long whiteTimeMs;
@@ -118,8 +121,8 @@ public final class Clock {
 		advanceToNow();
 		return new ClockSnapshot(
 			controlType,
-			whiteTimeMs,
-			blackTimeMs,
+			Math.max(0, whiteTimeMs),
+			Math.max(0, blackTimeMs),
 			activeSide,
 			running,
 			controlType != TimeControl.NO_CONTROL, // if there is time control, clock should be visible
@@ -147,11 +150,11 @@ public final class Clock {
 	 */
 	public synchronized long getWhiteTime() {
 		advanceToNow();
-		return whiteTimeMs;
+		return Math.max(0, whiteTimeMs);
 	}
 	public synchronized long getBlackTime() {
 		advanceToNow();
-		return blackTimeMs;
+		return Math.max(0, blackTimeMs);
 	}
 	public synchronized int getIncrementStartMove() {
 		return incrementStartMove;
@@ -186,14 +189,15 @@ public final class Clock {
 			return;
 		}
 
+		// Time may run negative within the grace period; it is shown as 0.
 		if (activeSide == Sides.WHITE) {
-			whiteTimeMs = Math.max(0, whiteTimeMs - elapsed);
-			if (whiteTimeMs <= 0) {
+			whiteTimeMs = Math.max(-FLAG_GRACE_MS, whiteTimeMs - elapsed);
+			if (whiteTimeMs <= -FLAG_GRACE_MS) {
 				flaggedSide = Sides.WHITE;
 			}
 		} else {
-			blackTimeMs = Math.max(0, blackTimeMs - elapsed);
-			if (blackTimeMs <= 0) {
+			blackTimeMs = Math.max(-FLAG_GRACE_MS, blackTimeMs - elapsed);
+			if (blackTimeMs <= -FLAG_GRACE_MS) {
 				flaggedSide = Sides.BLACK;
 			}
 		}
