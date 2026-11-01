@@ -113,3 +113,8 @@ not change the sequence. With alternating colors enabled, rounds 2, 4, etc. reus
 the preceding round's positions board-for-board; rounds 1, 3, etc. draw new ones.
 Otherwise, every round draws new positions for every game. The same file contents,
 game count, and options reproduce the same sequence in subsequent batches.
+
+Tournament setup has one shared time control for all games and automatic rounds.
+**Add game** copies the last tab's engine paths, participant names, and starting
+FEN into a new independently editable tab. Each game still starts its own engine
+processes.

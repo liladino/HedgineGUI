@@ -74,6 +74,7 @@ public final class TournamentWindow extends JFrame {
         JCheckBox randomFen = new JCheckBox("Random FEN from py/fens.txt (seed 0)");
         Runnable addGame = () -> {
             PairingForm form = new PairingForm();
+            if (!forms.isEmpty()) form.copyFrom(forms.get(forms.size() - 1));
             form.fen.setEnabled(!randomFen.isSelected());
             forms.add(form);
             tabs.addTab("Game " + forms.size(), form);
@@ -88,6 +89,11 @@ public final class TournamentWindow extends JFrame {
         buttons.add(alternate);
         randomFen.setToolTipText("Reversed rounds reuse the preceding round's positions.");
         JPanel options = new JPanel(new GridLayout(0, 1));
+        JTextField timeControl = new JTextField("X 2", 20);
+        JPanel timeSettings = new JPanel();
+        timeSettings.add(new JLabel("Time control for all games (N / X 1.5 / S 180 0 ms500)"));
+        timeSettings.add(timeControl);
+        options.add(timeSettings);
         options.add(randomFen);
         randomFen.addActionListener(e -> {
             for (PairingForm form : forms) form.fen.setEnabled(!randomFen.isSelected());
@@ -108,7 +114,7 @@ public final class TournamentWindow extends JFrame {
                         ? new FenSequence(Path.of("py", "fens.txt")) : null;
                 // A name identifies a participant across every board and round.
                 Map<String, File> identities = new HashMap<>(participants);
-                for (PairingForm form : forms) configurations.add(form.configuration(identities, selectedPositions != null));
+                for (PairingForm form : forms) configurations.add(form.configuration(identities, selectedPositions != null, timeControl.getText().trim()));
                 participants.clear();
                 participants.putAll(identities);
             } catch (Exception error) {
@@ -119,7 +125,7 @@ public final class TournamentWindow extends JFrame {
             for (int i = 0; i < forms.size(); i++) {
                 PairingForm form = forms.get(i);
                 automaticGames.add(new ScheduledGame(configurations.get(i), form.whiteFile,
-                        form.blackFile, form.time.getText().trim()));
+                        form.blackFile, timeControl.getText().trim()));
             }
             randomPositions = selectedPositions;
             alternateColors = alternate.isSelected();
@@ -291,7 +297,8 @@ public final class TournamentWindow extends JFrame {
         private final JTextField whiteName = new JTextField("White", 20);
         private final JTextField blackName = new JTextField("Black", 20);
         private final JTextField fen = new JTextField("startpos", 30);
-        private final JTextField time = new JTextField("X 2", 20);
+        private final JLabel wp = new JLabel("No engine selected");
+        private final JLabel bp = new JLabel("No engine selected");
         private File whiteFile;
         private File blackFile;
 
@@ -300,7 +307,6 @@ public final class TournamentWindow extends JFrame {
             setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
             add(new JLabel("White engine name")); add(whiteName);
             JButton white = new JButton("Choose white executable…");
-            JLabel wp = new JLabel("No engine selected");
             white.addActionListener(e -> {
                 File file = choose();
                 if (file != null) { whiteFile = file; whiteName.setText(file.getName()); wp.setText(file.getPath()); }
@@ -308,23 +314,31 @@ public final class TournamentWindow extends JFrame {
             add(white); add(wp);
             add(new JLabel("Black engine name")); add(blackName);
             JButton black = new JButton("Choose black executable…");
-            JLabel bp = new JLabel("No engine selected");
             black.addActionListener(e -> {
                 File file = choose();
                 if (file != null) { blackFile = file; blackName.setText(file.getName()); bp.setText(file.getPath()); }
             });
             add(black); add(bp);
             add(new JLabel("Starting FEN")); add(fen);
-            add(new JLabel("Time control (N / X 1.5 / S 180 0 ms500)")); add(time);
             add(new JLabel("Reuse the same name for the same participant."));
             add(new JLabel("Each game starts separate engine processes."));
+        }
+
+        private void copyFrom(PairingForm source) {
+            whiteName.setText(source.whiteName.getText());
+            blackName.setText(source.blackName.getText());
+            fen.setText(source.fen.getText());
+            whiteFile = source.whiteFile;
+            blackFile = source.blackFile;
+            wp.setText(source.wp.getText());
+            bp.setText(source.bp.getText());
         }
 
         private File choose() {
             return EngineFileChooser.choose(this);
         }
 
-        GameConfiguration configuration(Map<String, File> identities, boolean randomPosition) throws Exception {
+        GameConfiguration configuration(Map<String, File> identities, boolean randomPosition, String timeControl) throws Exception {
             String w = whiteName.getText().trim(), b = blackName.getText().trim();
             if (w.isEmpty() || b.isEmpty() || w.equals(b))
                 throw new IllegalArgumentException("Use distinct, nonempty participant names.");
@@ -333,9 +347,9 @@ public final class TournamentWindow extends JFrame {
             String position = randomPosition ? "startpos" : fen.getText().trim();
             new hedgineGUI.core.chess.Board(position.isEmpty() || position.equals("startpos")
                     ? GameConfiguration.STANDARD_START_FEN : position);
-            hedgineGUI.game.clock.ClockBuilder.setClock(new hedgineGUI.game.clock.Clock(), time.getText().trim());
+            hedgineGUI.game.clock.ClockBuilder.setClock(new hedgineGUI.game.clock.Clock(), timeControl);
             return new GameConfiguration(position, new EnginePlayer(Sides.WHITE, w, whiteFile),
-                    new EnginePlayer(Sides.BLACK, b, blackFile), time.getText().trim(), new SwingTicker());
+                    new EnginePlayer(Sides.BLACK, b, blackFile), timeControl, new SwingTicker());
         }
 
         private void register(Map<String, File> identities, String name, File file) throws IOException {
