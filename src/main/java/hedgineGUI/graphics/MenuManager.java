@@ -317,7 +317,10 @@ public class MenuManager implements ActionListener {
 		else if (s.equals(enginesMenuStrings.get(1))){
 			//restart engine
 			EnginePlayer e = getEngine();
-			if (e == null) return;
+			if (e == null) {
+				logger.info("Engine is null");
+				return;
+			}
 			try {
 				if (e.isRunning()) e.endGame();
 				Thread.sleep(100);
@@ -335,11 +338,15 @@ public class MenuManager implements ActionListener {
 		else if (s.equals(enginesMenuStrings.get(2))){
 			//engine stop -> get move
 			EnginePlayer e = getEngine();
-			if (e == null) return;
+			if (e == null) {
+				logger.info("Engine is null");
+				return;
+			}
 			try {
 				if (e.isRunning()) e.sendCommand("stop");
-			} catch (IOException _) {
-				// .
+			} catch (IOException exc) {
+				logger.info("Error while communicating with engine");
+				logger.info(exc.getMessage());
 			}
 		}
 		else if (s.equals(enginesMenuStrings.get(3))){
