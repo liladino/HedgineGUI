@@ -12,7 +12,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import hedgineGUI.core.chess.Move;
@@ -27,6 +26,12 @@ public final class EnginePlayer extends Player {
     private static final long READY_TIMEOUT_MS = 5_000;
     /** Time kept back from a fixed move time to cover I/O and process overhead. */
     private static final long MOVE_OVERHEAD_MS = 20;
+    /** Shared by all engines so the log keeps the order in which lines were seen. */
+    private static final ExecutorService LOG_WRITER = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "uci-log");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     private final File enginePath;
     private final List<String> engineInfo = new ArrayList<>();
@@ -157,7 +162,8 @@ public final class EnginePlayer extends Player {
         try {
             String output;
             while (running && (output = engineOutput.readLine()) != null) {
-                handleEngineOutput(output);
+                // Taken before anything else, so the engine is not charged for our processing.
+                handleEngineOutput(output, System.currentTimeMillis());
             }
         } catch (IOException error) {
             if (running) {
@@ -167,8 +173,8 @@ public final class EnginePlayer extends Player {
         }
     }
 
-    private void handleEngineOutput(String output) {
-        LOGGER.info(output);
+    private void handleEngineOutput(String output, long receivedAtMs) {
+        log(output);
         synchronized (engineInfo) {
             engineInfo.add(output);
         }
@@ -192,7 +198,7 @@ public final class EnginePlayer extends Player {
                 && !"(none)".equals(tokens[1])) {
             Move move = new Move(tokens[1]);
             if (!move.isNull()) {
-                returnMove(move);
+                returnMove(move, receivedAtMs);
             }
         }
     }
@@ -240,10 +246,15 @@ public final class EnginePlayer extends Player {
         if (!running || engineInput == null) {
             throw new IOException("Engine is not running");
         }
-        LOGGER.log(Level.INFO, "UCI command: {0}", command);
         engineInput.write(command);
         engineInput.newLine();
         engineInput.flush();
+        log("UCI command: " + command);
+    }
+
+    /** Console output can block, so it must never delay engine I/O or the clock. */
+    private static void log(String message) {
+        LOG_WRITER.execute(() -> LOGGER.info(message));
     }
 
     public boolean isRunning() {

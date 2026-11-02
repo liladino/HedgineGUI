@@ -74,3 +74,4 @@ lib/
 *.pdf
 log.txt
 saves/
+debuglog.txt

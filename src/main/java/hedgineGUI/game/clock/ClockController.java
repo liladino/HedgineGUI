@@ -79,6 +79,20 @@ public class ClockController {
 		clock.pressClock();
 	}
 
+	/** Presses the clock as of atMs and holds the opponent's time until startTurn. */
+	public void pressClockAt(long atMs) {
+		clock.pressClockAt(atMs);
+	}
+
+	/** Starts charging the side to move from atMs, unless the clock was pressed since ply was read. */
+	public void startTurn(int ply, long atMs) {
+		clock.startTurn(ply, atMs);
+	}
+
+	public int getPlyCount() {
+		return clock.getPlyCount();
+	}
+
 	public ClockSnapshot snapshot() {
 		return clock.snapshot();
 	}

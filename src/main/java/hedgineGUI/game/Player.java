@@ -97,6 +97,11 @@ public abstract class Player {
      * bestmove arrives; interactive implementations call it from submitMove.
      */
     protected final boolean returnMove(Move move) {
+        return returnMove(move, System.currentTimeMillis());
+    }
+
+    /** Completes the pending request with a move that arrived at receivedAtMs. */
+    protected final boolean returnMove(Move move, long receivedAtMs) {
         Objects.requireNonNull(move, "move");
 
         MoveReceiver receiver;
@@ -108,7 +113,7 @@ public abstract class Player {
             clearMoveRequest();
         }
 
-        receiver.onMoveReceived(this, new Move(move));
+        receiver.onMoveReceived(this, new Move(move), receivedAtMs);
         return true;
     }
 

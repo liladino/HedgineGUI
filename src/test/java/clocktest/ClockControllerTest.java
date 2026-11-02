@@ -81,6 +81,30 @@ class ClockControllerTest implements ClockListener {
 		assertEquals(true, timeUp);
 	}
 
+	@Test
+	void testDelaysAfterArrivalAreNotCharged() {
+		controller.startClock();
+		long arrived = System.currentTimeMillis();
+
+		//the move arrived, but the GUI is slow to process it
+		assertDoesNotThrow(() -> Thread.sleep(300));
+		int ply = controller.getPlyCount();
+		controller.pressClockAt(arrived);
+		assertTrue(clock.getWhiteTime() >= 990);
+
+		//black is not charged before it is asked to move
+		assertDoesNotThrow(() -> Thread.sleep(300));
+		assertEquals(1000, clock.getBlackTime());
+
+		//a stale request is ignored
+		controller.startTurn(ply, System.currentTimeMillis());
+		assertEquals(1000, clock.getBlackTime());
+
+		controller.startTurn(ply + 1, System.currentTimeMillis());
+		assertDoesNotThrow(() -> Thread.sleep(300));
+		assertTrue(clock.getBlackTime() <= 750);
+	}
+
 	@Override
 	public void onTick(ClockSnapshot snapshot) {
 		ticks++;

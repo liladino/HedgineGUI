@@ -27,7 +27,11 @@ public final class Clock {
 	private final List<Pair<Integer, Integer>> extraTimes = new ArrayList<>();
 
 	private boolean running;
+	// The stored times are valid as of lastUpdateMs; reads compute the elapsed part without committing it,
+	// so a clock press can still be dated back to when the move actually arrived.
 	private long lastUpdateMs;
+	// False between pressClockAt and startTurn: the side to move is not charged until it is asked to move.
+	private boolean turnStarted = true;
 	private Sides flaggedSide; // null if nobody flagged
 
 	public synchronized void setStartTime(Second startTime) {
@@ -86,11 +90,12 @@ public final class Clock {
 			return;
 		}
 		running = true;
+		turnStarted = true;
 		lastUpdateMs = System.currentTimeMillis();
 	}
 
 	public synchronized void pause() {
-		advanceToNow();
+		commitTo(System.currentTimeMillis());
 		running = false;
 	}
 
@@ -100,12 +105,23 @@ public final class Clock {
 		}
 		if (!running) {
 			running = true;
+			turnStarted = true;
 			lastUpdateMs = System.currentTimeMillis();
 		}
 	}
 
+	/** Presses the clock now; the opponent's time starts running immediately. */
 	public synchronized void pressClock() {
-		advanceToNow();
+		pressClockAt(System.currentTimeMillis());
+		turnStarted = true;
+	}
+
+	/**
+	 * Presses the clock as of atMs, the moment the move arrived. The opponent's time
+	 * is held until startTurn, so delays in between are charged to nobody.
+	 */
+	public synchronized void pressClockAt(long atMs) {
+		commitTo(atMs);
 		if (flaggedSide != null) {
 			return;
 		}
@@ -114,15 +130,35 @@ public final class Clock {
 
 		activeSide = (activeSide == Sides.WHITE) ? Sides.BLACK : Sides.WHITE;
 		plies++;
-		lastUpdateMs = System.currentTimeMillis();
+		lastUpdateMs = Math.max(lastUpdateMs, atMs);
+		turnStarted = false;
+	}
+
+	/**
+	 * Starts charging the side to move from atMs, when it was asked for its move.
+	 * Ignored if the clock was pressed again since ply was read.
+	 */
+	public synchronized void startTurn(int ply, long atMs) {
+		if (!running || flaggedSide != null || ply != plies) {
+			return;
+		}
+		if (!turnStarted || atMs > lastUpdateMs) {
+			lastUpdateMs = atMs;
+		}
+		turnStarted = true;
+	}
+
+	public synchronized int getPlyCount() {
+		return plies;
 	}
 
 	public synchronized ClockSnapshot snapshot() {
-		advanceToNow();
+		long now = System.currentTimeMillis();
+		checkFlag(now);
 		return new ClockSnapshot(
 			controlType,
-			Math.max(0, whiteTimeMs),
-			Math.max(0, blackTimeMs),
+			Math.max(0, timeAt(Sides.WHITE, now)),
+			Math.max(0, timeAt(Sides.BLACK, now)),
 			activeSide,
 			running,
 			controlType != TimeControl.NO_CONTROL, // if there is time control, clock should be visible
@@ -142,6 +178,7 @@ public final class Clock {
 		flaggedSide = snapshot.getFlaggedSide();
 		running = snapshot.isRunning() && flaggedSide == null
 				&& controlType != TimeControl.NO_CONTROL;
+		turnStarted = true;
 		lastUpdateMs = System.currentTimeMillis();
 	}
 
@@ -149,12 +186,14 @@ public final class Clock {
 	 * getters for testing
 	 */
 	public synchronized long getWhiteTime() {
-		advanceToNow();
-		return Math.max(0, whiteTimeMs);
+		long now = System.currentTimeMillis();
+		checkFlag(now);
+		return Math.max(0, timeAt(Sides.WHITE, now));
 	}
 	public synchronized long getBlackTime() {
-		advanceToNow();
-		return Math.max(0, blackTimeMs);
+		long now = System.currentTimeMillis();
+		checkFlag(now);
+		return Math.max(0, timeAt(Sides.BLACK, now));
 	}
 	public synchronized int getIncrementStartMove() {
 		return incrementStartMove;
@@ -175,34 +214,44 @@ public final class Clock {
         return running;
     }
 
-	/**
-	 * Advances the clock to the current time, keeps the internal state up to sync if needed.
-	 */
-	private void advanceToNow() {
-		if (!running || controlType == TimeControl.NO_CONTROL || flaggedSide != null) {
-			return;
+	/** Time charged to the side to move since lastUpdateMs, as of timeMs. */
+	private long elapsedAt(long timeMs) {
+		if (!running || !turnStarted || controlType == TimeControl.NO_CONTROL || flaggedSide != null) {
+			return 0;
 		}
+		return Math.max(0, timeMs - lastUpdateMs);
+	}
 
-		long now = System.currentTimeMillis();
-		long elapsed = now - lastUpdateMs;
-		if (elapsed <= 0) {
-			return;
+	private long timeAt(Sides side, long timeMs) {
+		long stored = side == Sides.WHITE ? whiteTimeMs : blackTimeMs;
+		return side == activeSide ? stored - elapsedAt(timeMs) : stored;
+	}
+
+	/** Flags the side to move once it is past the grace period. */
+	private void checkFlag(long timeMs) {
+		if (timeAt(activeSide, timeMs) <= -FLAG_GRACE_MS) {
+			commitTo(timeMs);
 		}
+	}
 
-		// Time may run negative within the grace period; it is shown as 0.
-		if (activeSide == Sides.WHITE) {
-			whiteTimeMs = Math.max(-FLAG_GRACE_MS, whiteTimeMs - elapsed);
-			if (whiteTimeMs <= -FLAG_GRACE_MS) {
-				flaggedSide = Sides.WHITE;
+	/** Deducts the elapsed time up to timeMs from the side to move. */
+	private void commitTo(long timeMs) {
+		long elapsed = elapsedAt(timeMs);
+		if (elapsed > 0) {
+			// Time may run negative within the grace period; it is shown as 0.
+			if (activeSide == Sides.WHITE) {
+				whiteTimeMs = Math.max(-FLAG_GRACE_MS, whiteTimeMs - elapsed);
+				if (whiteTimeMs <= -FLAG_GRACE_MS) {
+					flaggedSide = Sides.WHITE;
+				}
+			} else {
+				blackTimeMs = Math.max(-FLAG_GRACE_MS, blackTimeMs - elapsed);
+				if (blackTimeMs <= -FLAG_GRACE_MS) {
+					flaggedSide = Sides.BLACK;
+				}
 			}
-		} else {
-			blackTimeMs = Math.max(-FLAG_GRACE_MS, blackTimeMs - elapsed);
-			if (blackTimeMs <= -FLAG_GRACE_MS) {
-				flaggedSide = Sides.BLACK;
-			}
 		}
-
-		lastUpdateMs = now;
+		lastUpdateMs = Math.max(lastUpdateMs, timeMs);
 	}
 
 	private void applyTimeControl() {

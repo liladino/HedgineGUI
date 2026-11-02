@@ -133,11 +133,15 @@ public final class GameManager implements MoveReceiver, ClockListener {
     public void requestCurrentMove() {
         final Player player;
         final Position position;
+        final ClockController clock;
+        final int ply;
         synchronized (stateLock) {
             if (!running || board == null) {
                 return;
             }
             player = currentPlayer;
+            clock = clockController;
+            ply = clock.getPlyCount();
             awaitingMove = true;
             position = new Position(
                     positionFENStrings.getFirst(),
@@ -153,6 +157,8 @@ public final class GameManager implements MoveReceiver, ClockListener {
             onMoveRequestFailed(player, error);
             return;
         }
+        // The request (an engine's "go") has been sent; only from here on is the player charged.
+        clock.startTurn(ply, System.currentTimeMillis());
         publishCurrentState();
     }
 
@@ -169,7 +175,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
     }
 
     @Override
-    public void onMoveReceived(Player player, Move move) {
+    public void onMoveReceived(Player player, Move move, long receivedAtMs) {
         boolean gameEnded;
 
         synchronized (stateLock) {
@@ -186,7 +192,8 @@ public final class GameManager implements MoveReceiver, ClockListener {
                 board.makeMove(new Move(move));
                 moves.add(new Move(move));
                 positionFENStrings.add(board.convertToFEN());
-                clockController.pressClock();
+                // Charge the mover only up to when the move arrived, not for our own processing.
+                clockController.pressClockAt(receivedAtMs);
                 clockSnapshot = clockController.snapshot();
                 result = board.getResult();
                 errorMessage = null;
