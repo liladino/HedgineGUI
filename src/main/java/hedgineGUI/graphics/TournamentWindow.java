@@ -22,6 +22,12 @@ import hedgineGUI.utility.Sides;
 /** Manual pairings, concurrent games per round, and a persistent tournament history. */
 public final class TournamentWindow extends JFrame {
     private final List<GameController> games = new ArrayList<>();
+    private final List<GameController> attemptedGames = new ArrayList<>();
+    private final Map<GameController, String> startupErrors = new HashMap<>();
+    private final DefaultTableModel resolutions = new DefaultTableModel(
+            new String[]{"Resolution", "This round", "Tournament"}, 0) {
+        @Override public boolean isCellEditable(int row, int column) { return false; }
+    };
     private final List<GameController> currentRound = new ArrayList<>();
     private final JTabbedPane rounds = new JTabbedPane();
     private final DefaultTableModel scores = new DefaultTableModel(
@@ -46,7 +52,15 @@ public final class TournamentWindow extends JFrame {
         JPanel info = new JPanel(new BorderLayout(8, 8));
         info.setPreferredSize(new Dimension(350, 500));
         info.add(status, BorderLayout.NORTH);
-        info.add(new JScrollPane(new JTable(scores)), BorderLayout.CENTER);
+        JPanel results = new JPanel(new BorderLayout(8, 8));
+        results.add(new JScrollPane(new JTable(scores)), BorderLayout.CENTER);
+        JTable gameCounts = new JTable(resolutions);
+        gameCounts.setFillsViewportHeight(true);
+        JScrollPane countsPane = new JScrollPane(gameCounts);
+        countsPane.setPreferredSize(new Dimension(350, 190));
+        countsPane.setBorder(BorderFactory.createTitledBorder("Games by resolution"));
+        results.add(countsPane, BorderLayout.SOUTH);
+        info.add(results, BorderLayout.CENTER);
         JPanel actions = new JPanel(new GridLayout(0, 1, 6, 6));
         next.addActionListener(e -> configureRound());
         actions.add(next);
@@ -168,6 +182,7 @@ public final class TournamentWindow extends JFrame {
         for (GameConfiguration configuration : configurations) {
             GameController controller = new DefaultGameController(new GameManager());
             currentRound.add(controller);
+            attemptedGames.add(controller);
             JPanel cell = new JPanel(new BorderLayout());
             ChessBoardPanel board = new ChessBoardPanel(controller);
             board.setPreferredSize(new Dimension(360, 360));
@@ -185,6 +200,13 @@ public final class TournamentWindow extends JFrame {
             cell.add(controls, BorderLayout.SOUTH);
             grid.add(cell);
             controller.addStateListener(state -> SwingUtilities.invokeLater(() -> {
+                if (startupErrors.containsKey(controller)) {
+                    abort.setEnabled(false);
+                    label.setText(configuration.getWhite().getName() + " – "
+                            + configuration.getBlack().getName() + ": Error — " + startupErrors.get(controller));
+                    refresh();
+                    return;
+                }
                 abort.setEnabled(state.isRunning());
                 label.setText(configuration.getWhite().getName() + " – " + configuration.getBlack().getName()
                         + ": " + (state.isRunning() ? "Playing" : state.getTermination())
@@ -204,19 +226,36 @@ public final class TournamentWindow extends JFrame {
                         export.setEnabled(true);
                         if (ended || abortRequested.contains(controller)) controller.stopGame();
                     } catch (Exception error) {
-                        roundsRemaining = 0;
-                        controller.stopGame();
-                        label.setText("Failed: " + error.getMessage());
+                        Throwable cause = error.getCause() == null ? error : error.getCause();
+                        String message = cause.getMessage() == null ? cause.toString() : cause.getMessage();
+                        startupErrors.put(controller, message);
+                        games.remove(controller);
+                        export.setEnabled(false);
+                        abort.setEnabled(false);
+                        try {
+                            controller.stopGame();
+                        } catch (RuntimeException cleanupError) {
+                            message += " (cleanup: " + cleanupError.getMessage() + ")";
+                            startupErrors.put(controller, message);
+                        } finally {
+                            // Players may have started before GameManager installed them.
+                            configuration.getWhite().endGame();
+                            configuration.getBlack().endGame();
+                        }
+                        label.setText(configuration.getWhite().getName() + " – "
+                                + configuration.getBlack().getName() + ": Error — " + message);
+                    } finally {
+                        pending--;
+                        if (pending == 0) starting = false;
+                        refresh();
                     }
-                    pending--;
-                    if (pending == 0) starting = false;
-                    refresh();
                 }
             }.execute();
         }
         // done() runs on the EDT after this method returns.
         pending = configurations.size();
         grid.revalidate();
+        refresh();
     }
 
     private FenSequence randomPositions;
@@ -242,13 +281,23 @@ public final class TournamentWindow extends JFrame {
 
     private void refresh() {
         scores.setRowCount(0);
-        Standings.calculate(games.stream().map(GameController::getState).toList())
-                .entrySet().stream()
+        Map<String, double[]> standings = Standings.calculate(
+                games.stream().map(GameController::getState).toList());
+        // Players whose games never started still appear with zero points.
+        participants.keySet().forEach(name -> standings.putIfAbsent(name, new double[4]));
+        standings.entrySet().stream()
                 .sorted((a, b) -> Double.compare(b.getValue()[3], a.getValue()[3]))
                 .forEach(entry -> {
                     double[] s = entry.getValue();
                     scores.addRow(new Object[]{entry.getKey(), (int)s[0], (int)s[1], (int)s[2], s[3]});
                 });
+        resolutions.setRowCount(0);
+        String[] categories = {"Starting", "Ongoing", "Finished normally", "Timeout", "Error", "Aborted"};
+        for (String category : categories) {
+            resolutions.addRow(new Object[]{category,
+                    countResolution(currentRound, category), countResolution(attemptedGames, category)});
+        }
+        resolutions.addRow(new Object[]{"Total", currentRound.size(), attemptedGames.size()});
         long running = currentRound.stream().filter(g -> g.getState().isRunning()).count();
         status.setText((ended ? "Tournament aborted" : "Round " + roundNumber) + " · " + running + " active games · " + roundsRemaining + " rounds queued");
         next.setEnabled(!ended && !starting && running == 0 && roundsRemaining == 0);
@@ -263,6 +312,23 @@ public final class TournamentWindow extends JFrame {
                 startRound(automaticGames.stream().map(game -> game.create(reverse)).toList());
             });
         }
+    }
+
+    private long countResolution(List<GameController> targets, String category) {
+        return targets.stream().filter(game -> resolution(game).equals(category)).count();
+    }
+
+    private String resolution(GameController game) {
+        if (startupErrors.containsKey(game)) return "Error";
+        GameState state = game.getState();
+        if (state.isRunning()) return "Ongoing";
+        return switch (state.getTermination()) {
+            case NONE -> "Starting";
+            case CHECKMATE, STALEMATE, DRAW, RESIGNATION -> "Finished normally";
+            case TIMEOUT -> "Timeout";
+            case ERROR -> "Error";
+            case ABORTED -> "Aborted";
+        };
     }
 
     private void abort(List<GameController> targets) {

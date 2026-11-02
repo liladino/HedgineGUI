@@ -90,8 +90,8 @@ fresh engine processes. The same FEN and time controls are repeated. Enable **Re
 to swap the engines and participant names in rounds 2, 4, etc. of that batch;
 rounds 1, 3, etc. use the configured colors. The FEN, including the side to move,
 is preserved exactly. Without this option, the configured colors are repeated.
-Aborting a round or the tournament cancels queued rounds. A startup failure also
-cancels queued rounds. Individual game aborts do not cancel the schedule.
+Aborting a round or the tournament cancels queued rounds. A startup failure records an error with zero points for both players;
+the remaining games and queued rounds continue. Individual game aborts do not cancel the schedule.
 
 Clock duration fields accept decimal seconds or integer milliseconds with an
 `ms` prefix: `X 1.5`, `X ms500`, and `S 10.5 0 ms100 40 2.5`.
@@ -118,3 +118,7 @@ Tournament setup has one shared time control for all games and automatic rounds.
 **Add game** copies the last tab's engine paths, participant names, and starting
 FEN into a new independently editable tab. Each game still starts its own engine
 processes.
+
+Below the standings, games are counted by resolution for the current round and
+the whole tournament: starting, ongoing, normally finished, timeout, error, and
+aborted. Startup failures count as errors and show their reason on the board.
