@@ -15,7 +15,8 @@ public final class Standings {
             double[] black = scores.computeIfAbsent(game.getBlackName(), k -> new double[4]);
             if (game.isRunning() || game.getTermination() == GameTermination.NONE
                     || game.getTermination() == GameTermination.ABORTED
-                    || game.getTermination() == GameTermination.ERROR) continue;
+                    || game.getTermination() == GameTermination.ERROR
+                    || game.getTermination() == GameTermination.TIMEOUT) continue;
             Result result = game.getResult();
             if (result == Result.WHITE_WON) { white[0]++; black[2]++; }
             else if (result == Result.BLACK_WON) { black[0]++; white[2]++; }

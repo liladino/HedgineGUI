@@ -34,6 +34,10 @@ public final class TournamentWindow extends JFrame {
             new String[]{"Player", "Wins", "Draws", "Losses", "Points"}, 0) {
         @Override public boolean isCellEditable(int row, int column) { return false; }
     };
+    private final JButton replayTimeouts = new JButton("Replay timeouts");
+    private final Map<GameController, ScheduledGame> gameSettings = new LinkedHashMap<>();
+    private final Deque<ScheduledGame> replayQueue = new ArrayDeque<>();
+    private int parallelLimit = 1;
     private final JButton next = new JButton("Next round");
     private final JLabel status = new JLabel("Configure the first round");
     private boolean ended;
@@ -64,8 +68,11 @@ public final class TournamentWindow extends JFrame {
         JPanel actions = new JPanel(new GridLayout(0, 1, 6, 6));
         next.addActionListener(e -> configureRound());
         actions.add(next);
+        replayTimeouts.setEnabled(false);
+        replayTimeouts.addActionListener(e -> replayTimeouts());
+        actions.add(replayTimeouts);
         JButton abortRound = new JButton("Abort games in this round");
-        abortRound.addActionListener(e -> { roundsRemaining = 0; abort(currentRound); });
+        abortRound.addActionListener(e -> { roundsRemaining = 0; replayQueue.clear(); abort(currentRound); });
         actions.add(abortRound);
         JButton abortAll = new JButton("Abort tournament");
         abortAll.addActionListener(e -> abortTournament());
@@ -161,7 +168,12 @@ public final class TournamentWindow extends JFrame {
     private final Map<String, File> participants = new HashMap<>();
 
     private void startRound(List<GameConfiguration> configurations) {
-        if (randomPositions != null) {
+        startRound(configurations, automaticGames, false);
+    }
+
+    private void startRound(List<GameConfiguration> configurations, List<ScheduledGame> templates, boolean replay) {
+        if (!replay) parallelLimit = Math.max(parallelLimit, configurations.size());
+        if (!replay && randomPositions != null) {
             List<String> positions = randomPositions.nextRound(configurations.size(),
                     alternateColors && scheduledRoundIndex % 2 == 1);
             List<GameConfiguration> selected = new ArrayList<>();
@@ -179,10 +191,16 @@ public final class TournamentWindow extends JFrame {
         rounds.addTab("Round " + (++roundNumber), new JScrollPane(grid));
         rounds.setSelectedIndex(rounds.getTabCount() - 1);
         setVisible(true);
+        int gameIndex = 0;
         for (GameConfiguration configuration : configurations) {
             GameController controller = new DefaultGameController(new GameManager());
             currentRound.add(controller);
             attemptedGames.add(controller);
+            ScheduledGame template = templates.get(gameIndex++);
+            boolean reversed = !replay && alternateColors && scheduledRoundIndex % 2 == 1;
+            gameSettings.put(controller, new ScheduledGame(configuration,
+                    reversed ? template.black() : template.white(),
+                    reversed ? template.white() : template.black(), template.time()));
             JPanel cell = new JPanel(new BorderLayout());
             ChessBoardPanel board = new ChessBoardPanel(controller);
             board.setPreferredSize(new Dimension(360, 360));
@@ -299,19 +317,56 @@ public final class TournamentWindow extends JFrame {
         }
         resolutions.addRow(new Object[]{"Total", currentRound.size(), attemptedGames.size()});
         long running = currentRound.stream().filter(g -> g.getState().isRunning()).count();
-        status.setText((ended ? "Tournament aborted" : "Round " + roundNumber) + " · " + running + " active games · " + roundsRemaining + " rounds queued");
-        next.setEnabled(!ended && !starting && running == 0 && roundsRemaining == 0);
-        if (!ended && !starting && running == 0 && roundsRemaining > 0 && !advancementQueued) {
+        status.setText((ended ? "Tournament aborted" : "Round " + roundNumber) + " · " + running + " active games · " + (roundsRemaining + (replayQueue.size() + parallelLimit - 1) / parallelLimit) + " rounds queued");
+        boolean idle = !starting && running == 0 && roundsRemaining == 0 && replayQueue.isEmpty();
+        next.setEnabled(!ended && idle);
+        replayTimeouts.setEnabled(idle && !advancementQueued && !timedOutGames().isEmpty());
+        if (!ended && !starting && running == 0
+                && (roundsRemaining > 0 || !replayQueue.isEmpty()) && !advancementQueued) {
             advancementQueued = true;
             SwingUtilities.invokeLater(() -> {
                 advancementQueued = false;
-                if (ended || roundsRemaining == 0) return;
+                if (ended) return;
+                if (!replayQueue.isEmpty()) {
+                    startReplayRound();
+                    return;
+                }
+                if (roundsRemaining == 0) return;
                 roundsRemaining--;
                 scheduledRoundIndex++;
                 boolean reverse = alternateColors && scheduledRoundIndex % 2 == 1;
                 startRound(automaticGames.stream().map(game -> game.create(reverse)).toList());
             });
         }
+    }
+
+    private List<GameController> timedOutGames() {
+        return attemptedGames.stream()
+                .filter(game -> !startupErrors.containsKey(game)
+                        && game.getState().getTermination() == GameTermination.TIMEOUT)
+                .toList();
+    }
+
+    private void replayTimeouts() {
+        if (starting || roundsRemaining != 0 || !replayQueue.isEmpty()
+                || currentRound.stream().anyMatch(game -> game.getState().isRunning())) return;
+        List<GameController> timedOut = timedOutGames();
+        if (timedOut.isEmpty()) return;
+        for (GameController game : timedOut) replayQueue.addLast(gameSettings.get(game));
+        // Superseded attempts stay available on their boards and in PGN exports,
+        // but the summary counts only their replacement attempts.
+        attemptedGames.removeAll(timedOut);
+        currentRound.removeAll(timedOut);
+        ended = false;
+        startReplayRound();
+    }
+
+    private void startReplayRound() {
+        List<ScheduledGame> batch = new ArrayList<>();
+        while (!replayQueue.isEmpty() && batch.size() < parallelLimit)
+            batch.add(replayQueue.removeFirst());
+        // create(false) preserves the exact colors and FEN of the timed-out attempt.
+        startRound(batch.stream().map(game -> game.create(false)).toList(), batch, true);
     }
 
     private long countResolution(List<GameController> targets, String category) {
@@ -340,6 +395,7 @@ public final class TournamentWindow extends JFrame {
     private void abortTournament() {
         ended = true;
         roundsRemaining = 0;
+        replayQueue.clear();
         abort(currentRound);
     }
 

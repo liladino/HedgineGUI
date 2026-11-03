@@ -33,4 +33,13 @@ class StandingsTest {
         assertArrayEquals(new double[4], scores.get("new"));
         assertArrayEquals(new double[4], scores.get("old"));
     }
+
+    @Test void timeoutsAwardNeitherPlayerPointsOrWins() throws Exception {
+        var scores = Standings.calculate(List.of(
+                game("new", "old", Result.WHITE_WON, GameTermination.TIMEOUT),
+                game("old", "new", Result.BLACK_WON, GameTermination.TIMEOUT),
+                game("new", "old", Result.DRAW, GameTermination.TIMEOUT)));
+        assertArrayEquals(new double[4], scores.get("new"));
+        assertArrayEquals(new double[4], scores.get("old"));
+    }
 }
