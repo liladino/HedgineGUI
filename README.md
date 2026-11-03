@@ -122,3 +122,14 @@ processes.
 Below the standings, games are counted by resolution for the current round and
 the whole tournament: starting, ongoing, normally finished, timeout, error, and
 aborted. Startup failures count as errors and show their reason on the board.
+
+Tournament timeouts award 0–0 points, with no win, draw, or loss recorded in
+standings. Once all queued rounds finish, **Replay timeouts** schedules every
+currently counted timeout again, in original game order, using the exact engine
+paths, colors, starting FEN, and time control. Replays run in batches no larger
+than the largest configured parallel round: 11 games with a limit of 3 become
+3 + 3 + 3 + 2. Random positions are not redrawn for replays.
+
+Replayed timeout attempts are removed from the summary counts; their boards and
+PGN exports remain available as history. Replacement attempts contribute their
+own results, and any new timeouts can be replayed again after the batch finishes.
