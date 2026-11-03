@@ -12,7 +12,7 @@ import hedgineGUI.core.IO.FENException;
 
 /** Deterministic draws in board order, independent of engine completion order. */
 public final class FenSequence {
-    public static final long SEED = 0L;
+    public static final long SEED = 1L;
     private final List<String> positions;
     private final Random random = new Random(SEED);
     private List<String> previousRound = List.of();

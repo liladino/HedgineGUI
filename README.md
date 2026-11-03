@@ -102,7 +102,7 @@ Engine executable pickers in both Play and Bot tournament remember the last
 folder used for an approved selection, shared across pickers and app launches.
 If the saved folder no longer exists, the picker uses its default folder.
 
-Enable **Random FEN from py/fens.txt (seed 0)** in tournament setup to replace
+Enable **Random FEN from py/fens.txt (seed 1)** in tournament setup to replace
 the per-game FEN fields with random starting positions from that UTF-8 file
 (relative to the application's working directory). Blank lines are ignored;
 missing, empty, or invalid files are reported before any engines start.

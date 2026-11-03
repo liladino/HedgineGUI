@@ -85,7 +85,7 @@ public final class TournamentWindow extends JFrame {
         JDialog dialog = new JDialog(this, "Configure round " + (roundNumber + 1), true);
         JTabbedPane tabs = new JTabbedPane();
         List<PairingForm> forms = new ArrayList<>();
-        JCheckBox randomFen = new JCheckBox("Random FEN from py/fens.txt (seed 0)");
+        JCheckBox randomFen = new JCheckBox("Random FEN from py/fens.txt (seed 1)", true);
         Runnable addGame = () -> {
             PairingForm form = new PairingForm();
             if (!forms.isEmpty()) form.copyFrom(forms.get(forms.size() - 1));
@@ -96,14 +96,14 @@ public final class TournamentWindow extends JFrame {
         };
         addGame.run();
         JPanel buttons = new JPanel();
-        JSpinner repeat = new JSpinner(new SpinnerNumberModel(1, 1, 10000, 1));
+        JSpinner repeat = new JSpinner(new SpinnerNumberModel(10, 1, 10000, 1));
         buttons.add(new JLabel("Rounds (repeat these pairings):"));
         buttons.add(repeat);
-        JCheckBox alternate = new JCheckBox("Reverse colors every second round");
+        JCheckBox alternate = new JCheckBox("Reverse colors every second round", true);
         buttons.add(alternate);
         randomFen.setToolTipText("Reversed rounds reuse the preceding round's positions.");
         JPanel options = new JPanel(new GridLayout(0, 1));
-        JTextField timeControl = new JTextField("X 2", 20);
+        JTextField timeControl = new JTextField("X 0.2", 20);
         JPanel timeSettings = new JPanel();
         timeSettings.add(new JLabel("Time control for all games (N / X 1.5 / S 180 0 ms500)"));
         timeSettings.add(timeControl);
