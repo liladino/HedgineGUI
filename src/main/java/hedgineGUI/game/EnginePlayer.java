@@ -93,7 +93,7 @@ public final class EnginePlayer extends Player {
         try {
             sendCommand("stop");
         } catch (IOException error) {
-            LOGGER.fine("Could not stop engine search: " + error.getMessage());
+            LOGGER.warning("Could not stop engine search: " + error.getMessage());
         }
     }
 
@@ -107,7 +107,7 @@ public final class EnginePlayer extends Player {
         try {
             sendCommand("quit");
         } catch (IOException error) {
-            LOGGER.fine("Could not send quit to engine: " + error.getMessage());
+            LOGGER.warning("Could not send quit to engine: " + error.getMessage());
         } finally {
             running = false;
             if (process != null) {

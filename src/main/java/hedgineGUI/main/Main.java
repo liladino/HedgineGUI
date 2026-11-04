@@ -1,6 +1,8 @@
 package hedgineGUI.main;
 
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 
@@ -18,8 +20,10 @@ import hedgineGUI.utility.Sides;
 
 public final class Main {
     private Main() {}
+    private static final Logger ENGINE_PLAYER_LOGGER = Logger.getLogger("hedgineGUI.game.EnginePlayer");
 
     public static void main(String[] args) {
+        ENGINE_PLAYER_LOGGER.setLevel(Level.WARNING);
         FlatLightLaf.setup();
         SwingUtilities.invokeLater(Main::startApplication);
     }

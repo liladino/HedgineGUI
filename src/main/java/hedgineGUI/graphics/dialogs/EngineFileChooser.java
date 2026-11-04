@@ -21,7 +21,7 @@ public final class EngineFileChooser {
                 String saved = preferences().get(LAST_DIRECTORY, "");
                 if (!saved.isEmpty()) lastDirectory = new File(saved);
             } catch (SecurityException error) {
-                LOGGER.fine("Cannot read engine directory preference: " + error.getMessage());
+                LOGGER.warning("Cannot read engine directory preference: " + error.getMessage());
             }
         }
         JFileChooser chooser = lastDirectory != null && lastDirectory.isDirectory()
