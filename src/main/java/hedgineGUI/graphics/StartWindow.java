@@ -1,10 +1,15 @@
 package hedgineGUI.graphics;
 
 import java.awt.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.swing.*;
 
 /** Entry point shared by play and tournament windows. */
 public final class StartWindow extends JFrame {
+    private static final Logger ENGINE_PLAYER_LOGGER = Logger.getLogger("hedgineGUI.game.EnginePlayer");
+    
     public StartWindow(Runnable play) {
         super("HedgineGUI");
         GraphicSettings.initializeGraphicSettings();
@@ -17,6 +22,7 @@ public final class StartWindow extends JFrame {
         tournament.addActionListener(e -> {
             TournamentWindow window = new TournamentWindow();
             window.configureRound();
+            ENGINE_PLAYER_LOGGER.setLevel(Level.WARNING);
         });
         choices.add(playButton);
         choices.add(tournament);
