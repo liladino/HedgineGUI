@@ -16,6 +16,7 @@ import hedgineGUI.game.*;
 import hedgineGUI.graphics.chessBoard.ChessBoardPanel;
 import hedgineGUI.graphics.dialogs.EngineFileChooser;
 import hedgineGUI.tournament.Standings;
+import hedgineGUI.tournament.PairStatistics;
 import hedgineGUI.tournament.FenSequence;
 import hedgineGUI.utility.Sides;
 
@@ -34,11 +35,32 @@ public final class TournamentWindow extends JFrame {
             new String[]{"Player", "Wins", "Draws", "Losses", "Points"}, 0) {
         @Override public boolean isCellEditable(int row, int column) { return false; }
     };
+    private final DefaultTableModel pairScores = new DefaultTableModel(
+            new String[]{"Player", "Opponent", "0 (LL)", "0.5 (LD)", "1 (WL/DD)",
+                    "1.5 (WD)", "2 (WW)", "Complete", "Incomplete"}, 0) {
+        @Override public boolean isCellEditable(int row, int column) { return false; }
+    };
+    private static final class GamePair {
+        final String player;
+        final String opponent;
+        final GameController[] legs = new GameController[2];
+        GamePair(GameConfiguration configuration) {
+            player = configuration.getWhite().getName();
+            opponent = configuration.getBlack().getName();
+        }
+    }
+    private record PairLeg(GamePair pair, int leg) {}
+    private record Matchup(String player, String opponent) {}
+    private final List<GamePair> pairs = new ArrayList<>();
+    private final List<GamePair> currentPairs = new ArrayList<>();
+    private final Map<GameController, PairLeg> pairLegs = new HashMap<>();
+    private final Map<ScheduledGame, PairLeg> replayLegs = new IdentityHashMap<>();
+
     private final JButton replayTimeouts = new JButton("Replay timeouts");
     private final Map<GameController, ScheduledGame> gameSettings = new LinkedHashMap<>();
     private final Deque<ScheduledGame> replayQueue = new ArrayDeque<>();
     private int parallelLimit = 1;
-    private final JButton next = new JButton("Next round");
+    private final JButton next = new JButton("Add pairs");
     private final JLabel status = new JLabel("Configure the first round");
     private boolean ended;
     private boolean starting;
@@ -54,10 +76,21 @@ public final class TournamentWindow extends JFrame {
             }
         });
         JPanel info = new JPanel(new BorderLayout(8, 8));
-        info.setPreferredSize(new Dimension(350, 500));
+        info.setPreferredSize(new Dimension(600, 500));
         info.add(status, BorderLayout.NORTH);
         JPanel results = new JPanel(new BorderLayout(8, 8));
-        results.add(new JScrollPane(new JTable(scores)), BorderLayout.CENTER);
+        JPanel standingsPanel = new JPanel(new GridLayout(2, 1, 8, 8));
+        JScrollPane playerPane = new JScrollPane(new JTable(scores));
+        playerPane.setBorder(BorderFactory.createTitledBorder("Individual games"));
+        standingsPanel.add(playerPane);
+        JTable pairTable = new JTable(pairScores);
+        pairTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for (int column = 0; column < pairTable.getColumnCount(); column++)
+            pairTable.getColumnModel().getColumn(column).setPreferredWidth(column < 2 ? 110 : 85);
+        JScrollPane pairPane = new JScrollPane(pairTable);
+        pairPane.setBorder(BorderFactory.createTitledBorder("Pair scores by matchup"));
+        standingsPanel.add(pairPane);
+        results.add(standingsPanel, BorderLayout.CENTER);
         JTable gameCounts = new JTable(resolutions);
         gameCounts.setFillsViewportHeight(true);
         JScrollPane countsPane = new JScrollPane(gameCounts);
@@ -83,7 +116,7 @@ public final class TournamentWindow extends JFrame {
         info.add(actions, BorderLayout.SOUTH);
         add(rounds, BorderLayout.CENTER);
         add(info, BorderLayout.EAST);
-        setSize(1200, 800);
+        setSize(1450, 850);
         setLocationRelativeTo(null);
     }
 
@@ -103,11 +136,10 @@ public final class TournamentWindow extends JFrame {
         };
         addGame.run();
         JPanel buttons = new JPanel();
-        JSpinner repeat = new JSpinner(new SpinnerNumberModel(10, 1, 10000, 1));
-        buttons.add(new JLabel("Rounds (repeat these pairings):"));
+        JSpinner repeat = new JSpinner(new SpinnerNumberModel(5, 1, 5000, 1));
+        buttons.add(new JLabel("Pairs per matchup (2 rounds each):"));
         buttons.add(repeat);
-        JCheckBox alternate = new JCheckBox("Reverse colors every second round", true);
-        buttons.add(alternate);
+        buttons.add(new JLabel("Each opening is played in both colors"));
         randomFen.setToolTipText("Reversed rounds reuse the preceding round's positions.");
         JPanel options = new JPanel(new GridLayout(0, 1));
         JTextField timeControl = new JTextField("X 0.2", 20);
@@ -149,9 +181,8 @@ public final class TournamentWindow extends JFrame {
                         form.blackFile, timeControl.getText().trim()));
             }
             randomPositions = selectedPositions;
-            alternateColors = alternate.isSelected();
             scheduledRoundIndex = 0;
-            roundsRemaining = (Integer) repeat.getValue() - 1;
+            roundsRemaining = 2 * (Integer) repeat.getValue() - 1;
             dialog.dispose();
             startRound(configurations);
         });
@@ -175,7 +206,7 @@ public final class TournamentWindow extends JFrame {
         if (!replay) parallelLimit = Math.max(parallelLimit, configurations.size());
         if (!replay && randomPositions != null) {
             List<String> positions = randomPositions.nextRound(configurations.size(),
-                    alternateColors && scheduledRoundIndex % 2 == 1);
+                    scheduledRoundIndex % 2 == 1);
             List<GameConfiguration> selected = new ArrayList<>();
             for (int i = 0; i < configurations.size(); i++) {
                 GameConfiguration game = configurations.get(i);
@@ -191,13 +222,28 @@ public final class TournamentWindow extends JFrame {
         rounds.addTab("Round " + (++roundNumber), new JScrollPane(grid));
         rounds.setSelectedIndex(rounds.getTabCount() - 1);
         setVisible(true);
+        if (!replay && scheduledRoundIndex % 2 == 0) currentPairs.clear();
         int gameIndex = 0;
         for (GameConfiguration configuration : configurations) {
             GameController controller = new DefaultGameController(new GameManager());
             currentRound.add(controller);
             attemptedGames.add(controller);
-            ScheduledGame template = templates.get(gameIndex++);
-            boolean reversed = !replay && alternateColors && scheduledRoundIndex % 2 == 1;
+            int slot = gameIndex++;
+            ScheduledGame template = templates.get(slot);
+            PairLeg assignment;
+            if (replay) {
+                assignment = Objects.requireNonNull(replayLegs.remove(template));
+            } else if (scheduledRoundIndex % 2 == 0) {
+                GamePair pair = new GamePair(configuration);
+                pairs.add(pair);
+                currentPairs.add(pair);
+                assignment = new PairLeg(pair, 0);
+            } else {
+                assignment = new PairLeg(currentPairs.get(slot), 1);
+            }
+            assignment.pair().legs[assignment.leg()] = controller;
+            pairLegs.put(controller, assignment);
+            boolean reversed = !replay && scheduledRoundIndex % 2 == 1;
             gameSettings.put(controller, new ScheduledGame(configuration,
                     reversed ? template.black() : template.white(),
                     reversed ? template.white() : template.black(), template.time()));
@@ -277,7 +323,6 @@ public final class TournamentWindow extends JFrame {
     }
 
     private FenSequence randomPositions;
-    private boolean alternateColors;
     private int scheduledRoundIndex;
     private int roundsRemaining;
     private boolean advancementQueued;
@@ -309,6 +354,7 @@ public final class TournamentWindow extends JFrame {
                     double[] s = entry.getValue();
                     scores.addRow(new Object[]{entry.getKey(), (int)s[0], (int)s[1], (int)s[2], s[3]});
                 });
+        refreshPairScores();
         resolutions.setRowCount(0);
         String[] categories = {"Starting", "Ongoing", "Finished normally", "Timeout", "Error", "Aborted"};
         for (String category : categories) {
@@ -334,10 +380,29 @@ public final class TournamentWindow extends JFrame {
                 if (roundsRemaining == 0) return;
                 roundsRemaining--;
                 scheduledRoundIndex++;
-                boolean reverse = alternateColors && scheduledRoundIndex % 2 == 1;
+                boolean reverse = scheduledRoundIndex % 2 == 1;
                 startRound(automaticGames.stream().map(game -> game.create(reverse)).toList());
             });
         }
+    }
+
+    private GameState pairState(GameController game) {
+        return game == null || startupErrors.containsKey(game) ? null : game.getState();
+    }
+
+    private void refreshPairScores() {
+        Map<Matchup, long[]> counts = new LinkedHashMap<>();
+        for (GamePair pair : pairs) {
+            int bucket = PairStatistics.bucket(pairState(pair.legs[0]), pairState(pair.legs[1]));
+            long[] forward = counts.computeIfAbsent(new Matchup(pair.player, pair.opponent), k -> new long[6]);
+            long[] backward = counts.computeIfAbsent(new Matchup(pair.opponent, pair.player), k -> new long[6]);
+            forward[bucket < 0 ? 5 : bucket]++;
+            backward[bucket < 0 ? 5 : 4 - bucket]++;
+        }
+        pairScores.setRowCount(0);
+        counts.forEach((matchup, bins) -> pairScores.addRow(new Object[]{
+                matchup.player(), matchup.opponent(), bins[0], bins[1], bins[2], bins[3], bins[4],
+                bins[0] + bins[1] + bins[2] + bins[3] + bins[4], bins[5]}));
     }
 
     private List<GameController> timedOutGames() {
@@ -352,7 +417,11 @@ public final class TournamentWindow extends JFrame {
                 || currentRound.stream().anyMatch(game -> game.getState().isRunning())) return;
         List<GameController> timedOut = timedOutGames();
         if (timedOut.isEmpty()) return;
-        for (GameController game : timedOut) replayQueue.addLast(gameSettings.get(game));
+        for (GameController game : timedOut) {
+            ScheduledGame settings = gameSettings.get(game);
+            replayLegs.put(settings, pairLegs.get(game));
+            replayQueue.addLast(settings);
+        }
         // Superseded attempts stay available on their boards and in PGN exports,
         // but the summary counts only their replacement attempts.
         attemptedGames.removeAll(timedOut);

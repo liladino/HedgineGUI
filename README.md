@@ -80,16 +80,15 @@ Each round appears in a tab containing a scrollable two-column board grid.
 Individual games have Abort and Export buttons. The sidebar can abort the current
 round, end the tournament, or export all successfully started games from every
 round into a single PGN file, including unfinished games. Once all current games
-finish or are aborted, **Next round** opens a new set of manual pairing tabs.
+finish or are aborted, **Add pairs** opens a new set of manual pairing tabs.
 Closing the tournament stops its engines.
 
-Automatic rounds: set **Rounds (repeat these pairings)** in the round setup dialog.
-The count includes the round being configured. All games in a round run concurrently;
-the next round starts after every game has stopped. Each game in every round gets
-fresh engine processes. The same FEN and time controls are repeated. Enable **Reverse colors every second round**
-to swap the engines and participant names in rounds 2, 4, etc. of that batch;
-rounds 1, 3, etc. use the configured colors. The FEN, including the side to move,
-is preserved exactly. Without this option, the configured colors are repeated.
+Automatic rounds: set **Pairs per matchup (2 rounds each)** in setup. Each tab
+defines one matchup. A count of 5 runs ten rounds, yielding five game pairs for
+each tab. Each pair uses the same FEN, including side to move, and time control
+in both games, with engine colors reversed in the second game. Color reversal
+is mandatory. Games in each round run concurrently, and each gets fresh engine
+processes. The next round starts when every game in the preceding round stops.
 Aborting a round or the tournament cancels queued rounds. A startup failure records an error with zero points for both players;
 the remaining games and queued rounds continue. Individual game aborts do not cancel the schedule.
 
@@ -109,9 +108,9 @@ missing, empty, or invalid files are reported before any engines start.
 
 The fixed seed resets at the start of each configured batch. Positions are drawn
 with replacement in game-tab order before engines start, so engine timing does
-not change the sequence. With alternating colors enabled, rounds 2, 4, etc. reuse
+not change the sequence. Rounds 2, 4, etc. reuse
 the preceding round's positions board-for-board; rounds 1, 3, etc. draw new ones.
-Otherwise, every round draws new positions for every game. The same file contents,
+The same file contents,
 game count, and options reproduce the same sequence in subsequent batches.
 
 Tournament setup has one shared time control for all games and automatic rounds.
@@ -133,3 +132,16 @@ than the largest configured parallel round: 11 games with a limit of 3 become
 Replayed timeout attempts are removed from the summary counts; their boards and
 PGN exports remain available as history. Replacement attempts contribute their
 own results, and any new timeouts can be replayed again after the batch finishes.
+
+
+The **Pair scores by matchup** table counts 0 (LL), 0.5 (LD/DL), 1 (WL/LW/DD),
+1.5 (WD/DW), and 2 (WW) points from the named player's perspective. Separate
+player/opponent rows prevent results against different opponents being pooled.
+Each pair also appears from the opponent's perspective, with complementary
+scores. Complete and incomplete counts are shown.
+
+Only two normally completed games contribute to a score bucket. Timeouts,
+errors, aborts, and missing or unfinished legs keep the pair incomplete.
+Timeout replays replace the corresponding leg of the original pair; they do
+not create a new pair or duplicate its statistics. Separate pairs with identical
+openings and players remain separate observations.
