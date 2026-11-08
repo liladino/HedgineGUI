@@ -84,6 +84,7 @@ public final class TournamentWindow extends JFrame {
         playerPane.setBorder(BorderFactory.createTitledBorder("Individual games"));
         standingsPanel.add(playerPane);
         JTable pairTable = new JTable(pairScores);
+        pairTable.setToolTipText("One row per matchup; scores are from the Player column’s perspective.");
         pairTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         for (int column = 0; column < pairTable.getColumnCount(); column++)
             pairTable.getColumnModel().getColumn(column).setPreferredWidth(column < 2 ? 110 : 85);
@@ -394,10 +395,16 @@ public final class TournamentWindow extends JFrame {
         Map<Matchup, long[]> counts = new LinkedHashMap<>();
         for (GamePair pair : pairs) {
             int bucket = PairStatistics.bucket(pairState(pair.legs[0]), pairState(pair.legs[1]));
-            long[] forward = counts.computeIfAbsent(new Matchup(pair.player, pair.opponent), k -> new long[6]);
-            long[] backward = counts.computeIfAbsent(new Matchup(pair.opponent, pair.player), k -> new long[6]);
-            forward[bucket < 0 ? 5 : bucket]++;
-            backward[bucket < 0 ? 5 : 4 - bucket]++;
+            Matchup matchup = new Matchup(pair.player, pair.opponent);
+            Matchup opposite = new Matchup(pair.opponent, pair.player);
+            // Keep the first encountered orientation as the row's scoring perspective.
+            // A pair configured in the opposite direction still contributes only once.
+            if (counts.containsKey(opposite)) {
+                matchup = opposite;
+                if (bucket >= 0) bucket = 4 - bucket;
+            }
+            long[] bins = counts.computeIfAbsent(matchup, k -> new long[6]);
+            bins[bucket < 0 ? 5 : bucket]++;
         }
         pairScores.setRowCount(0);
         counts.forEach((matchup, bins) -> pairScores.addRow(new Object[]{

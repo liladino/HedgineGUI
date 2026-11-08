@@ -137,8 +137,10 @@ own results, and any new timeouts can be replayed again after the batch finishes
 The **Pair scores by matchup** table counts 0 (LL), 0.5 (LD/DL), 1 (WL/LW/DD),
 1.5 (WD/DW), and 2 (WW) points from the named player's perspective. Separate
 player/opponent rows prevent results against different opponents being pooled.
-Each pair also appears from the opponent's perspective, with complementary
-scores. Complete and incomplete counts are shown.
+A vs B and B vs A share one row, using the first encountered player order.
+Scores always use the Player column's perspective; pairs configured in the
+opposite order have their scores converted to that perspective. Each pair
+contributes exactly once. Complete and incomplete counts are shown.
 
 Only two normally completed games contribute to a score bucket. Timeouts,
 errors, aborts, and missing or unfinished legs keep the pair incomplete.
