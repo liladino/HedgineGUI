@@ -8,7 +8,7 @@ from collections import Counter
 import chess
 import chess.pgn
 
-# python .\openings.py "lichess_db_standard_rated_2015-09.pgn" --moves 10 --min-occurrences 2 --output fens.txt
+# python .\openings.py "lichess_db_standard_rated_2015-09.pgn" --plies 10 --min-occurrences 2 --output fens.txt
 
 def open_pgn(path):
     if path.lower().endswith(".zst"):
@@ -109,7 +109,7 @@ class OpeningVisitor(chess.pgn.BaseVisitor):
 
 def extract(args):
     rng = random.Random(args.seed)
-    target_ply = args.moves * 2
+    target_ply = args.plies
 
     counts = Counter()
     full_fens = {}
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     parser.add_argument("input", help="Input .pgn or .pgn.zst")
     parser.add_argument("-o", "--output", default="openings.txt")
 
-    parser.add_argument("-m", "--moves", type=int, default=10)
+    parser.add_argument("-m", "--plies", type=int, default=10)
     parser.add_argument("-n", "--max-positions", type=int, default=2000)
     parser.add_argument("--min-occurrences", type=int, default=5)
     parser.add_argument("--min-elo", type=int, default=2100)
@@ -228,8 +228,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.moves < 1 or args.max_positions < 1:
-        parser.error("--moves and --max-positions must be positive")
+    if args.plies < 1 or args.max_positions < 1:
+        parser.error("--plies and --max-positions must be positive")
     if args.min_occurrences < 1 or args.max_games < 0:
         parser.error("Invalid occurrences or max-games value")
 

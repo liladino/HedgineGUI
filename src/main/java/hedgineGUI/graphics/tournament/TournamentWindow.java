@@ -136,7 +136,7 @@ public final class TournamentWindow extends JFrame {
         BoardGrid grid = new BoardGrid();
         rounds.addTab("Round " + (++roundNumber), new JScrollPane(grid));
         rounds.setSelectedIndex(rounds.getTabCount() - 1);
-        setVisible(true);
+        if (!isVisible()) setVisible(true);
         if (!replay && scheduledRoundIndex % 2 == 0) currentPairs.clear();
         for (int slot = 0; slot < configurations.size(); slot++) {
             GameConfiguration configuration = configurations.get(slot);
