@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 
 import javax.swing.*;
 
+import hedgineGUI.graphics.tournament.TournamentWindow;
+
 /** Entry point shared by play and tournament windows. */
 public final class StartWindow extends JFrame {
     private static final Logger ENGINE_PLAYER_LOGGER = Logger.getLogger("hedgineGUI.game.EnginePlayer");

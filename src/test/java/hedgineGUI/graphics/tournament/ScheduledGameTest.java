@@ -1,9 +1,10 @@
-package hedgineGUI.graphics;
+package hedgineGUI.graphics.tournament;
 
 import java.io.File;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import hedgineGUI.game.*;
+import hedgineGUI.graphics.SwingTicker;
 import hedgineGUI.utility.Sides;
 
 class ScheduledGameTest {
@@ -12,7 +13,7 @@ class ScheduledGameTest {
         var original = new GameConfiguration(fen,
                 new EnginePlayer(Sides.WHITE, "new", new File("new")),
                 new EnginePlayer(Sides.BLACK, "old", new File("old")), "X ms500", new SwingTicker());
-        var template = new TournamentWindow.ScheduledGame(original, new File("new"), new File("old"), "X ms500");
+        var template = new ScheduledGame(original, new File("new"), new File("old"), "X ms500");
         var reversed = template.create(true);
         assertEquals("old", reversed.getWhite().getName());
         assertEquals("new", reversed.getBlack().getName());
