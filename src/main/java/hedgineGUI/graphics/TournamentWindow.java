@@ -6,8 +6,14 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -22,6 +28,7 @@ import hedgineGUI.utility.Sides;
 
 /** Manual pairings, concurrent games per round, and a persistent tournament history. */
 public final class TournamentWindow extends JFrame {
+    private static final Logger LOGGER = Logger.getLogger(TournamentWindow.class.getName());
     private final List<GameController> games = new ArrayList<>();
     private final List<GameController> attemptedGames = new ArrayList<>();
     private final Map<GameController, String> startupErrors = new HashMap<>();
@@ -56,7 +63,6 @@ public final class TournamentWindow extends JFrame {
     private final Map<GameController, PairLeg> pairLegs = new HashMap<>();
     private final Map<ScheduledGame, PairLeg> replayLegs = new IdentityHashMap<>();
 
-    private final JButton replayTimeouts = new JButton("Replay timeouts");
     private final Map<GameController, ScheduledGame> gameSettings = new LinkedHashMap<>();
     private final Deque<ScheduledGame> replayQueue = new ArrayDeque<>();
     private int parallelLimit = 1;
@@ -102,11 +108,13 @@ public final class TournamentWindow extends JFrame {
         JPanel actions = new JPanel(new GridLayout(0, 1, 6, 6));
         next.addActionListener(e -> configureRound());
         actions.add(next);
-        replayTimeouts.setEnabled(false);
-        replayTimeouts.addActionListener(e -> replayTimeouts());
-        actions.add(replayTimeouts);
         JButton abortRound = new JButton("Abort games in this round");
-        abortRound.addActionListener(e -> { roundsRemaining = 0; replayQueue.clear(); abort(currentRound); });
+        abortRound.addActionListener(e -> {
+            roundsRemaining = 0;
+            replayQueue.clear();
+            roundAborted = true;
+            abort(currentRound);
+        });
         actions.add(abortRound);
         JButton abortAll = new JButton("Abort tournament");
         abortAll.addActionListener(e -> abortTournament());
@@ -115,8 +123,15 @@ public final class TournamentWindow extends JFrame {
         export.addActionListener(e -> export(games));
         actions.add(export);
         info.add(actions, BorderLayout.SOUTH);
-        add(rounds, BorderLayout.CENTER);
-        add(info, BorderLayout.EAST);
+        // The divider lets the user trade board space for the standings panel.
+        info.setMinimumSize(new Dimension(250, 0));
+        rounds.setMinimumSize(new Dimension(250, 0));
+        rounds.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, rounds, info);
+        split.setResizeWeight(1.0);
+        split.setContinuousLayout(true);
+        split.setOneTouchExpandable(true);
+        add(split, BorderLayout.CENTER);
         setSize(1450, 850);
         setLocationRelativeTo(null);
     }
@@ -204,6 +219,8 @@ public final class TournamentWindow extends JFrame {
     }
 
     private void startRound(List<GameConfiguration> configurations, List<ScheduledGame> templates, boolean replay) {
+        if (resultsFile == null) resultsFile = Path.of(System.getProperty("user.dir"), "saves",
+                "tournament_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + ".txt");
         if (!replay) parallelLimit = Math.max(parallelLimit, configurations.size());
         if (!replay && randomPositions != null) {
             List<String> positions = randomPositions.nextRound(configurations.size(),
@@ -217,9 +234,10 @@ public final class TournamentWindow extends JFrame {
             configurations = selected;
         }
         starting = true;
+        roundAborted = false;
         next.setEnabled(false);
         currentRound.clear();
-        JPanel grid = new JPanel(new GridLayout(0, 2, 12, 12));
+        BoardGrid grid = new BoardGrid();
         rounds.addTab("Round " + (++roundNumber), new JScrollPane(grid));
         rounds.setSelectedIndex(rounds.getTabCount() - 1);
         setVisible(true);
@@ -250,7 +268,7 @@ public final class TournamentWindow extends JFrame {
                     reversed ? template.white() : template.black(), template.time()));
             JPanel cell = new JPanel(new BorderLayout());
             ChessBoardPanel board = new ChessBoardPanel(controller);
-            board.setPreferredSize(new Dimension(360, 360));
+            board.setPreferredSize(new Dimension(BoardGrid.MIN_BOARD, BoardGrid.MIN_BOARD));
             cell.add(board);
             JLabel label = new JLabel(configuration.getWhite().getName() + " – " + configuration.getBlack().getName());
             cell.add(label, BorderLayout.NORTH);
@@ -327,6 +345,9 @@ public final class TournamentWindow extends JFrame {
     private int scheduledRoundIndex;
     private int roundsRemaining;
     private boolean advancementQueued;
+    private boolean roundAborted;
+    private Path resultsFile;
+    private int savedRound;
     private List<ScheduledGame> automaticGames = List.of();
 
     record ScheduledGame(GameConfiguration configuration, File white, File black, String time) {
@@ -364,16 +385,23 @@ public final class TournamentWindow extends JFrame {
         }
         resolutions.addRow(new Object[]{"Total", currentRound.size(), attemptedGames.size()});
         long running = currentRound.stream().filter(g -> g.getState().isRunning()).count();
-        status.setText((ended ? "Tournament aborted" : "Round " + roundNumber) + " · " + running + " active games · " + (roundsRemaining + (replayQueue.size() + parallelLimit - 1) / parallelLimit) + " rounds queued");
-        boolean idle = !starting && running == 0 && roundsRemaining == 0 && replayQueue.isEmpty();
+        List<GameController> timedOut = starting || running > 0 ? List.of() : roundTimeouts();
+        int replays = replayQueue.size() + timedOut.size();
+        status.setText((ended ? "Tournament aborted" : "Round " + roundNumber) + " · " + running + " active games · " + (roundsRemaining + (replays + parallelLimit - 1) / parallelLimit) + " rounds queued");
+        if (!starting && running == 0 && roundNumber > savedRound) {
+            savedRound = roundNumber;
+            saveResults();
+        }
+        boolean idle = !starting && running == 0 && roundsRemaining == 0 && replays == 0;
         next.setEnabled(!ended && idle);
-        replayTimeouts.setEnabled(idle && !advancementQueued && !timedOutGames().isEmpty());
         if (!ended && !starting && running == 0
-                && (roundsRemaining > 0 || !replayQueue.isEmpty()) && !advancementQueued) {
+                && (roundsRemaining > 0 || replays > 0) && !advancementQueued) {
             advancementQueued = true;
             SwingUtilities.invokeLater(() -> {
                 advancementQueued = false;
                 if (ended) return;
+                // Timeouts are replayed before the next scheduled round.
+                queueReplays(roundTimeouts());
                 if (!replayQueue.isEmpty()) {
                     startReplayRound();
                     return;
@@ -412,18 +440,16 @@ public final class TournamentWindow extends JFrame {
                 bins[0] + bins[1] + bins[2] + bins[3] + bins[4], bins[5]}));
     }
 
-    private List<GameController> timedOutGames() {
-        return attemptedGames.stream()
+    /** Timed-out games of the current round, unless the user aborted it. */
+    private List<GameController> roundTimeouts() {
+        if (ended || roundAborted) return List.of();
+        return currentRound.stream()
                 .filter(game -> !startupErrors.containsKey(game)
                         && game.getState().getTermination() == GameTermination.TIMEOUT)
                 .toList();
     }
 
-    private void replayTimeouts() {
-        if (starting || roundsRemaining != 0 || !replayQueue.isEmpty()
-                || currentRound.stream().anyMatch(game -> game.getState().isRunning())) return;
-        List<GameController> timedOut = timedOutGames();
-        if (timedOut.isEmpty()) return;
+    private void queueReplays(List<GameController> timedOut) {
         for (GameController game : timedOut) {
             ScheduledGame settings = gameSettings.get(game);
             replayLegs.put(settings, pairLegs.get(game));
@@ -433,8 +459,6 @@ public final class TournamentWindow extends JFrame {
         // but the summary counts only their replacement attempts.
         attemptedGames.removeAll(timedOut);
         currentRound.removeAll(timedOut);
-        ended = false;
-        startReplayRound();
     }
 
     private void startReplayRound() {
@@ -475,6 +499,33 @@ public final class TournamentWindow extends JFrame {
         abort(currentRound);
     }
 
+    /** Overwrites the tournament's results file with the current contents of the results panel. */
+    private void saveResults() {
+        StringBuilder text = new StringBuilder(status.getText()).append("\n\n");
+        text.append("Individual games (wins draws losses points)\n");
+        for (int row = 0; row < scores.getRowCount(); row++)
+            text.append(scores.getValueAt(row, 0)).append(": ").append(cells(scores, row, 1)).append('\n');
+        text.append("\nPair scores (0 0.5 1 1.5 2 complete incomplete)\n");
+        for (int row = 0; row < pairScores.getRowCount(); row++)
+            text.append(pairScores.getValueAt(row, 0)).append(" vs ").append(pairScores.getValueAt(row, 1))
+                    .append(": ").append(cells(pairScores, row, 2)).append('\n');
+        text.append("\nGames by resolution (this round, tournament)\n");
+        for (int row = 0; row < resolutions.getRowCount(); row++)
+            text.append(resolutions.getValueAt(row, 0)).append(": ").append(cells(resolutions, row, 1)).append('\n');
+        try {
+            Files.createDirectories(resultsFile.getParent());
+            Files.writeString(resultsFile, text, StandardCharsets.UTF_8);
+        } catch (IOException error) {
+            LOGGER.log(Level.WARNING, "Could not save tournament results to " + resultsFile, error);
+        }
+    }
+
+    private static String cells(DefaultTableModel model, int row, int from) {
+        return IntStream.range(from, model.getColumnCount())
+                .mapToObj(column -> String.valueOf(model.getValueAt(row, column)))
+                .collect(Collectors.joining(" "));
+    }
+
     private void export(List<GameController> targets) {
         JFileChooser chooser = new JFileChooser();
         chooser.setSelectedFile(new File("tournament.pgn"));
@@ -489,6 +540,82 @@ public final class TournamentWindow extends JFrame {
         } catch (IOException error) {
             JOptionPane.showMessageDialog(this, error.getMessage(), "Export failed", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Sizes the board cells to show the whole round in the visible area, picking the column count
+     * that gives the largest boards. Only when boards would drop below MIN_BOARD does it scroll vertically.
+     */
+    private static final class BoardGrid extends JPanel implements Scrollable {
+        static final int MIN_BOARD = 150;
+        private static final int GAP = 12;
+        private record Fit(int columns, int board) {}
+
+        BoardGrid() {
+            super(null);
+        }
+
+        @Override public void addNotify() {
+            super.addNotify();
+            // Viewport height changes do not resize this panel, but they change the best fit.
+            if (getParent() instanceof JViewport viewport) viewport.addComponentListener(new ComponentAdapter() {
+                @Override public void componentResized(ComponentEvent e) { revalidate(); }
+            });
+        }
+
+        /** Height of each cell's label and buttons; boards are given MIN_BOARD as preferred height. */
+        private int extraHeight() {
+            int extra = 0;
+            for (Component cell : getComponents()) extra = Math.max(extra, cell.getPreferredSize().height - MIN_BOARD);
+            return extra;
+        }
+
+        private Dimension area() {
+            return getParent() instanceof JViewport viewport ? viewport.getExtentSize() : getSize();
+        }
+
+        private Fit fit(Dimension area, int extra) {
+            int count = getComponentCount();
+            if (count == 0 || area.width <= 0 || area.height <= 0) return new Fit(Math.max(1, Math.min(count, 2)), MIN_BOARD);
+            Fit best = null;
+            for (int columns = 1; columns <= count; columns++) {
+                int rows = (count + columns - 1) / columns;
+                int board = Math.min((area.width - GAP * (columns - 1)) / columns,
+                        (area.height - GAP * (rows - 1)) / rows - extra);
+                if (best == null || board > best.board()) best = new Fit(columns, board);
+            }
+            if (best.board() >= MIN_BOARD) return best;
+            int columns = Math.max(1, Math.min(count, (area.width + GAP) / (MIN_BOARD + GAP)));
+            return new Fit(columns, Math.max(1, (area.width - GAP * (columns - 1)) / columns));
+        }
+
+        @Override public void doLayout() {
+            Dimension area = area();
+            int extra = extraHeight();
+            Fit fit = fit(area, extra);
+            int cellHeight = fit.board() + extra;
+            int left = Math.max(0, (area.width - fit.columns() * (fit.board() + GAP) + GAP) / 2);
+            for (int i = 0; i < getComponentCount(); i++) {
+                getComponent(i).setBounds(left + i % fit.columns() * (fit.board() + GAP),
+                        i / fit.columns() * (cellHeight + GAP), fit.board(), cellHeight);
+            }
+        }
+
+        @Override public Dimension getPreferredSize() {
+            int extra = extraHeight();
+            Fit fit = fit(area(), extra);
+            int rows = (getComponentCount() + fit.columns() - 1) / fit.columns();
+            return new Dimension(fit.columns() * (fit.board() + GAP) - GAP,
+                    Math.max(0, rows * (fit.board() + extra + GAP) - GAP));
+        }
+
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(Rectangle visible, int orientation, int direction) { return 24; }
+        @Override public int getScrollableBlockIncrement(Rectangle visible, int orientation, int direction) {
+            return orientation == SwingConstants.VERTICAL ? visible.height : visible.width;
+        }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
     }
 
     private static final class PairingForm extends JPanel {
