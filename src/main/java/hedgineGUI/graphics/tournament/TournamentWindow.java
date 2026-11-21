@@ -45,6 +45,7 @@ public final class TournamentWindow extends JFrame {
     private List<ScheduledGame> automaticGames = List.of();
     private FenSequence randomPositions;
     private int randomPlies;
+    private boolean dataGeneration;
     private Random openingRandom;
     private List<List<Move>> pairedOpeningMoves = List.of();
     private int parallelLimit = 1;
@@ -63,7 +64,7 @@ public final class TournamentWindow extends JFrame {
 
     private final JTabbedPane rounds = new JTabbedPane();
     private final StandingsPanel standings = new StandingsPanel();
-    private final JButton next = new JButton("Add pairs");
+    private final JButton next = new JButton("Add games");
 
     public TournamentWindow() {
         super("Bot tournament");
@@ -120,10 +121,11 @@ public final class TournamentWindow extends JFrame {
         automaticGames = setup.games();
         randomPositions = setup.positions();
         randomPlies = setup.randomPlies();
+        dataGeneration = setup.dataGeneration();
         openingRandom = new Random(FenSequence.SEED);
         pairedOpeningMoves = List.of();
         scheduledRoundIndex = 0;
-        roundsRemaining = 2 * setup.pairsPerMatchup() - 1;
+        roundsRemaining = setup.rounds() - 1;
         startRound(setup.configurations());
     }
 
@@ -153,7 +155,7 @@ public final class TournamentWindow extends JFrame {
             attemptedGames.add(controller);
             ScheduledGame template = templates.get(slot);
             assignPairLeg(controller, configuration, template, slot, replay);
-            boolean reversed = !replay && scheduledRoundIndex % 2 == 1;
+            boolean reversed = !replay && reverseColors();
             gameSettings.put(controller, new ScheduledGame(configuration,
                     reversed ? template.black() : template.white(),
                     reversed ? template.white() : template.black(), template.time()));
@@ -174,7 +176,7 @@ public final class TournamentWindow extends JFrame {
     }
 
     private List<GameConfiguration> withRandomPositions(List<GameConfiguration> configurations) {
-        List<String> positions = randomPositions.nextRound(configurations.size(), scheduledRoundIndex % 2 == 1);
+        List<String> positions = randomPositions.nextRound(configurations.size(), reverseColors());
         List<GameConfiguration> selected = new ArrayList<>();
         for (int i = 0; i < configurations.size(); i++) {
             GameConfiguration game = configurations.get(i);
@@ -183,9 +185,13 @@ public final class TournamentWindow extends JFrame {
         return selected;
     }
 
-    /** Generate once per pair, in tab order; reversed games and retries reuse the exact moves. */
+    private boolean reverseColors() {
+        return !dataGeneration && scheduledRoundIndex % 2 == 1;
+    }
+
+    /** Generate per opening, in tab order; only tournament pairs reuse it in reverse colors. */
     private List<GameConfiguration> withOpeningMoves(List<GameConfiguration> configurations) {
-        if (scheduledRoundIndex % 2 == 0) {
+        if (!reverseColors()) {
             List<List<Move>> generated = new ArrayList<>();
             for (GameConfiguration game : configurations) {
                 try {
@@ -209,7 +215,10 @@ public final class TournamentWindow extends JFrame {
             ScheduledGame template, int slot, boolean replay) {
         PairLeg assignment;
         if (replay) {
-            assignment = Objects.requireNonNull(replayLegs.remove(template));
+            assignment = replayLegs.remove(template);
+            if (assignment == null) return; // Data-generation replays have no pair.
+        } else if (dataGeneration) {
+            return;
         } else if (scheduledRoundIndex % 2 == 0) {
             GamePair pair = new GamePair(configuration.getWhite().getName(), configuration.getBlack().getName());
             pairs.add(pair);
@@ -297,7 +306,7 @@ public final class TournamentWindow extends JFrame {
         if (roundsRemaining == 0) return;
         roundsRemaining--;
         scheduledRoundIndex++;
-        boolean reverse = scheduledRoundIndex % 2 == 1;
+        boolean reverse = reverseColors();
         startRound(automaticGames.stream().map(game -> game.create(reverse)).toList());
     }
 
@@ -323,7 +332,8 @@ public final class TournamentWindow extends JFrame {
     private void queueReplays(List<GameController> timedOut) {
         for (GameController game : timedOut) {
             ScheduledGame settings = gameSettings.get(game);
-            replayLegs.put(settings, pairLegs.get(game));
+            PairLeg leg = pairLegs.get(game);
+            if (leg != null) replayLegs.put(settings, leg);
             replayQueue.addLast(settings);
         }
         // Superseded attempts stay available on their boards and in PGN exports,

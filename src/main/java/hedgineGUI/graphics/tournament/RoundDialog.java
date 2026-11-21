@@ -17,7 +17,10 @@ import hedgineGUI.tournament.FenSequence;
 final class RoundDialog extends JDialog {
     /** Participants includes the previously known ones plus everyone registered by this setup. */
     record RoundSetup(List<GameConfiguration> configurations, List<ScheduledGame> games,
-            FenSequence positions, int pairsPerMatchup, Map<String, File> participants, int randomPlies) {}
+            FenSequence positions, int repetitions, Map<String, File> participants,
+            int randomPlies, boolean dataGeneration) {
+        int rounds() { return dataGeneration ? repetitions : 2 * repetitions; }
+    }
 
     private final Map<String, File> knownParticipants;
     private final List<PairingForm> forms = new ArrayList<>();
@@ -43,9 +46,11 @@ final class RoundDialog extends JDialog {
         knownParticipants = participants;
         addGame();
         JPanel buttons = new JPanel();
-        buttons.add(new JLabel("Pairs per matchup (2 rounds each):"));
+        JLabel repeatLabel = new JLabel("Pairs per matchup (2 rounds each):");
+        JLabel openingLabel = new JLabel("Each opening is played in both colors");
+        buttons.add(repeatLabel);
         buttons.add(repeat);
-        buttons.add(new JLabel("Each opening is played in both colors"));
+        buttons.add(openingLabel);
         randomFen.setToolTipText("Reversed rounds reuse the preceding round's positions.");
         JPanel options = new JPanel(new GridLayout(0, 1));
         JPanel timeSettings = new JPanel();
@@ -67,6 +72,10 @@ final class RoundDialog extends JDialog {
         options.add(generationSettings);
         mode.addActionListener(e -> {
             boolean generation = mode.getSelectedIndex() == 1;
+            repeatLabel.setText(generation ? "Games per matchup:" : "Pairs per matchup (2 rounds each):");
+            openingLabel.setText(generation ? "One game per sampled opening" : "Each opening is played in both colors");
+            randomFen.setToolTipText(generation ? "Sample a new opening for every game."
+                    : "Reversed rounds reuse the preceding round's positions.");
             timeSettings.setVisible(!generation);
             generationSettings.setVisible(generation);
             pack();
@@ -129,7 +138,7 @@ final class RoundDialog extends JDialog {
                 games.add(game);
             }
             setup = new RoundSetup(configurations, games, positions, (Integer) repeat.getValue(), identities,
-                    generation ? (Integer) randomPlies.getValue() : 0);
+                    generation ? (Integer) randomPlies.getValue() : 0, generation);
         } catch (Exception error) {
             JOptionPane.showMessageDialog(this, error.getMessage(), "Invalid game", JOptionPane.ERROR_MESSAGE);
             return;

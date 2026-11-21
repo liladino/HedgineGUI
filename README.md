@@ -80,7 +80,7 @@ Each round appears in a tab containing a scrollable two-column board grid.
 Individual games have Abort and Export buttons. The sidebar can abort the current
 round, end the tournament, or export all successfully started games from every
 round into a single PGN file, including unfinished games. Once all current games
-finish or are aborted, **Add pairs** opens a new set of manual pairing tabs.
+finish or are aborted, **Add games** opens a new set of manual pairing tabs.
 Closing the tournament stops its engines.
 
 Automatic rounds: set **Pairs per matchup (2 rounds each)** in setup. Each tab
@@ -153,14 +153,16 @@ openings and players remain separate observations.
 Choose **Data generation** in tournament setup. Set **K** random moves (individual
 plies, default 4), **N** search depth (default 8), and a positive timeout for each
 search (default 10 seconds; decimal seconds and `ms500` are accepted).
-Opening selection and paired games work as in tournament mode.
+Set **Games per matchup** to choose how many games each tab runs. Data generation
+plays one game per sampled opening, without a reversed-color partner. Tournament
+mode still uses **Pairs per matchup** and plays both colors.
 
 Before engine play, the GUI chooses uniformly from the legal moves at each of K
 plies. It stops early if the game ends. These moves are included in the game
 history and exported PGN, without evaluation comments. The random sequence uses
 the fixed opening seed, in tab order, and resets for each configured batch.
-Both colors in a pair and every timeout retry reuse the same opening and random
-moves. Each engine receives the original FEN plus the full move history.
+Each new data-generation game samples a fresh opening and random move sequence.
+Timeout retries reuse the same opening and random moves as the failed attempt. Each engine receives the original FEN plus the full move history.
 
 Engine searches use `go depth N`. The timeout is enforced by the existing
 per-move clock, with the same grace period, 0–0 tournament scoring, and automatic
@@ -177,3 +179,8 @@ ignored. Missing or malformed scores, mate scores, and bound-only scores are
 not exported as exact centipawn values. Scores are cleared for each new search,
 so a move never inherits the preceding search's evaluation. Human moves and
 the random opening moves have no such comments.
+
+Data-generation games contribute to individual standings and resolution counts,
+but do not create entries in pair-score statistics. For example, 5 games per
+matchup across 3 tabs schedules 5 rounds of 3 games (15 games total), plus any
+timeout retries.
