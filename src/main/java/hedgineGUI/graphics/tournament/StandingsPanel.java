@@ -62,7 +62,7 @@ final class StandingsPanel extends JPanel {
                 .sorted((a, b) -> Double.compare(b.getValue()[3], a.getValue()[3]))
                 .forEach(entry -> {
                     double[] s = entry.getValue();
-                    scores.addRow(new Object[]{entry.getKey(), (int)s[0], (int)s[1], (int)s[2], s[3]});
+                    scores.addRow(new Object[]{entry.getKey(), (long)s[0], (long)s[1], (long)s[2], s[3]});
                 });
     }
 
@@ -73,14 +73,14 @@ final class StandingsPanel extends JPanel {
                 bins[0] + bins[1] + bins[2] + bins[3] + bins[4], bins[5]}));
     }
 
-    void showResolutions(List<Resolution> round, List<Resolution> tournament) {
+    void showResolutions(List<Resolution> round, List<Resolution> tournament, Map<Resolution, Long> archived) {
         resolutions.setRowCount(0);
         for (Resolution resolution : Resolution.values()) {
             resolutions.addRow(new Object[]{resolution,
                     round.stream().filter(resolution::equals).count(),
-                    tournament.stream().filter(resolution::equals).count()});
+                    archived.getOrDefault(resolution, 0L) + tournament.stream().filter(resolution::equals).count()});
         }
-        resolutions.addRow(new Object[]{"Total", round.size(), tournament.size()});
+        resolutions.addRow(new Object[]{"Total", round.size(), archived.values().stream().mapToLong(Long::longValue).sum() + tournament.size()});
     }
 
     /** Plain-text copy of everything shown, for the results file. */

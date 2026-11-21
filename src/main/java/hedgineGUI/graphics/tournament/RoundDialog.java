@@ -18,7 +18,7 @@ final class RoundDialog extends JDialog {
     /** Participants includes the previously known ones plus everyone registered by this setup. */
     record RoundSetup(List<GameConfiguration> configurations, List<ScheduledGame> games,
             FenSequence positions, int repetitions, Map<String, File> participants,
-            int randomPlies, boolean dataGeneration) {
+            int randomPlies, boolean dataGeneration, int batchRounds) {
         int rounds() { return dataGeneration ? repetitions : 2 * repetitions; }
     }
 
@@ -27,11 +27,12 @@ final class RoundDialog extends JDialog {
     private final JTabbedPane tabs = new JTabbedPane();
     private final JCheckBox randomFen = new JCheckBox("Random FEN from py/fens.txt (seed 1)", true);
     private final JTextField timeControl = new JTextField("X 0.2", 20);
-    private final JSpinner repeat = new JSpinner(new SpinnerNumberModel(5, 1, 5000, 1));
+    private final JSpinner repeat = new JSpinner(new SpinnerNumberModel(5, 1, 100_000_000, 1));
     private final JComboBox<String> mode = new JComboBox<>(new String[]{"Tournament", "Data generation"});
     private final JSpinner randomPlies = new JSpinner(new SpinnerNumberModel(4, 0, 1000, 1));
     private final JSpinner depth = new JSpinner(new SpinnerNumberModel(8, 1, 128, 1));
     private final JTextField timeout = new JTextField("10", 8);
+    private final JSpinner batchRounds = new JSpinner(new SpinnerNumberModel(1000, 1, 100_000, 1));
     private RoundSetup setup;
 
     /** Returns null when the dialog is closed without starting. */
@@ -70,6 +71,12 @@ final class RoundDialog extends JDialog {
         generationSettings.add(timeout);
         generationSettings.setVisible(false);
         options.add(generationSettings);
+        JPanel batchSettings = new JPanel();
+        batchSettings.add(new JLabel("Release saved history every N rounds (including retries)"));
+        batchSettings.add(batchRounds);
+        batchSettings.add(new JLabel("PGN is saved after every round in saves/"));
+        batchSettings.setVisible(false);
+        options.add(batchSettings);
         mode.addActionListener(e -> {
             boolean generation = mode.getSelectedIndex() == 1;
             repeatLabel.setText(generation ? "Games per matchup:" : "Pairs per matchup (2 rounds each):");
@@ -78,6 +85,7 @@ final class RoundDialog extends JDialog {
                     : "Reversed rounds reuse the preceding round's positions.");
             timeSettings.setVisible(!generation);
             generationSettings.setVisible(generation);
+            batchSettings.setVisible(generation);
             pack();
         });
         options.add(randomFen);
@@ -115,6 +123,7 @@ final class RoundDialog extends JDialog {
         String time = generation ? "X " + timeout.getText().trim() : timeControl.getText().trim();
         try {
             repeat.commitEdit();
+            batchRounds.commitEdit();
             randomPlies.commitEdit();
             depth.commitEdit();
             if (generation) {
@@ -138,7 +147,7 @@ final class RoundDialog extends JDialog {
                 games.add(game);
             }
             setup = new RoundSetup(configurations, games, positions, (Integer) repeat.getValue(), identities,
-                    generation ? (Integer) randomPlies.getValue() : 0, generation);
+                    generation ? (Integer) randomPlies.getValue() : 0, generation, (Integer) batchRounds.getValue());
         } catch (Exception error) {
             JOptionPane.showMessageDialog(this, error.getMessage(), "Invalid game", JOptionPane.ERROR_MESSAGE);
             return;

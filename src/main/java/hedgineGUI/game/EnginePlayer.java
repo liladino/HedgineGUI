@@ -269,7 +269,8 @@ public final class EnginePlayer extends Player {
 
     /** Console output can block, so it must never delay engine I/O or the clock. */
     private static void log(String message) {
-        LOG_WRITER.execute(() -> LOGGER.info(message));
+        if (LOGGER.isLoggable(java.util.logging.Level.INFO))
+            LOG_WRITER.execute(() -> LOGGER.info(message));
     }
 
     public boolean isRunning() {

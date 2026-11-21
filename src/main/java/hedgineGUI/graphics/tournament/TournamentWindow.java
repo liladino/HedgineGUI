@@ -61,6 +61,16 @@ public final class TournamentWindow extends JFrame {
     // Results file
     private Path resultsFile;
     private int savedRound;
+    private PgnArchive archive;
+    private final Set<GameController> archivedGames = new HashSet<>();
+    private final Map<String, double[]> archivedScores = new TreeMap<>();
+    private final Map<MatchupScores.Matchup, long[]> archivedMatchups = new LinkedHashMap<>();
+    private final Map<Resolution, Long> archivedResolutions = new EnumMap<>(Resolution.class);
+    private int batchRounds = 1000;
+    private int retainedRounds;
+    private int archivedRound;
+    private boolean saveFailed;
+    private final JButton retrySave = new JButton("Retry saving PGN and continue");
 
     private final JTabbedPane rounds = new JTabbedPane();
     private final StandingsPanel standings = new StandingsPanel();
@@ -72,7 +82,9 @@ public final class TournamentWindow extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override public void windowClosing(WindowEvent e) {
                 abortTournament();
-                dispose();
+                if (!saveFailed || JOptionPane.showConfirmDialog(TournamentWindow.this,
+                        "PGN saving failed. Close and discard unsaved games?", "Unsaved games",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) dispose();
             }
         });
         JPanel info = new JPanel(new BorderLayout(8, 8));
@@ -93,8 +105,13 @@ public final class TournamentWindow extends JFrame {
         abortAll.addActionListener(e -> abortTournament());
         actions.add(abortAll);
         JButton export = new JButton("Export all games");
-        export.addActionListener(e -> PgnExport.export(this, games));
+        export.addActionListener(e -> PgnExport.export(this,
+                games.stream().filter(game -> !archivedGames.contains(game)).toList(),
+                archive == null ? null : archive.path()));
         actions.add(export);
+        retrySave.setVisible(false);
+        retrySave.addActionListener(e -> { saveFailed = false; refresh(); });
+        actions.add(retrySave);
         info.add(actions, BorderLayout.SOUTH);
         // The divider lets the user trade board space for the standings panel.
         info.setMinimumSize(new Dimension(250, 0));
@@ -110,7 +127,7 @@ public final class TournamentWindow extends JFrame {
     }
 
     public void configureRound() {
-        if (ended || starting || currentRound.stream().anyMatch(g -> g.getState().isRunning())) return;
+        if (ended || saveFailed || starting || currentRound.stream().anyMatch(g -> g.getState().isRunning())) return;
         RoundDialog.RoundSetup setup = RoundDialog.show(this, roundNumber + 1, participants);
         if (setup == null) {
             if (roundNumber == 0) dispose();
@@ -122,6 +139,8 @@ public final class TournamentWindow extends JFrame {
         randomPositions = setup.positions();
         randomPlies = setup.randomPlies();
         dataGeneration = setup.dataGeneration();
+        batchRounds = setup.batchRounds();
+        if (dataGeneration && archive != null) releaseHistory();
         openingRandom = new Random(FenSequence.SEED);
         pairedOpeningMoves = List.of();
         scheduledRoundIndex = 0;
@@ -136,7 +155,7 @@ public final class TournamentWindow extends JFrame {
     private void startRound(List<GameConfiguration> configurations, List<ScheduledGame> templates, boolean replay) {
         if (resultsFile == null) resultsFile = Path.of(System.getProperty("user.dir"), "saves",
                 "tournament_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + ".txt");
-        if (!replay) parallelLimit = Math.max(parallelLimit, configurations.size());
+        if (!replay) parallelLimit = configurations.size();
         if (!replay) configurations = withOpeningMoves(
                 randomPositions == null ? configurations : withRandomPositions(configurations));
         starting = true;
@@ -163,6 +182,7 @@ public final class TournamentWindow extends JFrame {
                     () -> abort(List.of(controller)), () -> PgnExport.export(this, List.of(controller)));
             grid.add(cell);
             controller.addStateListener(state -> SwingUtilities.invokeLater(() -> {
+                if (!gameSettings.containsKey(controller)) return; // A saved batch was released.
                 if (startupErrors.containsKey(controller)) cell.showError(startupErrors.get(controller));
                 else cell.showState(state);
                 refresh();
@@ -271,11 +291,15 @@ public final class TournamentWindow extends JFrame {
 
     private void refresh() {
         Map<String, double[]> scores = Standings.calculate(games.stream().map(GameController::getState).toList());
+        mergeScores(scores, archivedScores);
         // Players whose games never started still appear with zero points.
         participants.keySet().forEach(name -> scores.putIfAbsent(name, new double[4]));
         standings.showStandings(scores);
-        standings.showMatchups(MatchupScores.calculate(pairs, this::pairState));
-        standings.showResolutions(resolutions(currentRound), resolutions(attemptedGames));
+        Map<MatchupScores.Matchup, long[]> matchups = new LinkedHashMap<>();
+        mergeMatchups(matchups, archivedMatchups);
+        mergeMatchups(matchups, MatchupScores.calculate(pairs, this::pairState));
+        standings.showMatchups(matchups);
+        standings.showResolutions(resolutions(currentRound), resolutions(attemptedGames), archivedResolutions);
         long running = currentRound.stream().filter(g -> g.getState().isRunning()).count();
         List<GameController> timedOut = starting || running > 0 ? List.of() : roundTimeouts();
         int replays = replayQueue.size() + timedOut.size();
@@ -285,9 +309,13 @@ public final class TournamentWindow extends JFrame {
             savedRound = roundNumber;
             saveResults();
         }
+        if (!starting && running == 0 && roundNumber > archivedRound && (dataGeneration || archive != null)
+                && !saveFailed) savePgnRound();
+        retrySave.setVisible(saveFailed);
+        if (saveFailed) standings.setStatus("PGN save failed — play paused; retry saving or export games");
         boolean idle = !starting && running == 0 && roundsRemaining == 0 && replays == 0;
-        next.setEnabled(!ended && idle);
-        if (!ended && !starting && running == 0
+        next.setEnabled(!ended && !saveFailed && idle);
+        if (!ended && !saveFailed && !starting && running == 0
                 && (roundsRemaining > 0 || replays > 0) && !advancementQueued) {
             advancementQueued = true;
             SwingUtilities.invokeLater(this::advance);
@@ -296,9 +324,10 @@ public final class TournamentWindow extends JFrame {
 
     private void advance() {
         advancementQueued = false;
-        if (ended) return;
+        if (ended || saveFailed) return;
         // Timeouts are replayed before the next scheduled round.
         queueReplays(roundTimeouts());
+        if (dataGeneration && retainedRounds >= batchRounds) releaseHistory();
         if (!replayQueue.isEmpty()) {
             startReplayRound();
             return;
@@ -361,6 +390,64 @@ public final class TournamentWindow extends JFrame {
         roundsRemaining = 0;
         replayQueue.clear();
         abort(currentRound);
+    }
+
+    /** Save only unarchived attempts. A failed write leaves both history and scheduling untouched. */
+    private void savePgnRound() {
+        try {
+            if (archive == null) archive = new PgnArchive(resultsFile.resolveSibling(
+                    resultsFile.getFileName().toString().replace(".txt", "") + "_" + UUID.randomUUID() + ".pgn"));
+            List<GameController> unsaved = games.stream().filter(g -> !archivedGames.contains(g)).toList();
+            archive.append(() -> unsaved.stream().map(GameController::getPGN).iterator());
+            archivedGames.addAll(unsaved);
+            archivedRound = roundNumber;
+            retainedRounds++;
+        } catch (IOException | RuntimeException error) {
+            saveFailed = true;
+            LOGGER.log(Level.SEVERE, "Could not save PGN; tournament paused", error);
+            JOptionPane.showMessageDialog(this, "Games remain in memory. Free disk space or fix the save folder, then retry.\n"
+                    + error.getMessage(), "PGN save failed", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /** Called only between rounds, after retry specifications have been captured. */
+    private void releaseHistory() {
+        if (saveFailed || !archivedGames.containsAll(games)) return;
+        mergeScores(archivedScores, Standings.calculate(games.stream().map(GameController::getState).toList()));
+        mergeMatchups(archivedMatchups, MatchupScores.calculate(pairs, this::pairState));
+        for (Resolution resolution : resolutions(attemptedGames))
+            archivedResolutions.merge(resolution, 1L, Long::sum);
+        rounds.removeAll();
+        games.clear();
+        attemptedGames.clear();
+        currentRound.clear();
+        startupErrors.clear();
+        abortRequested.clear();
+        gameSettings.clear();
+        archivedGames.clear();
+        pairs.clear();
+        currentPairs.clear();
+        pairLegs.clear();
+        replayLegs.clear();
+        retainedRounds = 0;
+    }
+
+    static void mergeScores(Map<String, double[]> target, Map<String, double[]> source) {
+        source.forEach((name, values) -> {
+            double[] total = target.computeIfAbsent(name, key -> new double[4]);
+            for (int i = 0; i < total.length; i++) total[i] += values[i];
+        });
+    }
+
+    static void mergeMatchups(Map<MatchupScores.Matchup, long[]> target,
+            Map<MatchupScores.Matchup, long[]> source) {
+        source.forEach((matchup, values) -> {
+            var opposite = new MatchupScores.Matchup(matchup.opponent(), matchup.player());
+            boolean reversed = !matchup.equals(opposite) && target.containsKey(opposite);
+            long[] total = target.computeIfAbsent(reversed ? opposite : matchup, key -> new long[6]);
+            for (int i = 0; i < 5; i++) total[reversed ? 4 - i : i] += values[i];
+            total[5] += values[5];
+        });
     }
 
     /** Overwrites the tournament's results file with the current contents of the standings panel. */

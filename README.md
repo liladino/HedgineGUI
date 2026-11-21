@@ -160,7 +160,7 @@ mode still uses **Pairs per matchup** and plays both colors.
 Before engine play, the GUI chooses uniformly from the legal moves at each of K
 plies. It stops early if the game ends. These moves are included in the game
 history and exported PGN, without evaluation comments. The random sequence uses
-the fixed opening seed, in tab order, and resets for each configured batch.
+the fixed opening seed, in tab order, and resets when a new series is configured (not at automatic history cleanup).
 Each new data-generation game samples a fresh opening and random move sequence.
 Timeout retries reuse the same opening and random moves as the failed attempt. Each engine receives the original FEN plus the full move history.
 
@@ -184,3 +184,37 @@ Data-generation games contribute to individual standings and resolution counts,
 but do not create entries in pair-score statistics. For example, 5 games per
 matchup across 3 tabs schedules 5 rounds of 3 games (15 games total), plus any
 timeout retries.
+
+### Long data-generation runs
+
+Data generation saves completed rounds automatically to a uniquely named PGN in
+`saves/`, alongside the existing summary text file. Every round is appended and
+flushed before the next round starts. This includes timeout attempts; their
+replacement games are appended later, while the summary counts the replacements.
+Games that fail to start contribute to the error count but have no PGN.
+
+**Release saved history every N rounds** defaults to 1,000. Before starting the
+next round at that boundary, the window removes saved boards and game objects.
+Rounds used for timeout retries also count toward this limit, so repeated retries
+do not accumulate unlimited board history. Use a smaller value if memory usage
+is too high. Cumulative standings, resolution counts, remaining games, and both
+random generators are preserved. Changing this setting does not change the
+opening sequence. The window stays open; no process restart is needed.
+
+**Export all games** streams the automatic archive plus any games not yet saved
+into the selected file. Archived rounds remain available in the automatic PGN,
+but their individual board tabs are removed. The final batch stays visible until
+you configure another data-generation series or close the window.
+
+If PGN saving fails, automatic scheduling pauses and retains the unsaved games.
+Fix the save folder or free disk space, then press **Retry saving PGN and continue**.
+A failed append is rolled back so retrying does not duplicate games. Exporting to
+another file is also possible. Do not modify the automatic archive during a run.
+
+The round-count field accepts up to 100 million repetitions. Memory use depends
+on the retained batch and parallelism rather than the total number of scheduled
+data-generation games; disk usage still grows with the PGN output. This is not a
+restart/resume checkpoint: after a process crash, completed saved rounds remain
+on disk, but automatic continuation from that point is not implemented. Timeout
+retries remain unlimited, so an engine that always times out can still prevent
+progress to the next scheduled opening.
