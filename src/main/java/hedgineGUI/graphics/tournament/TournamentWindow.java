@@ -15,8 +15,9 @@ import java.util.logging.Logger;
 import javax.swing.*;
 
 import hedgineGUI.control.*;
+import hedgineGUI.core.chess.Move;
+import hedgineGUI.core.IO.FENException;
 import hedgineGUI.game.*;
-import hedgineGUI.graphics.SwingTicker;
 import hedgineGUI.tournament.*;
 
 /** Manual pairings, concurrent games per round, and a persistent tournament history. */
@@ -43,6 +44,9 @@ public final class TournamentWindow extends JFrame {
     private final Deque<ScheduledGame> replayQueue = new ArrayDeque<>();
     private List<ScheduledGame> automaticGames = List.of();
     private FenSequence randomPositions;
+    private int randomPlies;
+    private Random openingRandom;
+    private List<List<Move>> pairedOpeningMoves = List.of();
     private int parallelLimit = 1;
     private int scheduledRoundIndex;
     private int roundsRemaining;
@@ -115,6 +119,9 @@ public final class TournamentWindow extends JFrame {
         participants.putAll(setup.participants());
         automaticGames = setup.games();
         randomPositions = setup.positions();
+        randomPlies = setup.randomPlies();
+        openingRandom = new Random(FenSequence.SEED);
+        pairedOpeningMoves = List.of();
         scheduledRoundIndex = 0;
         roundsRemaining = 2 * setup.pairsPerMatchup() - 1;
         startRound(setup.configurations());
@@ -128,7 +135,8 @@ public final class TournamentWindow extends JFrame {
         if (resultsFile == null) resultsFile = Path.of(System.getProperty("user.dir"), "saves",
                 "tournament_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + ".txt");
         if (!replay) parallelLimit = Math.max(parallelLimit, configurations.size());
-        if (!replay && randomPositions != null) configurations = withRandomPositions(configurations);
+        if (!replay) configurations = withOpeningMoves(
+                randomPositions == null ? configurations : withRandomPositions(configurations));
         starting = true;
         roundAborted = false;
         next.setEnabled(false);
@@ -170,8 +178,28 @@ public final class TournamentWindow extends JFrame {
         List<GameConfiguration> selected = new ArrayList<>();
         for (int i = 0; i < configurations.size(); i++) {
             GameConfiguration game = configurations.get(i);
-            selected.add(new GameConfiguration(positions.get(i), game.getWhite(), game.getBlack(),
-                    automaticGames.get(i).time(), new SwingTicker()));
+            selected.add(game.withOpening(positions.get(i), List.of()));
+        }
+        return selected;
+    }
+
+    /** Generate once per pair, in tab order; reversed games and retries reuse the exact moves. */
+    private List<GameConfiguration> withOpeningMoves(List<GameConfiguration> configurations) {
+        if (scheduledRoundIndex % 2 == 0) {
+            List<List<Move>> generated = new ArrayList<>();
+            for (GameConfiguration game : configurations) {
+                try {
+                    generated.add(RandomOpening.generate(game.getFen(), randomPlies, openingRandom));
+                } catch (FENException error) {
+                    throw new IllegalStateException("Previously validated opening became invalid", error);
+                }
+            }
+            pairedOpeningMoves = List.copyOf(generated);
+        }
+        List<GameConfiguration> selected = new ArrayList<>();
+        for (int i = 0; i < configurations.size(); i++) {
+            GameConfiguration game = configurations.get(i);
+            selected.add(game.withOpening(game.getFen(), pairedOpeningMoves.get(i)));
         }
         return selected;
     }

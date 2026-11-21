@@ -8,13 +8,16 @@ import java.util.List;
 import javax.swing.*;
 
 import hedgineGUI.game.GameConfiguration;
+import hedgineGUI.game.clock.Clock;
+import hedgineGUI.game.clock.ClockBuilder;
+import hedgineGUI.graphics.SwingTicker;
 import hedgineGUI.tournament.FenSequence;
 
 /** Modal dialog that collects the pairings and settings for a new series of rounds. */
 final class RoundDialog extends JDialog {
     /** Participants includes the previously known ones plus everyone registered by this setup. */
     record RoundSetup(List<GameConfiguration> configurations, List<ScheduledGame> games,
-            FenSequence positions, int pairsPerMatchup, Map<String, File> participants) {}
+            FenSequence positions, int pairsPerMatchup, Map<String, File> participants, int randomPlies) {}
 
     private final Map<String, File> knownParticipants;
     private final List<PairingForm> forms = new ArrayList<>();
@@ -22,6 +25,10 @@ final class RoundDialog extends JDialog {
     private final JCheckBox randomFen = new JCheckBox("Random FEN from py/fens.txt (seed 1)", true);
     private final JTextField timeControl = new JTextField("X 0.2", 20);
     private final JSpinner repeat = new JSpinner(new SpinnerNumberModel(5, 1, 5000, 1));
+    private final JComboBox<String> mode = new JComboBox<>(new String[]{"Tournament", "Data generation"});
+    private final JSpinner randomPlies = new JSpinner(new SpinnerNumberModel(4, 0, 1000, 1));
+    private final JSpinner depth = new JSpinner(new SpinnerNumberModel(8, 1, 128, 1));
+    private final JTextField timeout = new JTextField("10", 8);
     private RoundSetup setup;
 
     /** Returns null when the dialog is closed without starting. */
@@ -44,7 +51,26 @@ final class RoundDialog extends JDialog {
         JPanel timeSettings = new JPanel();
         timeSettings.add(new JLabel("Time control for all games (N / X 1.5 / S 180 0 ms500)"));
         timeSettings.add(timeControl);
+        JPanel modeSettings = new JPanel();
+        modeSettings.add(new JLabel("Mode"));
+        modeSettings.add(mode);
+        options.add(modeSettings);
         options.add(timeSettings);
+        JPanel generationSettings = new JPanel();
+        generationSettings.add(new JLabel("Random moves K (plies)"));
+        generationSettings.add(randomPlies);
+        generationSettings.add(new JLabel("Search depth N"));
+        generationSettings.add(depth);
+        generationSettings.add(new JLabel("Timeout per search (seconds or ms…)"));
+        generationSettings.add(timeout);
+        generationSettings.setVisible(false);
+        options.add(generationSettings);
+        mode.addActionListener(e -> {
+            boolean generation = mode.getSelectedIndex() == 1;
+            timeSettings.setVisible(!generation);
+            generationSettings.setVisible(generation);
+            pack();
+        });
         options.add(randomFen);
         randomFen.addActionListener(e -> {
             for (PairingForm form : forms) form.setFenEnabled(!randomFen.isSelected());
@@ -76,8 +102,17 @@ final class RoundDialog extends JDialog {
     }
 
     private void start() {
-        String time = timeControl.getText().trim();
+        boolean generation = mode.getSelectedIndex() == 1;
+        String time = generation ? "X " + timeout.getText().trim() : timeControl.getText().trim();
         try {
+            repeat.commitEdit();
+            randomPlies.commitEdit();
+            depth.commitEdit();
+            if (generation) {
+                Clock clock = new Clock();
+                ClockBuilder.setClock(clock, time);
+                if (clock.getWhiteTime() <= 0) throw new IllegalArgumentException("Timeout must be positive");
+            }
             FenSequence positions = randomFen.isSelected() ? new FenSequence(Path.of("py", "fens.txt")) : null;
             // A name identifies a participant across every board and round.
             Map<String, File> identities = new HashMap<>(knownParticipants);
@@ -85,10 +120,16 @@ final class RoundDialog extends JDialog {
             List<ScheduledGame> games = new ArrayList<>();
             for (PairingForm form : forms) {
                 GameConfiguration configuration = form.configuration(identities, positions != null, time);
-                configurations.add(configuration);
-                games.add(new ScheduledGame(configuration, form.whiteFile(), form.blackFile(), time));
+                if (generation) {
+                    configuration = new GameConfiguration(configuration.getFen(), configuration.getWhite(),
+                            configuration.getBlack(), time, new SwingTicker(), (Integer) depth.getValue(), List.of());
+                }
+                ScheduledGame game = new ScheduledGame(configuration, form.whiteFile(), form.blackFile(), time);
+                configurations.add(game.create(false));
+                games.add(game);
             }
-            setup = new RoundSetup(configurations, games, positions, (Integer) repeat.getValue(), identities);
+            setup = new RoundSetup(configurations, games, positions, (Integer) repeat.getValue(), identities,
+                    generation ? (Integer) randomPlies.getValue() : 0);
         } catch (Exception error) {
             JOptionPane.showMessageDialog(this, error.getMessage(), "Invalid game", JOptionPane.ERROR_MESSAGE);
             return;

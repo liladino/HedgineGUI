@@ -147,3 +147,33 @@ errors, aborts, and missing or unfinished legs keep the pair incomplete.
 Timeout replays replace the corresponding leg of the original pair; they do
 not create a new pair or duplicate its statistics. Separate pairs with identical
 openings and players remain separate observations.
+
+### Data generation and engine evaluations
+
+Choose **Data generation** in tournament setup. Set **K** random moves (individual
+plies, default 4), **N** search depth (default 8), and a positive timeout for each
+search (default 10 seconds; decimal seconds and `ms500` are accepted).
+Opening selection and paired games work as in tournament mode.
+
+Before engine play, the GUI chooses uniformly from the legal moves at each of K
+plies. It stops early if the game ends. These moves are included in the game
+history and exported PGN, without evaluation comments. The random sequence uses
+the fixed opening seed, in tab order, and resets for each configured batch.
+Both colors in a pair and every timeout retry reuse the same opening and random
+moves. Each engine receives the original FEN plus the full move history.
+
+Engine searches use `go depth N`. The timeout is enforced by the existing
+per-move clock, with the same grace period, 0–0 tournament scoring, and automatic
+timeout replays as normal tournaments. It is a safety deadline, not a
+`go movetime` budget.
+
+PGN exports for all modes, including human-vs-engine Play, now annotate engine
+moves when a search supplies both centipawns and depth. For example, a Black
+engine reporting `info depth 8 cp 35` before `bestmove e7e5` produces
+`e5 {-35/8}`. Values are integer centipawns from White's perspective.
+Both `info depth 8 score cp 35` (standard UCI) and the shorter form are accepted.
+The deepest primary-variation score is used; additional MultiPV lines are
+ignored. Missing or malformed scores, mate scores, and bound-only scores are
+not exported as exact centipawn values. Scores are cleared for each new search,
+so a move never inherits the preceding search's evaluation. Human moves and
+the random opening moves have no such comments.

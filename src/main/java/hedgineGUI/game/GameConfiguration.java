@@ -1,6 +1,8 @@
 package hedgineGUI.game;
 
 import java.util.Objects;
+import java.util.List;
+import hedgineGUI.core.chess.Move;
 
 import hedgineGUI.core.IO.FENException;
 import hedgineGUI.core.chess.Board;
@@ -21,6 +23,8 @@ public final class GameConfiguration {
     private final Player black;
     private final String timeControl;
     private final Ticker ticker;
+    private final int searchDepth;
+    private final List<Move> initialMoves;
 
     public GameConfiguration(
             String fen,
@@ -28,6 +32,15 @@ public final class GameConfiguration {
             Player black,
             String timeControl,
             Ticker ticker) {
+        this(fen, white, black, timeControl, ticker, 0, List.of());
+    }
+
+    public GameConfiguration(String fen, Player white, Player black, String timeControl,
+            Ticker ticker, int searchDepth, List<Move> initialMoves) {
+        if (searchDepth < 0) throw new IllegalArgumentException("Search depth cannot be negative");
+        this.searchDepth = searchDepth;
+        this.initialMoves = initialMoves.stream()
+                .map(move -> move.withEvaluation(null)).toList();
         this.fen = normalizeFen(fen);
         this.white = Objects.requireNonNull(white, "white");
         this.black = Objects.requireNonNull(black, "black");
@@ -57,6 +70,16 @@ public final class GameConfiguration {
         Clock clock = new Clock();
         ClockBuilder.setClock(clock, timeControl);
         return new ClockController(ticker, clock);
+    }
+
+    public int getSearchDepth() { return searchDepth; }
+
+    public List<Move> getInitialMoves() {
+        return initialMoves.stream().map(Move::new).toList();
+    }
+
+    public GameConfiguration withOpening(String position, List<Move> moves) {
+        return new GameConfiguration(position, white, black, timeControl, ticker, searchDepth, moves);
     }
 
     public String getFen() {

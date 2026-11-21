@@ -63,6 +63,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
     private boolean running;
     private boolean awaitingMove;
     private String errorMessage;
+    private int initialMoveCount;
 
     public void addStateListener(StateListener listener) {
         listeners.add(listener);
@@ -86,6 +87,16 @@ public final class GameManager implements MoveReceiver, ClockListener {
             throw new GameException("Invalid game configuration: " + error.getMessage(), error);
         }
 
+        List<Move> openingMoves = configuration.getInitialMoves();
+        List<String> openingPositions = new ArrayList<>();
+        openingPositions.add(newBoard.convertToFEN());
+        for (Move move : openingMoves) {
+            if (newBoard.getResult() != Result.ONGOING || !newBoard.isMoveLegal(move))
+                throw new GameException("Invalid random opening move: " + move);
+            newBoard.makeMove(move);
+            openingPositions.add(newBoard.convertToFEN());
+        }
+
         Player newWhite = configuration.getWhite();
         Player newBlack = configuration.getBlack();
         try {
@@ -107,8 +118,10 @@ public final class GameManager implements MoveReceiver, ClockListener {
             black = newBlack;
             board = newBoard;
             moves.clear();
+            moves.addAll(openingMoves);
+            initialMoveCount = openingMoves.size();
             positionFENStrings.clear();
-            positionFENStrings.add(newBoard.convertToFEN());
+            positionFENStrings.addAll(openingPositions);
             clockHistory.clear();
             clockController = newClock;
             clockSnapshot = newClock.snapshot();
@@ -119,8 +132,15 @@ public final class GameManager implements MoveReceiver, ClockListener {
             errorMessage = null;
             running = true;
             awaitingMove = false;
+            result = board.getResult();
+            if (checkThreeFoldRepetition()) result = Result.DRAW;
+            if (result != Result.ONGOING) {
+                running = false;
+                setBoardTermination();
+            }
         }
 
+        if (!isGameRunning()) stopResources();
         publishCurrentState();
         requestCurrentMove();
     }
@@ -190,7 +210,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
             } else {
                 clockHistory.add(clockController.snapshot());
                 board.makeMove(new Move(move));
-                moves.add(new Move(move));
+                moves.add(move.withEvaluation(player instanceof EnginePlayer ? move.getEvaluation() : null));
                 positionFENStrings.add(board.convertToFEN());
                 // Charge the mover only up to when the move arrived, not for our own processing.
                 clockController.pressClockAt(receivedAtMs);
@@ -276,7 +296,7 @@ public final class GameManager implements MoveReceiver, ClockListener {
         final Player playerToCancel;
         final ClockSnapshot clockToRestore;
         synchronized (stateLock) {
-            if (!running || moves.isEmpty()) {
+            if (!running || moves.size() <= initialMoveCount) {
                 return false;
             }
             playerToCancel = currentPlayer;

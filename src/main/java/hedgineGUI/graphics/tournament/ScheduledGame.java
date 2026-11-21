@@ -10,9 +10,9 @@ public record ScheduledGame(GameConfiguration configuration, File white, File bl
     public GameConfiguration create(boolean reverse) {
         return new GameConfiguration(configuration.getFen(),
                 new EnginePlayer(Sides.WHITE, reverse ? configuration.getBlack().getName() : configuration.getWhite().getName(),
-                        reverse ? black : white),
+                        reverse ? black : white, configuration.getSearchDepth()),
                 new EnginePlayer(Sides.BLACK, reverse ? configuration.getWhite().getName() : configuration.getBlack().getName(),
-                        reverse ? white : black),
-                time, new SwingTicker());
+                        reverse ? white : black, configuration.getSearchDepth()),
+                time, new SwingTicker(), configuration.getSearchDepth(), configuration.getInitialMoves());
     }
 }

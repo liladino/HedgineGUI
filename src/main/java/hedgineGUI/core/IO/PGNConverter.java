@@ -175,7 +175,7 @@ public class PGNConverter {
 		sb.append(res);
 		sb.append(lineEnd);
 
-		String movesString = convertToMoves(fen, moves);
+		String movesString = convertToMoves(fen, moves, true);
 		if (movesString != null){
 			sb.append(movesString);
 		}
@@ -186,6 +186,10 @@ public class PGNConverter {
 	}
 
 	public static String convertToMoves(String fen, List<Move> moves){
+        return convertToMoves(fen, moves, false);
+    }
+
+    private static String convertToMoves(String fen, List<Move> moves, boolean annotations){
 		Board temp;
 		try {
 			temp = new Board(fen);
@@ -208,6 +212,8 @@ public class PGNConverter {
 				sb.append(". ");
 			}
 			sb.append(PGNConverter.convertMoveToPGNString(temp, m));
+            if (annotations && m.getEvaluation() != null)
+                sb.append(" ").append(m.getEvaluation().pgnComment());
 			sb.append(" ");
 			temp.makeMove(m);
 			c++;

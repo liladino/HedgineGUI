@@ -34,6 +34,8 @@ public final class EnginePlayer extends Player {
     });
 
     private final File enginePath;
+    private final int searchDepth;
+    private final UciSearchInfo searchInfo = new UciSearchInfo();
     private final List<String> engineInfo = new ArrayList<>();
 
     private Process process;
@@ -45,8 +47,14 @@ public final class EnginePlayer extends Player {
     private volatile boolean running;
 
     public EnginePlayer(Sides side, String name, File enginePath) {
+        this(side, name, enginePath, 0);
+    }
+
+    public EnginePlayer(Sides side, String name, File enginePath, int searchDepth) {
         super(side, name);
+        if (searchDepth < 0) throw new IllegalArgumentException("Search depth cannot be negative");
         this.enginePath = enginePath;
+        this.searchDepth = searchDepth;
     }
 
     @Override
@@ -82,11 +90,13 @@ public final class EnginePlayer extends Player {
             startGame();
         }
         sendCommand(buildPositionCommand(position));
+        searchInfo.reset();
         sendCommand(buildGoCommand(position));
     }
 
     @Override
     protected void onMoveRequestCancelled() {
+        searchInfo.reset();
         if (!running) {
             return;
         }
@@ -183,6 +193,10 @@ public final class EnginePlayer extends Player {
         if (tokens.length == 0) {
             return;
         }
+        if ("info".equals(tokens[0]) && getRequestedPosition() != null) {
+            searchInfo.accept(output, getSide());
+            return;
+        }
         if ("uciok".equals(tokens[0])) {
             uciReady.countDown();
             return;
@@ -198,7 +212,7 @@ public final class EnginePlayer extends Player {
                 && !"(none)".equals(tokens[1])) {
             Move move = new Move(tokens[1]);
             if (!move.isNull()) {
-                returnMove(move, receivedAtMs);
+                returnMove(move.withEvaluation(searchInfo.finish()), receivedAtMs);
             }
         }
     }
@@ -221,7 +235,8 @@ public final class EnginePlayer extends Player {
         return command.toString();
     }
 
-    private String buildGoCommand(Position position) {
+    String buildGoCommand(Position position) {
+        if (searchDepth > 0) return "go depth " + searchDepth;
         ClockSnapshot clock = position.getClock();
         if (clock == null || clock.getTimeControl() == TimeControl.NO_CONTROL) {
             return "go movetime 2000";

@@ -10,6 +10,7 @@ public class Move {
 	private final Square from;
 	private final Square to;
 	private final char promotion;
+	private MoveEvaluation evaluation;
 	
 	/* * * * * * * *
 	 * Constructor *
@@ -83,11 +84,21 @@ public class Move {
 		from = new Square(m.from);
 		to = new Square(m.to);
 		promotion = m.promotion;
+		evaluation = m.evaluation;
 	}
 
 	/* * * * * *
 	 * Getters *
 	 * * * * * */
+    /** Returns a copy with optional search metadata; move identity ignores metadata. */
+    public Move withEvaluation(MoveEvaluation value) {
+        Move copy = new Move(this);
+        copy.evaluation = value;
+        return copy;
+    }
+
+    public MoveEvaluation getEvaluation() { return evaluation; }
+
 	public Square getFrom() {
 		return from;
 	}
