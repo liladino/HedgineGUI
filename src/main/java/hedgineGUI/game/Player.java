@@ -18,7 +18,7 @@ public abstract class Player {
     private final Sides side;
 
     private MoveReceiver moveReceiver;
-    private Position requestedPosition;
+    private volatile Position requestedPosition;
 
     protected Player(Sides side, String name) {
         this.side = Objects.requireNonNull(side, "side");
@@ -118,9 +118,7 @@ public abstract class Player {
     }
 
     protected final Position getRequestedPosition() {
-        synchronized (this) {
-            return requestedPosition;
-        }
+        return requestedPosition;
     }
 
     protected final void failMoveRequest(Exception error) {
