@@ -140,7 +140,7 @@ public final class TournamentWindow extends JFrame {
         randomPlies = setup.randomPlies();
         dataGeneration = setup.dataGeneration();
         batchRounds = setup.batchRounds();
-        if (dataGeneration && archive != null) releaseHistory();
+        if (archive != null) releaseHistory();
         openingRandom = new Random(FenSequence.SEED);
         pairedOpeningMoves = List.of();
         scheduledRoundIndex = 0;
@@ -164,6 +164,8 @@ public final class TournamentWindow extends JFrame {
         currentRound.clear();
         BoardGrid grid = new BoardGrid();
         rounds.addTab("Round " + (++roundNumber), new JScrollPane(grid));
+        LOGGER.log(Level.INFO, "Round {0} started with {1} games{2}",
+                new Object[]{roundNumber, configurations.size(), replay ? " (timeout replays)" : ""});
         rounds.setSelectedIndex(rounds.getTabCount() - 1);
         if (!isVisible()) setVisible(true);
         if (!replay && scheduledRoundIndex % 2 == 0) currentPairs.clear();
@@ -309,8 +311,7 @@ public final class TournamentWindow extends JFrame {
             savedRound = roundNumber;
             saveResults();
         }
-        if (!starting && running == 0 && roundNumber > archivedRound && (dataGeneration || archive != null)
-                && !saveFailed) savePgnRound();
+        if (!starting && running == 0 && roundNumber > archivedRound && !saveFailed) savePgnRound();
         retrySave.setVisible(saveFailed);
         if (saveFailed) standings.setStatus("PGN save failed — play paused; retry saving or export games");
         boolean idle = !starting && running == 0 && roundsRemaining == 0 && replays == 0;
@@ -327,7 +328,7 @@ public final class TournamentWindow extends JFrame {
         if (ended || saveFailed) return;
         // Timeouts are replayed before the next scheduled round.
         queueReplays(roundTimeouts());
-        if (dataGeneration && retainedRounds >= batchRounds) releaseHistory();
+        if (retainedRounds >= batchRounds && pairsComplete()) releaseHistory();
         if (!replayQueue.isEmpty()) {
             startReplayRound();
             return;
@@ -349,9 +350,12 @@ public final class TournamentWindow extends JFrame {
         return game == null || startupErrors.containsKey(game) ? null : game.getState();
     }
 
-    /** Timed-out games of the current round, unless the user aborted it. */
+    /**
+     * Timed-out games of the current round to replay, unless the user aborted it. Data generation
+     * never replays: a position that times out at the chosen depth would time out again forever.
+     */
     private List<GameController> roundTimeouts() {
-        if (ended || roundAborted) return List.of();
+        if (ended || roundAborted || dataGeneration) return List.of();
         return currentRound.stream()
                 .filter(game -> !startupErrors.containsKey(game)
                         && game.getState().getTermination() == GameTermination.TIMEOUT)
@@ -408,6 +412,14 @@ public final class TournamentWindow extends JFrame {
             JOptionPane.showMessageDialog(this, "Games remain in memory. Free disk space or fix the save folder, then retry.\n"
                     + error.getMessage(), "PGN save failed", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Releasing drops pair bookkeeping, so a tournament may only release after a reversed-color
+     * round whose timeouts have all been replayed. Data-generation games are not paired.
+     */
+    private boolean pairsComplete() {
+        return dataGeneration || (scheduledRoundIndex % 2 == 1 && replayQueue.isEmpty());
     }
 
     /** Called only between rounds, after retry specifications have been captured. */

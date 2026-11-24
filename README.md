@@ -101,17 +101,16 @@ Engine executable pickers in both Play and Bot tournament remember the last
 folder used for an approved selection, shared across pickers and app launches.
 If the saved folder no longer exists, the picker uses its default folder.
 
-Enable **Random FEN from py/fens.txt (seed 1)** in tournament setup to replace
+Enable **Random FEN from py/fens.txt** in tournament setup to replace
 the per-game FEN fields with random starting positions from that UTF-8 file
 (relative to the application's working directory). Blank lines are ignored;
 missing, empty, or invalid files are reported before any engines start.
 
-The fixed seed resets at the start of each configured batch. Positions are drawn
-with replacement in game-tab order before engines start, so engine timing does
-not change the sequence. Rounds 2, 4, etc. reuse
-the preceding round's positions board-for-board; rounds 1, 3, etc. draw new ones.
-The same file contents,
-game count, and options reproduce the same sequence in subsequent batches.
+Positions are drawn with replacement in game-tab order before engines start, so 
+engine timing does not change the sequence. Rounds 2, 4, etc. reuse the 
+preceding round's positions board-for-board; rounds 1, 3, etc. draw new ones.
+The same file contents, game count, and options reproduce the same sequence in 
+subsequent batches.
 
 Tournament setup has one shared time control for all games and automatic rounds.
 **Add game** copies the last tab's engine paths, participant names, and starting
@@ -160,9 +159,11 @@ mode still uses **Pairs per matchup** and plays both colors.
 Before engine play, the GUI chooses uniformly from the legal moves at each of K
 plies. It stops early if the game ends. These moves are included in the game
 history and exported PGN, without evaluation comments. The random sequence uses
-the fixed opening seed, in tab order, and resets when a new series is configured (not at automatic history cleanup).
+the opening seed, in tab order, and resets when a new series is configured (not 
+at automatic history cleanup).
 Each new data-generation game samples a fresh opening and random move sequence.
-Timeout retries reuse the same opening and random moves as the failed attempt. Each engine receives the original FEN plus the full move history.
+Timeout retries reuse the same opening and random moves as the failed attempt. 
+Each engine receives the original FEN plus the full move history.
 
 Engine searches use `go depth N`. The timeout is enforced by the existing
 per-move clock, with the same grace period, 0–0 tournament scoring, and automatic

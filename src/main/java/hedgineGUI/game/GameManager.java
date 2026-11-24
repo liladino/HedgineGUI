@@ -47,6 +47,11 @@ public final class GameManager implements MoveReceiver, ClockListener {
 
     private final Object stateLock = new Object();
     private final List<StateListener> listeners = new CopyOnWriteArrayList<>();
+    // Clock ticks (EDT) and engine moves (reader threads) publish concurrently; without ordering, a
+    // stale "running" snapshot could be delivered after the final one and stick forever.
+    private final Object publishLock = new Object();
+    private long snapshotVersion; 
+    private long deliveredVersion; 
 
     private Player white;
     private Player black;
@@ -518,13 +523,23 @@ public final class GameManager implements MoveReceiver, ClockListener {
                 errorMessage);
     }
 
+    /** Delivers snapshots in the order they were taken, dropping any overtaken by a newer one. */
     private void publishCurrentState() {
-        GameState snapshot = getSnapshot();
-        for (StateListener listener : listeners) {
-            try {
-                listener.onStateChanged(snapshot);
-            } catch (RuntimeException error) {
-                LOGGER.warning("State listener failed: " + error.getMessage());
+        GameState snapshot;
+        long version;
+        synchronized (stateLock) {
+            snapshot = createSnapshot();
+            version = ++snapshotVersion;
+        }
+        synchronized (publishLock) {
+            if (version < deliveredVersion) return;
+            deliveredVersion = version;
+            for (StateListener listener : listeners) {
+                try {
+                    listener.onStateChanged(snapshot);
+                } catch (RuntimeException error) {
+                    LOGGER.warning("State listener failed: " + error.getMessage());
+                }
             }
         }
     }

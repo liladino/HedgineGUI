@@ -25,10 +25,11 @@ final class RoundDialog extends JDialog {
     private final Map<String, File> knownParticipants;
     private final List<PairingForm> forms = new ArrayList<>();
     private final JTabbedPane tabs = new JTabbedPane();
-    private final JCheckBox randomFen = new JCheckBox("Random FEN from py/fens.txt (seed 1)", true);
+    private final JCheckBox randomFen = new JCheckBox("Random FEN from py/fens.txt", true);
     private final JTextField timeControl = new JTextField("X 0.2", 20);
     private final JSpinner repeat = new JSpinner(new SpinnerNumberModel(5, 1, 100_000_000, 1));
     private final JComboBox<String> mode = new JComboBox<>(new String[]{"Tournament", "Data generation"});
+    private final JComboBox<String> limit = new JComboBox<>(new String[]{"Time control", "Depth"});
     private final JSpinner randomPlies = new JSpinner(new SpinnerNumberModel(4, 0, 1000, 1));
     private final JSpinner depth = new JSpinner(new SpinnerNumberModel(8, 1, 128, 1));
     private final JTextField timeout = new JTextField("10", 8);
@@ -60,32 +61,46 @@ final class RoundDialog extends JDialog {
         JPanel modeSettings = new JPanel();
         modeSettings.add(new JLabel("Mode"));
         modeSettings.add(mode);
+        JLabel limitLabel = new JLabel("Search limit");
+        modeSettings.add(limitLabel);
+        modeSettings.add(limit);
         options.add(modeSettings);
         options.add(timeSettings);
+        JPanel depthSettings = new JPanel();
+        depthSettings.add(new JLabel("Search depth N"));
+        depthSettings.add(depth);
+        depthSettings.add(new JLabel("Timeout per search (seconds or ms…)"));
+        depthSettings.add(timeout);
+        depthSettings.setVisible(false);
+        options.add(depthSettings);
         JPanel generationSettings = new JPanel();
         generationSettings.add(new JLabel("Random moves K (plies)"));
         generationSettings.add(randomPlies);
-        generationSettings.add(new JLabel("Search depth N"));
-        generationSettings.add(depth);
-        generationSettings.add(new JLabel("Timeout per search (seconds or ms…)"));
-        generationSettings.add(timeout);
         generationSettings.setVisible(false);
         options.add(generationSettings);
         JPanel batchSettings = new JPanel();
         batchSettings.add(new JLabel("Release saved history every N rounds (including retries)"));
         batchSettings.add(batchRounds);
         batchSettings.add(new JLabel("PGN is saved after every round in saves/"));
-        batchSettings.setVisible(false);
+        batchSettings.setToolTipText("In tournament mode, history is only released once every pair has both games.");
         options.add(batchSettings);
         mode.addActionListener(e -> {
-            boolean generation = mode.getSelectedIndex() == 1;
+            boolean generation = isGeneration();
             repeatLabel.setText(generation ? "Games per matchup:" : "Pairs per matchup (2 rounds each):");
             openingLabel.setText(generation ? "One game per sampled opening" : "Each opening is played in both colors");
             randomFen.setToolTipText(generation ? "Sample a new opening for every game."
                     : "Reversed rounds reuse the preceding round's positions.");
-            timeSettings.setVisible(!generation);
+            // Data generation is always depth limited.
+            limitLabel.setVisible(!generation);
+            limit.setVisible(!generation);
+            timeSettings.setVisible(!isDepthLimited());
+            depthSettings.setVisible(isDepthLimited());
             generationSettings.setVisible(generation);
-            batchSettings.setVisible(generation);
+            pack();
+        });
+        limit.addActionListener(e -> {
+            timeSettings.setVisible(!isDepthLimited());
+            depthSettings.setVisible(isDepthLimited());
             pack();
         });
         options.add(randomFen);
@@ -118,15 +133,25 @@ final class RoundDialog extends JDialog {
         tabs.setSelectedComponent(form);
     }
 
+    private boolean isGeneration() {
+        return mode.getSelectedIndex() == 1;
+    }
+
+    /** in depth limited games the clock only enforces a per-search timeout. */
+    private boolean isDepthLimited() {
+        return isGeneration() || limit.getSelectedIndex() == 1;
+    }
+
     private void start() {
-        boolean generation = mode.getSelectedIndex() == 1;
-        String time = generation ? "X " + timeout.getText().trim() : timeControl.getText().trim();
+        boolean generation = isGeneration();
+        boolean depthLimited = isDepthLimited();
+        String time = depthLimited ? "X " + timeout.getText().trim() : timeControl.getText().trim();
         try {
             repeat.commitEdit();
             batchRounds.commitEdit();
             randomPlies.commitEdit();
             depth.commitEdit();
-            if (generation) {
+            if (depthLimited) {
                 Clock clock = new Clock();
                 ClockBuilder.setClock(clock, time);
                 if (clock.getWhiteTime() <= 0) throw new IllegalArgumentException("Timeout must be positive");
@@ -138,7 +163,7 @@ final class RoundDialog extends JDialog {
             List<ScheduledGame> games = new ArrayList<>();
             for (PairingForm form : forms) {
                 GameConfiguration configuration = form.configuration(identities, positions != null, time);
-                if (generation) {
+                if (depthLimited) {
                     configuration = new GameConfiguration(configuration.getFen(), configuration.getWhite(),
                             configuration.getBlack(), time, new SwingTicker(), (Integer) depth.getValue(), List.of());
                 }

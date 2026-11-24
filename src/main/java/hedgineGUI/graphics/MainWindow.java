@@ -100,11 +100,6 @@ public final class MainWindow extends JFrame {
                     break;
             }
         };
-
-        if (SwingUtilities.isEventDispatchThread()) {
-            renderEndState.run();
-        } else {
-            SwingUtilities.invokeLater(renderEndState);
-        }
+        SwingUtilities.invokeLater(renderEndState);
     }
 }
